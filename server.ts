@@ -191,10 +191,10 @@ let emissionHistory: EmissionSnapshot[] = [];
 let streakData = { days: 1, lastDate: new Date().toDateString() };
 
 let commanderRecommendation = {
-  warning: "Warning: Transport emissions exceeding limits in Sector B. Deploy biking initiative to reduce projected 0.4 MT overage.",
-  action: "EXECUTE_DEPLOY",
-  projectedSaving: "-0.4 MT",
-  sector: "Sector B",
+  warning: "Your transport emissions are the biggest part of your footprint. Even switching to remote work a few days a week could make a noticeable difference.",
+  action: "REMOTE",
+  projectedSaving: "-0.4t",
+  sector: "Transport",
   status: "ACTIVE",
 };
 
@@ -863,36 +863,36 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
   const rank = getRank(score);
 
   const contextDescription = `
-    You are the AI_COMMANDER_UNIT, a strict, authoritative, planetary-scale defense and carbon management intelligence system.
-    Current mission telemetry:
-    - Transport: ${currentStats.transport} MT CO2e (includes ${userTelemetry.flightsShortHaul} short-haul and ${userTelemetry.flightsLongHaul} long-haul flights)
-    - Energy Grid: ${currentStats.energy} MT CO2e (source: ${userTelemetry.energySource}, heating: ${userTelemetry.heatingType})
-    - Food: ${currentStats.food} MT CO2e (diet: ${userTelemetry.meatIntake}, waste level: ${userTelemetry.foodWaste})
-    - Waste: ${currentStats.waste} MT CO2e (recycling: ${userTelemetry.recycledPercent}%)
-    - Shopping: ${currentStats.shopping} MT CO2e
-    - Total: ${currentStats.total} MT CO2e
-    - Mission Score: ${score}/100 | Rank: ${rank}
+    You are a helpful AI carbon advisor. Your job is to help users understand and reduce their personal carbon footprint.
+    Here is the user's current emissions data:
+    - Transport: ${currentStats.transport} t CO₂e (${userTelemetry.flightsShortHaul} short-haul and ${userTelemetry.flightsLongHaul} long-haul flights/yr)
+    - Energy: ${currentStats.energy} t CO₂e (source: ${userTelemetry.energySource}, heating: ${userTelemetry.heatingType})
+    - Food: ${currentStats.food} t CO₂e (diet: ${userTelemetry.meatIntake}, food waste: ${userTelemetry.foodWaste})
+    - Waste: ${currentStats.waste} t CO₂e (recycling: ${userTelemetry.recycledPercent}%)
+    - Shopping: ${currentStats.shopping} t CO₂e
+    - Total: ${currentStats.total} t CO₂e/year
+    - Climate Score: ${score}/100 | Rank: ${rank}
     - Commute: ${userTelemetry.commuteFrequency}
 
-    Provide your response as a strict, urgent military mission dispatch. Keep under 80 words. Include technical designations (like [SECTOR BRAVO], [CARBON SHIELD ENGAGED]). If no custom prompt, generate a warning about the highest emission sector.
+    Respond in a friendly, conversational tone — like a knowledgeable friend who cares about the environment. Give one clear, actionable tip based on the user's highest emission area. Keep it under 80 words. No jargon, no military language. If the user asks a custom question, answer it helpfully in the context of their carbon data.
   `;
 
   try {
     if (geminiClient) {
       const response = await geminiClient.models.generateContent({
         model: "gemini-2.0-flash",
-        contents: customPrompt ? `Query: ${customPrompt}` : "Give me a critical mission update.",
+        contents: customPrompt ? customPrompt : "Give me one practical tip to reduce my carbon footprint based on my current data.",
         config: { systemInstruction: contextDescription, temperature: 0.8 },
       });
-      const responseText = response.text || "Diagnostic stream stable. Ready for inputs.";
+      const responseText = response.text || "I'm ready to help! Ask me anything about your carbon footprint.";
       commanderRecommendation.warning = responseText;
       commanderRecommendation.status = "ACTIVE";
       res.json({ text: responseText });
     } else {
       const backupMessages = [
-        "Warning: Transport emissions exceeding limits in Sector B. Deploy biking initiative to reduce projected 0.4 MT overage.",
-        "Diagnostic: Energy Grid load fluctuates (+1.2t CO2). Engage SOLAR_CONVERSION syncing matrices.",
-        "Alert: Sector Delta meatless protocol neglected. Deploy PLANT_BASED_SHIFT to stabilize tactical parameters.",
+        "Your transport emissions look high. Consider reducing driving or switching to remote work a few days a week — it could save around 0.4t CO₂ per year.",
+        "Your home energy use is a significant part of your footprint. Switching to a renewable energy plan or improving insulation can make a real impact.",
+        "Eating less meat — even just a few days a week — is one of the most effective things you can do to lower your food-related emissions.",
       ];
       const selected = backupMessages[Math.floor(Math.random() * backupMessages.length)];
       commanderRecommendation.warning = selected;
