@@ -81,6 +81,9 @@ interface ActivityLog {
   type: "LOG" | "INIT" | "DATA" | "SYS";
 }
 
+// --- Constants ---
+const CHALLENGE_REFRESH_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 // --- In-memory State ---
 let userLocation = { name: "COMMANDER", country: "", city: "" };
 
@@ -189,6 +192,8 @@ let appSettings = { safetyThreshold: 5.1, scrubberEfficiency: 85, audioFeedback:
 
 let emissionHistory: EmissionSnapshot[] = [];
 let streakData = { days: 1, lastDate: new Date().toDateString() };
+
+let lastChallengeRefresh: number = Date.now();
 
 let commanderRecommendation = {
   warning: "Your transport emissions are the biggest part of your footprint. Even switching to remote work a few days a week could make a noticeable difference.",
@@ -801,8 +806,14 @@ app.post("/api/settings", (req: Request, res: Response) => {
 });
 
 app.get("/api/challenges", (req: Request, res: Response) => {
+  let refreshed = false;
+  if (Date.now() - lastChallengeRefresh >= CHALLENGE_REFRESH_INTERVAL_MS) {
+    challenges = generatePersonalizedChallenges(userTelemetry, userLocation, challenges);
+    lastChallengeRefresh = Date.now();
+    refreshed = true;
+  }
   const withProgress = challenges.map(c => ({ ...c, progress: computeChallengeProgress(c) }));
-  res.json(withProgress);
+  res.json({ challenges: withProgress, refreshed });
 });
 
 app.post("/api/challenges/join", (req: Request, res: Response) => {

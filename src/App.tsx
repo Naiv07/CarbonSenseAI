@@ -162,7 +162,12 @@ export default function App() {
     try {
       const res = await resilientFetch("/api/challenges");
       const data = await res.json();
-      if (data) setChallenges(data);
+      if (data?.challenges) {
+        setChallenges(data.challenges);
+        if (data.refreshed) {
+          addToast("New challenges available this week!", "SUCCESS");
+        }
+      }
     } catch (e) {
       console.error("Error reading challenges list:", e);
       addToast("Warning: Challenge data unavailable — retrying on next sync.", "WARNING");
