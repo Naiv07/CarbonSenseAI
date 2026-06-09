@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityLog, Challenge, Achievement } from "../types";
-import { ShieldCheck, Award, Zap, Globe, Flame, Calendar, Leaf, Sun, Plane, Wifi, RefreshCw } from "lucide-react";
+import { ShieldCheck, Award, Zap, Globe, Flame, Calendar, Leaf, Sun, Plane, Wifi, RefreshCw, User } from "lucide-react";
 
 interface ProfileViewProps {
   logs: ActivityLog[];
@@ -24,38 +24,37 @@ const ACHIEVEMENT_ICONS: Record<string, React.ReactNode> = {
   wifi: <Wifi className="w-4 h-4" />,
 };
 
-export default function ProfileView({ logs, totalSaved, missionScore, rank, name = "COMMANDER", city = "", country = "", streak = 1, challenges = [], achievements = [] }: ProfileViewProps) {
+export default function ProfileView({ logs, totalSaved, missionScore, rank, name = "", city = "", country = "", streak = 1, challenges = [], achievements = [] }: ProfileViewProps) {
   const tierProgress = missionScore % 10 === 0 && missionScore > 0 ? 100 : (missionScore % 10) * 10;
   const pointsToNextRank = missionScore >= 100 ? 0 : 10 - (missionScore % 10);
   const estimatedXP = missionScore * 150;
   const joinedCount = challenges.filter(c => c.status === "JOINED" || c.status === "COMPLETED").length;
   const unlockedCount = achievements.filter(a => a.unlocked).length;
+  const displayName = name && name.toUpperCase() !== "COMMANDER" ? name : null;
   return (
     <div className="space-y-6">
-      
-      {/* Officer Dossier Section */}
+
+      {/* Profile Section */}
       <section className="bento-card flex flex-col md:flex-row gap-6 items-center">
-        {/* Dossier Image Avatar */}
-        <div className="h-32 w-32 rounded-full overflow-hidden border-2 border-brand-blue/60 shrink-0 shadow-[0_4px_20px_rgba(0,242,255,0.15)] bg-brand-black">
-          <img
-            alt="Commander Dossier Photo"
-            className="w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5Nq-3_BTclXxH5F-jyc_7QQZyjgF9DdruLQnDxySjr7FaBZ7xnjXQP4m8bDyKKHnLpaIivwqG5mQNWwIKdQ_X1bAPms3Jno4WOeCxKZEMDLcGmqlvkmsKFsSkJY7dvPcA_zSS9dLFXfnd3vrEWNGXXV9qUo02t0Zh7wng0MraZ47jrXNvafoBsHF2JitVsn7VZ-X1VypLT1R8UXTWn36-t3Aa5nphSUsaaJ_6ZU3lHV5wi9rp_1yR5_MWd9i3dAN7LMZMX9GKUMwj"
-          />
+        {/* Generic Avatar */}
+        <div className="h-32 w-32 rounded-full border-2 border-brand-blue/60 shrink-0 shadow-[0_4px_20px_rgba(0,242,255,0.15)] bg-brand-black flex items-center justify-center">
+          <User className="w-14 h-14 text-brand-blue/60" />
         </div>
 
-        {/* Dossier Information Parameters */}
+        {/* Profile Information */}
         <div className="flex-1 space-y-4 font-mono text-center md:text-left">
           <div>
             <div className="flex flex-col md:flex-row md:items-baseline gap-2 justify-center md:justify-start">
-              <span className="text-xl font-display font-extrabold text-white tracking-widest uppercase">{name.toUpperCase()}</span>
+              {displayName && (
+                <span className="text-xl font-display font-extrabold text-white tracking-widest uppercase">{displayName.toUpperCase()}</span>
+              )}
               <span className="text-[10px] bg-brand-blue/10 border border-brand-blue/20 text-brand-blue px-2 py-0.5 rounded font-bold tracking-widest uppercase">
                 {rank.toUpperCase().replace(/\s+/g, "_")}
               </span>
             </div>
-            
+
             <p className="text-xs text-[#888888] mt-1.5 leading-relaxed font-sans">
-              Based in {city ? `${city}, ` : ""}{country || "unknown location"}. Tracking your climate impact.
+              Based in {city ? `${city}, ` : ""}{country || "your location"}. Tracking your climate impact.
             </p>
           </div>
 

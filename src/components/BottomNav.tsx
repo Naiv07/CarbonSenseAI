@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutDashboard, Calculator, BarChart3, Target, User } from "lucide-react";
+import { LayoutDashboard, Calculator, BarChart3, Target, User, Newspaper } from "lucide-react";
 
 interface BottomNavProps {
   currentTab: string;
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { id: "CALCULATOR", label: "CALC", icon: Calculator },
   { id: "INSIGHTS", label: "INSIGHTS", icon: BarChart3 },
   { id: "GOALS", label: "GOALS", icon: Target },
+  { id: "DAILY", label: "DAILY", icon: Newspaper },
   { id: "PROFILE", label: "PROFILE", icon: User },
 ];
 

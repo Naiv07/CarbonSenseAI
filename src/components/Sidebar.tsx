@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LayoutDashboard, Calculator, BarChart3, Target, User, Settings, Trash2, Terminal } from "lucide-react";
+import { LayoutDashboard, Calculator, BarChart3, Target, User, Settings, Trash2, Terminal, Newspaper } from "lucide-react";
 
 interface SidebarProps {
   currentTab: string;
@@ -16,6 +16,7 @@ export default function Sidebar({ currentTab, setTab, onDeployInitiative, onRese
     { id: "CALCULATOR", label: "Calculator", icon: Calculator },
     { id: "INSIGHTS", label: "Insights", icon: BarChart3 },
     { id: "GOALS", label: "Challenges", icon: Target },
+    { id: "DAILY", label: "Daily", icon: Newspaper },
     { id: "PROFILE", label: "Profile", icon: User },
   ];
 

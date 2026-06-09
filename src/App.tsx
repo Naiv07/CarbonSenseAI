@@ -8,6 +8,7 @@ import GoalsView from "./components/GoalsView";
 import ProfileView from "./components/ProfileView";
 import SettingsView from "./components/SettingsView";
 import OnboardingView from "./components/OnboardingView";
+import DailyView from "./components/DailyView";
 import BottomNav from "./components/BottomNav";
 
 import { TelemetryState, EmissionsBreakdown, Challenge, ActivityLog, SimulationState, CommanderState, EmissionSnapshot, Achievement } from "./types";
@@ -19,7 +20,7 @@ export default function App() {
   const { addToast } = useToast();
   const [isEntered, setIsEntered] = useState<boolean>(false);
   const [hasOnboarded, setHasOnboarded] = useState<boolean>(() => localStorage.getItem("csai_onboarded") === "true");
-  const [userLocation, setUserLocation] = useState({ name: "COMMANDER", country: "", city: "" });
+  const [userLocation, setUserLocation] = useState({ name: "", country: "", city: "" });
   const [currentTab, setTab] = useState<string>("DASHBOARD");
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [isGateLoading, setIsGateLoading] = useState<boolean>(false);
@@ -245,6 +246,27 @@ export default function App() {
     }
   };
 
+  const toggleChallengeTask = async (challengeId: string, taskId: string) => {
+    try {
+      const res = await resilientFetch(
+        `/api/challenges/${challengeId}/tasks/${taskId}/toggle`,
+        { method: "POST" }
+      );
+      const data = await res.json();
+      setChallenges(prev =>
+        prev.map(c =>
+          c.id !== challengeId ? c : {
+            ...c,
+            progress: data.progress,
+            tasks: c.tasks?.map(t => t.id === taskId ? data.task : t),
+          }
+        )
+      );
+    } catch (e) {
+      console.error("Error toggling challenge task:", e);
+    }
+  };
+
   const handleRefreshCommander = async (customPrompt?: string) => {
     try {
       const res = await fetch("/api/ai/commander", {
@@ -254,11 +276,14 @@ export default function App() {
       });
       const data = await res.json();
       if (data.text) {
-        fetchInitialTelemetry();
+        setCommander(prev => ({ ...prev, warning: data.text, status: "ACTIVE" }));
         fetchLogs();
+      } else {
+        addToast("AI advisor is temporarily unavailable — try again in a moment.", "WARNING");
       }
     } catch (e) {
-      console.error("Error prompting AI commander stream:", e);
+      console.error("Error prompting AI commander:", e);
+      addToast("AI advisor is temporarily unavailable — try again in a moment.", "WARNING");
     }
   };
 
@@ -483,7 +508,11 @@ export default function App() {
           )}
 
           {currentTab === "GOALS" && (
-            <GoalsView challenges={challenges} missionScore={missionScore} onToggleChallenge={handleJoinChallenge} />
+            <GoalsView challenges={challenges} missionScore={missionScore} onToggleChallenge={handleJoinChallenge} onToggleTask={toggleChallengeTask} />
+          )}
+
+          {currentTab === "DAILY" && (
+            <DailyView city={userLocation.city} country={userLocation.country} />
           )}
 
           {currentTab === "PROFILE" && (

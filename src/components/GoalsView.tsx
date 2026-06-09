@@ -1,14 +1,15 @@
 import React from "react";
 import { Challenge } from "../types";
-import { Users, ShieldAlert, Award, Lock } from "lucide-react";
+import { ShieldAlert, Award, Lock, Check } from "lucide-react";
 
 interface GoalsViewProps {
   challenges: Challenge[];
   missionScore?: number;
   onToggleChallenge: (id: string) => void;
+  onToggleTask?: (challengeId: string, taskId: string) => void;
 }
 
-export default function GoalsView({ challenges, missionScore = 0, onToggleChallenge }: GoalsViewProps) {
+export default function GoalsView({ challenges, missionScore = 0, onToggleChallenge, onToggleTask }: GoalsViewProps) {
   return (
     <div className="space-y-6">
       {/* View Header */}
@@ -87,20 +88,16 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                 </div>
 
                 <div className="pt-4 border-t border-brand-border flex flex-col gap-3">
-                  {/* Status checklist metrics */}
-                  <div className="flex justify-between items-center text-[10px] font-mono text-[#888888] font-bold uppercase tracking-wider">
-                    <span className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{challenge.participants}</span>
-                    </span>
+                  {/* Status label */}
+                  <div className="flex justify-end items-center text-[10px] font-mono text-[#888888] font-bold uppercase tracking-wider">
                     <span className={isJoined ? "text-brand-green" : ""}>
                       {challenge.status}
                     </span>
                   </div>
 
-                  {/* Real progress bar for joined challenges */}
+                  {/* Progress bar + task checklist for joined challenges */}
                   {isJoined && (
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <div className="h-1 bg-brand-border rounded-full overflow-hidden">
                         <div
                           className="h-full bg-brand-green transition-all duration-700"
@@ -108,8 +105,32 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                         />
                       </div>
                       <span className="text-[9px] font-mono text-brand-blue font-bold tracking-widest">
-                        {challenge.progress ?? 0}% Progress
+                        {challenge.progress ?? 0}% Complete
                       </span>
+                      {challenge.tasks && challenge.tasks.length > 0 && (
+                        <div className="space-y-1.5 pt-1">
+                          {challenge.tasks.map(task => (
+                            <button
+                              key={task.id}
+                              onClick={() => onToggleTask?.(challenge.id, task.id)}
+                              className="flex items-start gap-2 w-full text-left group/task"
+                            >
+                              <div className={`mt-0.5 w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center transition-colors ${
+                                task.completed
+                                  ? "bg-brand-green border-brand-green"
+                                  : "border-[#444444] group-hover/task:border-brand-blue"
+                              }`}>
+                                {task.completed && <Check className="w-2.5 h-2.5 text-brand-black" />}
+                              </div>
+                              <span className={`text-[10px] font-mono leading-tight ${
+                                task.completed ? "line-through text-[#555555]" : "text-[#888888]"
+                              }`}>
+                                {task.label}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 

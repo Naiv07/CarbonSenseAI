@@ -31,19 +31,26 @@ export interface EmissionsBreakdown {
   total: number;
 }
 
+export interface ChallengeTask {
+  id: string;
+  label: string;
+  completed: boolean;
+  completedAt?: number;
+}
+
 export interface Challenge {
   id: string;
   title: string;
   description: string;
   xp: number;
   status: "LOCKED" | "AVAILABLE" | "JOINED" | "COMPLETED";
-  participants: string;
   category: string;
   urgency?: string;
   xpReward: number;
   image: string;
   joinedAt?: number;
   progress?: number;
+  tasks?: ChallengeTask[];
 }
 
 export interface ActivityLog {

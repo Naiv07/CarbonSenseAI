@@ -59,19 +59,26 @@ interface TelemetryState {
   category: string;
 }
 
+interface ChallengeTask {
+  id: string;
+  label: string;
+  completed: boolean;
+  completedAt?: number;
+}
+
 interface Challenge {
   id: string;
   title: string;
   description: string;
   xp: number;
   status: "LOCKED" | "AVAILABLE" | "JOINED" | "COMPLETED";
-  participants: string;
   category: string;
   urgency?: string;
   xpReward: number;
   image: string;
   joinedAt?: number;
   progress?: number;
+  tasks?: ChallengeTask[];
 }
 
 interface ActivityLog {
@@ -85,7 +92,7 @@ interface ActivityLog {
 const CHALLENGE_REFRESH_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // --- In-memory State ---
-let userLocation = { name: "COMMANDER", country: "", city: "" };
+let userLocation = { name: "", country: "", city: "" };
 
 let userTelemetry: TelemetryState = {
   mileage: 12500,
@@ -112,11 +119,16 @@ let challenges: Challenge[] = [
     description: "Offset your monthly grid consumption by investing in community wind projects.",
     xp: 500,
     status: "JOINED",
-    participants: "12.4k PARTICIPANTS",
     category: "ENERGY",
     xpReward: 500,
     joinedAt: Date.now() - 15 * 24 * 60 * 60 * 1000,
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm",
+    tasks: [
+      { id: "ozg-t1", label: "Sign up for a community wind or solar plan", completed: false },
+      { id: "ozg-t2", label: "Log your current monthly energy bill as a baseline", completed: false },
+      { id: "ozg-t3", label: "Track your kWh usage for one full week", completed: false },
+      { id: "ozg-t4", label: "Share the challenge with one friend or neighbour", completed: false },
+    ],
   },
   {
     id: "bio-shield-alpha",
@@ -124,11 +136,15 @@ let challenges: Challenge[] = [
     description: "Support massive reforestation in the Amazon basin. Target: 10k Hectares.",
     xp: 850,
     status: "AVAILABLE",
-    participants: "9.2k PARTICIPANTS",
     category: "REFORESTATION",
     urgency: "URGENT: 48H REMAINING",
     xpReward: 850,
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAhw0533HcolCMG68x8paQLanAnKH9csTFN5YQKyXCAHDfTeNOjVrI_Q-m1C4qw-npF27O82gDhARdro7TQDnz0b4d-WaX7XuX2msV_woaiBUHB3Jngm6Yk0YcSlB6BwZ8aBeSqpmUx84xwswf2rQ82dVOspBwVYlZ8lBfvETaCPg79DoToIhhf8p2Hj7vx09eu2IcYGutmq6xR1RUavy8tnR0pRJLSGhUng5tHQiGjH1ve7HPdEwXF_IrUHOXVbsMwLEGT6rqxmGDo",
+    tasks: [
+      { id: "bsa-t1", label: "Research and choose a verified reforestation charity", completed: false },
+      { id: "bsa-t2", label: "Make a contribution to plant at least 12 trees", completed: false },
+      { id: "bsa-t3", label: "Post about your contribution on social media", completed: false },
+    ],
   },
   {
     id: "urban-refit-x",
@@ -136,11 +152,16 @@ let challenges: Challenge[] = [
     description: "Pilot program for retrofitting low-income housing with smart carbon scrubbers.",
     xp: 1200,
     status: "LOCKED",
-    participants: "COMMANDER ONLY",
     category: "RETROFIT",
     urgency: "TIER_3: COMMANDER ONLY",
     xpReward: 1200,
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzlZYc-KyO1YrgvSoIJj3YZ2fU7kpz2L-9s68I3eQcHTNbxS7c0joara5U5HEgdwobhltvtNqZCEpU01eG-sF_5K-tKcfPOKmVGAWiWqoDFrJwxMcgcVhRp4TMjSMbFGz-MsvjiM4jUYvBB_IUwlJfUYX2wcTK45CBsB0KYcPPcf9fI1CfMYzYs44HKeFMfjyrYXhi2-HNM3cMO5z3ygVHSi-Y9Ve2EzQMhxlfcV5_4FhlUBSY0BHslkZMD43PTRoSwFYD_FPPg-_G",
+    tasks: [
+      { id: "urx-t1", label: "Complete a housing retrofit feasibility survey", completed: false },
+      { id: "urx-t2", label: "Connect with a local housing authority or NGO", completed: false },
+      { id: "urx-t3", label: "Identify 3 candidate properties in your area", completed: false },
+      { id: "urx-t4", label: "Submit a funding application or grant proposal", completed: false },
+    ],
   },
   {
     id: "transit-shift",
@@ -148,10 +169,15 @@ let challenges: Challenge[] = [
     description: "Replace 3 days of personal vehicle commutes per week with public transit or cycling.",
     xp: 400,
     status: "AVAILABLE",
-    participants: "31.7k PARTICIPANTS",
     category: "TRANSPORT",
     xpReward: 400,
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm",
+    tasks: [
+      { id: "ts-t1", label: "Plan your first car-free commute route", completed: false },
+      { id: "ts-t2", label: "Complete 3 car-free commute days this week", completed: false },
+      { id: "ts-t3", label: "Download a local transit or bike-share app", completed: false },
+      { id: "ts-t4", label: "Log your CO2 saved compared to driving", completed: false },
+    ],
   },
   {
     id: "zero-plastic-cycle",
@@ -159,11 +185,16 @@ let challenges: Challenge[] = [
     description: "Eliminate single-use plastics across all household consumption zones for 30 days.",
     xp: 350,
     status: "AVAILABLE",
-    participants: "18.3k PARTICIPANTS",
     category: "WASTE",
     urgency: "CHALLENGE: 14D WINDOW",
     xpReward: 350,
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAhw0533HcolCMG68x8paQLanAnKH9csTFN5YQKyXCAHDfTeNOjVrI_Q-m1C4qw-npF27O82gDhARdro7TQDnz0b4d-WaX7XuX2msV_woaiBUHB3Jngm6Yk0YcSlB6BwZ8aBeSqpmUx84xwswf2rQ82dVOspBwVYlZ8lBfvETaCPg79DoToIhhf8p2Hj7vx09eu2IcYGutmq6xR1RUavy8tnR0pRJLSGhUng5tHQiGjH1ve7HPdEwXF_IrUHOXVbsMwLEGT6rqxmGDo",
+    tasks: [
+      { id: "zpc-t1", label: "Audit your kitchen for single-use plastic items", completed: false },
+      { id: "zpc-t2", label: "Replace plastic bags with reusable alternatives", completed: false },
+      { id: "zpc-t3", label: "Switch to a reusable water bottle and coffee cup", completed: false },
+      { id: "zpc-t4", label: "Go 7 consecutive days without buying single-use plastic", completed: false },
+    ],
   },
   {
     id: "home-audit-pro",
@@ -171,10 +202,15 @@ let challenges: Challenge[] = [
     description: "Complete an energy efficiency audit and implement at least 2 recommended optimizations.",
     xp: 600,
     status: "AVAILABLE",
-    participants: "7.8k PARTICIPANTS",
     category: "ENERGY",
     xpReward: 600,
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCzqTRPDZEtIiwFPcHVwkwRSnyHhtKodv6uMRK1nrO4wvvw6c57jO7nK3s6afGRxSmkTpUhAVXQzooq4vXkzw9gITewx6Cb2oQZE84MROiFiv7QSKoZd6YDN6txHrMn8hufR9-EY35lncm3J0l9FzsLvkIbgH5g7dmTcSMUk3b-bpSwqO0uwUy_CjQFmV1EHDhUKS-TN7r6DclCZKUCXn5fdWxH6ohjRD6kyKh0GLzfzbkwfFW5QwjhVPenNDu_42j97ANlom9SS1CN",
+    tasks: [
+      { id: "hap-t1", label: "Book or complete a home energy audit", completed: false },
+      { id: "hap-t2", label: "Switch all bulbs to LED lighting", completed: false },
+      { id: "hap-t3", label: "Install a smart thermostat or programmable timer", completed: false },
+      { id: "hap-t4", label: "Seal draughts around windows and doors", completed: false },
+    ],
   },
 ];
 
@@ -194,6 +230,8 @@ let emissionHistory: EmissionSnapshot[] = [];
 let streakData = { days: 1, lastDate: new Date().toDateString() };
 
 let lastChallengeRefresh: number = Date.now();
+
+let dailyInsightCache: { date: string; text: string; city: string } | null = null;
 
 let commanderRecommendation = {
   warning: "Your transport emissions are the biggest part of your footprint. Even switching to remote work a few days a week could make a noticeable difference.",
@@ -336,9 +374,15 @@ function generatePersonalizedChallenges(
       title: "TRANSIT_SHIFT",
       description: `You commute ${telemetry.commuteFrequency.toLowerCase()} by car in ${place}. Swap 3+ days per week to ${ctx.transit} — each car-free day saves ~0.3 kg CO2. In ${location.country || "your country"}, transit riders average 2.6× lower transport emissions.`,
       xp: 400, xpReward: 400, status: "AVAILABLE",
-      participants: "31.7k PARTICIPANTS", category: "TRANSPORT",
+      category: "TRANSPORT",
       image: CHALLENGE_IMG.transport,
       priority: telemetry.commuteFrequency === "DAILY" ? 88 : 60,
+      tasks: [
+        { id: "tc-t1", label: "Plan your first car-free commute route", completed: false },
+        { id: "tc-t2", label: "Complete 3 car-free commute days this week", completed: false },
+        { id: "tc-t3", label: "Download a local transit or bike-share app", completed: false },
+        { id: "tc-t4", label: "Log your CO2 saved compared to driving", completed: false },
+      ],
     });
   }
 
@@ -349,10 +393,16 @@ function generatePersonalizedChallenges(
       title: "EV_CONVERT",
       description: `At ${telemetry.mileage.toLocaleString()} km/year your vehicle emits ${raw.transport}t CO2e. Switch to an EV using ${ctx.ev} and cut transport emissions by ~${saving}t/year. ${location.country ? `${location.country} has expanding public charging networks` : "Charging infrastructure is growing fast"}.`,
       xp: 750, xpReward: 750, status: "AVAILABLE",
-      participants: "14.2k PARTICIPANTS", category: "TRANSPORT",
+      category: "TRANSPORT",
       urgency: "HIGH_IMPACT: ~70% TRANSPORT REDUCTION",
       image: CHALLENGE_IMG.transport,
       priority: telemetry.mileage > 15000 ? 85 : telemetry.mileage > 8000 ? 72 : 50,
+      tasks: [
+        { id: "ev-t1", label: "Research EV models suited to your driving needs", completed: false },
+        { id: "ev-t2", label: "Find 3 public charging locations near your home or work", completed: false },
+        { id: "ev-t3", label: "Calculate your annual fuel savings from switching to EV", completed: false },
+        { id: "ev-t4", label: "Book a test drive at a local EV dealership", completed: false },
+      ],
     });
   }
 
@@ -363,10 +413,15 @@ function generatePersonalizedChallenges(
       title: "FLIGHT_NEUTRAL",
       description: `Your ${telemetry.flightsLongHaul} long-haul and ${telemetry.flightsShortHaul} short-haul flights generate ~${flightCO2}t CO2e. Commit to offsetting via verified carbon removal and replacing 1 short-haul with rail this year.`,
       xp: 550, xpReward: 550, status: "AVAILABLE",
-      participants: "8.9k PARTICIPANTS", category: "TRANSPORT",
+      category: "TRANSPORT",
       urgency: "AVIATION: HIGH-ALTITUDE IMPACT",
       image: CHALLENGE_IMG.transport,
       priority: Math.min(90, (telemetry.flightsLongHaul * 18 + telemetry.flightsShortHaul * 4)),
+      tasks: [
+        { id: "fn-t1", label: "Calculate your total flight emissions for the year", completed: false },
+        { id: "fn-t2", label: "Purchase verified carbon offsets for past flights", completed: false },
+        { id: "fn-t3", label: "Book one rail journey instead of a short-haul flight", completed: false },
+      ],
     });
   }
 
@@ -380,10 +435,16 @@ function generatePersonalizedChallenges(
       title: "SOLAR_GRID_DEPLOY",
       description: `Your ${telemetry.energySource} energy mix in ${place} contributes ${raw.energy}t CO2e/year. Enrol in ${ctx.solar} to switch to clean solar — cutting energy emissions by ~${saving}t annually. ${location.country ? `${location.country} receives strong solar irradiance year-round.` : ""}`,
       xp: 650, xpReward: 650, status: "AVAILABLE",
-      participants: "22.1k PARTICIPANTS", category: "ENERGY",
+      category: "ENERGY",
       urgency: telemetry.energySource === "fossil" ? "CRITICAL: FOSSIL_GRID_ACTIVE" : undefined,
       image: CHALLENGE_IMG.energy,
       priority: telemetry.energySource === "fossil" ? 92 : 68,
+      tasks: [
+        { id: "ss-t1", label: "Get a solar feasibility quote for your home", completed: false },
+        { id: "ss-t2", label: "Sign up for a green energy tariff with your utility", completed: false },
+        { id: "ss-t3", label: "Check available government solar incentives in your area", completed: false },
+        { id: "ss-t4", label: "Track your energy usage for a full billing cycle", completed: false },
+      ],
     });
   }
 
@@ -394,9 +455,14 @@ function generatePersonalizedChallenges(
       title: "HEAT_PUMP_PROTOCOL",
       description: `Your ${telemetry.heatingType} heating in ${place} emits ~${heatSaving}t CO2e/year. Heat pumps deliver 3-4× more warmth per energy unit and pair perfectly with ${ctx.solar}. Typical payback in ${location.country || "temperate climates"}: 5-7 years.`,
       xp: 700, xpReward: 700, status: "AVAILABLE",
-      participants: "5.6k PARTICIPANTS", category: "ENERGY",
+      category: "ENERGY",
       image: CHALLENGE_IMG.energy,
       priority: telemetry.heatingType === "oil" ? 78 : 62,
+      tasks: [
+        { id: "hp-t1", label: "Get a heat pump assessment from a certified installer", completed: false },
+        { id: "hp-t2", label: "Research available heat pump grants or subsidies", completed: false },
+        { id: "hp-t3", label: "Lower your thermostat by 1°C for the next month", completed: false },
+      ],
     });
   }
 
@@ -405,9 +471,15 @@ function generatePersonalizedChallenges(
     title: "HOME_AUDIT_PRO",
     description: `Complete an energy efficiency audit for your home in ${place} and implement 2+ optimisations — smart thermostats, LED lighting, draft sealing. Households in ${location.country || "your region"} typically cut energy use 15-30% from these low-cost actions.`,
     xp: 600, xpReward: 600, status: "AVAILABLE",
-    participants: "7.8k PARTICIPANTS", category: "ENERGY",
+    category: "ENERGY",
     image: CHALLENGE_IMG.energy,
     priority: 38,
+    tasks: [
+      { id: "hap-t1", label: "Book or complete a home energy audit", completed: false },
+      { id: "hap-t2", label: "Switch all bulbs to LED lighting", completed: false },
+      { id: "hap-t3", label: "Install a smart thermostat or programmable timer", completed: false },
+      { id: "hap-t4", label: "Seal draughts around windows and doors", completed: false },
+    ],
   });
 
   // ── FOOD ─────────────────────────────────────────────────────────────────
@@ -418,19 +490,30 @@ function generatePersonalizedChallenges(
       title: "PLANT_PROTOCOL_30",
       description: `Daily meat adds ~${raw.food.toFixed(1)}t CO2e/year to your footprint. Take the 30-day plant-based challenge inspired by ${ctx.diet}. Eliminating meat cuts food emissions by ~${plantSaving}t — one of the highest-leverage personal actions in ${place}.`,
       xp: 500, xpReward: 500, status: "AVAILABLE",
-      participants: "19.4k PARTICIPANTS", category: "FOOD",
+      category: "FOOD",
       urgency: "DIET: HIGHEST REDUCTION POTENTIAL",
       image: CHALLENGE_IMG.food,
       priority: 86,
+      tasks: [
+        { id: "pb-t1", label: "Cook your first fully plant-based meal", completed: false },
+        { id: "pb-t2", label: "Complete 7 consecutive plant-based days", completed: false },
+        { id: "pb-t3", label: "Find 3 plant-based protein sources you enjoy", completed: false },
+        { id: "pb-t4", label: "Complete all 30 days of the plant-based challenge", completed: false },
+      ],
     });
     pool.push({
       id: "meatless-days",
       title: "MEATLESS_OPS",
       description: `Step down from daily meat by committing to 4 meat-free days per week. ${ctx.diet} makes this easy to sustain. Expect food-sector emissions to drop from ${raw.food.toFixed(1)}t toward ${(raw.food * 0.5).toFixed(1)}t CO2e/year.`,
       xp: 350, xpReward: 350, status: "AVAILABLE",
-      participants: "28.7k PARTICIPANTS", category: "FOOD",
+      category: "FOOD",
       image: CHALLENGE_IMG.food,
       priority: 72,
+      tasks: [
+        { id: "md-t1", label: "Plan your 4 meat-free days for the week", completed: false },
+        { id: "md-t2", label: "Complete your first full meat-free day", completed: false },
+        { id: "md-t3", label: "Maintain 4 meat-free days for 2 consecutive weeks", completed: false },
+      ],
     });
   } else if (telemetry.meatIntake === "WEEKLY") {
     pool.push({
@@ -438,9 +521,14 @@ function generatePersonalizedChallenges(
       title: "MEATLESS_OPS",
       description: `Increase your plant-forward days to 5 per week. Leveraging ${ctx.diet} traditions, you can halve your remaining food-sector CO2 impact in ${place} without sacrificing flavour or nutrition.`,
       xp: 350, xpReward: 350, status: "AVAILABLE",
-      participants: "28.7k PARTICIPANTS", category: "FOOD",
+      category: "FOOD",
       image: CHALLENGE_IMG.food,
       priority: 52,
+      tasks: [
+        { id: "md-t1", label: "Plan your 5 meat-free days for the week", completed: false },
+        { id: "md-t2", label: "Complete your first full meat-free day", completed: false },
+        { id: "md-t3", label: "Maintain 5 meat-free days for 2 consecutive weeks", completed: false },
+      ],
     });
   }
 
@@ -450,9 +538,14 @@ function generatePersonalizedChallenges(
       title: "ZERO_FOOD_WASTE",
       description: `Food waste causes 8% of global emissions. Set up home composting via ${ctx.waste} in ${place} and plan weekly meals to cut your current ${telemetry.foodWaste}-waste profile to near-zero within 30 days.`,
       xp: 300, xpReward: 300, status: "AVAILABLE",
-      participants: "15.2k PARTICIPANTS", category: "FOOD",
+      category: "FOOD",
       image: CHALLENGE_IMG.food,
       priority: telemetry.foodWaste === "high" ? 63 : 38,
+      tasks: [
+        { id: "fwz-t1", label: "Set up a compost bin or find a local composting scheme", completed: false },
+        { id: "fwz-t2", label: "Plan your weekly meals to use up perishables first", completed: false },
+        { id: "fwz-t3", label: "Go one full week without throwing away food", completed: false },
+      ],
     });
   }
 
@@ -463,10 +556,16 @@ function generatePersonalizedChallenges(
       title: "ZERO_PLASTIC_CYCLE",
       description: `Boost recycling from ${telemetry.recycledPercent}% toward 75%+ in 30 days using ${ctx.waste}. Eliminate single-use plastics at home. This directly reduces your waste-sector emissions of ${raw.waste.toFixed(2)}t CO2e in ${place}.`,
       xp: 350, xpReward: 350, status: "AVAILABLE",
-      participants: "18.3k PARTICIPANTS", category: "WASTE",
+      category: "WASTE",
       urgency: telemetry.recycledPercent < 20 ? "CRITICAL: LOW_RECYCLE_RATE" : "CHALLENGE: 14D WINDOW",
       image: CHALLENGE_IMG.food,
       priority: telemetry.recycledPercent < 20 ? 76 : 52,
+      tasks: [
+        { id: "zpc-t1", label: "Audit your kitchen for single-use plastic items", completed: false },
+        { id: "zpc-t2", label: "Replace plastic bags with reusable alternatives", completed: false },
+        { id: "zpc-t3", label: "Switch to a reusable water bottle and coffee cup", completed: false },
+        { id: "zpc-t4", label: "Go 7 consecutive days without buying single-use plastic", completed: false },
+      ],
     });
   }
 
@@ -476,9 +575,14 @@ function generatePersonalizedChallenges(
       title: "CONSCIOUS_CONSUMER",
       description: `Frequent shopping adds ~${raw.shopping.toFixed(1)}t CO2e to your annual footprint. Commit to a 30-day "buy nothing new" protocol — repair, borrow, rent instead. Targets: 0.6-0.9t savings, aligned with ${location.country || "your region"}'s circular economy goals.`,
       xp: 420, xpReward: 420, status: "AVAILABLE",
-      participants: "11.8k PARTICIPANTS", category: "WASTE",
+      category: "WASTE",
       image: CHALLENGE_IMG.food,
       priority: 58,
+      tasks: [
+        { id: "cc-t1", label: "Identify 3 items you want to buy and try borrowing instead", completed: false },
+        { id: "cc-t2", label: "Repair something instead of replacing it", completed: false },
+        { id: "cc-t3", label: "Complete 30 days without buying anything non-essential", completed: false },
+      ],
     });
   }
 
@@ -488,21 +592,26 @@ function generatePersonalizedChallenges(
     title: "BIO_SHIELD_ALPHA",
     description: `Support verified reforestation of critical biodiversity zones near ${location.country || "your region"}. Each verified contribution plants 12 trees sequestering ~0.1t CO2e over 10 years. Current target: 10,000 hectares restored.`,
     xp: 850, xpReward: 850, status: "AVAILABLE",
-    participants: "9.2k PARTICIPANTS", category: "REFORESTATION",
+    category: "REFORESTATION",
     urgency: "URGENT: 48H REMAINING",
     image: CHALLENGE_IMG.food,
     priority: 48,
+    tasks: [
+      { id: "bsa-t1", label: "Research and choose a verified reforestation charity", completed: false },
+      { id: "bsa-t2", label: "Make a contribution to plant at least 12 trees", completed: false },
+      { id: "bsa-t3", label: "Post about your contribution on social media", completed: false },
+    ],
   });
 
   // ── SELECT TOP 5 by priority ──────────────────────────────────────────────
   pool.sort((a, b) => b.priority - a.priority);
   const top5 = pool.slice(0, 5);
 
-  // Preserve status/joinedAt from existing challenges where IDs match
+  // Preserve status/joinedAt/tasks from existing challenges where IDs match
   const existingMap = new Map(existing.map(c => [c.id, c]));
   const result: Challenge[] = top5.map(({ priority: _p, ...c }) => {
     const prev = existingMap.get(c.id);
-    return prev ? { ...c, status: prev.status, joinedAt: prev.joinedAt } : c;
+    return prev ? { ...c, status: prev.status, joinedAt: prev.joinedAt, tasks: prev.tasks ?? c.tasks } : c;
   });
 
   // Ensure at least one JOINED challenge for demo purposes
@@ -520,9 +629,14 @@ function generatePersonalizedChallenges(
     xp: 1200, xpReward: 1200,
     status: prevUrban?.status === "AVAILABLE" ? "AVAILABLE" : "LOCKED",
     urgency: prevUrban?.status === "AVAILABLE" ? "TIER_3: UNLOCKED" : "TIER_3: COMMANDER ONLY",
-    participants: "COMMANDER ONLY",
     category: "RETROFIT",
     image: CHALLENGE_IMG.retrofit,
+    tasks: prevUrban?.tasks ?? [
+      { id: "urx-t1", label: "Complete a housing retrofit feasibility survey", completed: false },
+      { id: "urx-t2", label: "Connect with a local housing authority or NGO", completed: false },
+      { id: "urx-t3", label: "Identify 3 candidate properties in your area", completed: false },
+      { id: "urx-t4", label: "Submit a funding application or grant proposal", completed: false },
+    ],
   });
 
   return result;
@@ -616,7 +730,13 @@ function logActivity(entry: ActivityLog) {
 // --- Challenge Progress ---
 function computeChallengeProgress(c: Challenge): number {
   if (c.status === "COMPLETED") return 100;
-  if (c.status !== "JOINED" || !c.joinedAt) return 0;
+  if (c.status !== "JOINED") return 0;
+  if (c.tasks && c.tasks.length > 0) {
+    const done = c.tasks.filter(t => t.completed).length;
+    return Math.round((done / c.tasks.length) * 100);
+  }
+  // fallback: time-based (30-day window)
+  if (!c.joinedAt) return 0;
   const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
   return Math.min(100, Math.round(((Date.now() - c.joinedAt) / THIRTY_DAYS_MS) * 100));
 }
@@ -842,6 +962,16 @@ app.post("/api/challenges/join", (req: Request, res: Response) => {
   }
 });
 
+app.post("/api/challenges/:id/tasks/:taskId/toggle", (req: Request, res: Response) => {
+  const challenge = challenges.find(c => c.id === req.params.id);
+  if (!challenge || !challenge.tasks) return res.status(404).json({ error: "Challenge or tasks not found" });
+  const task = challenge.tasks.find(t => t.id === req.params.taskId);
+  if (!task) return res.status(404).json({ error: "Task not found" });
+  task.completed = !task.completed;
+  task.completedAt = task.completed ? Date.now() : undefined;
+  res.json({ task, progress: computeChallengeProgress(challenge) });
+});
+
 app.post("/api/simulation", (req: Request, res: Response) => {
   const { plantBased, solarConversion, evMobility } = req.body;
   if (plantBased !== undefined) activeSimulation.plantBased = plantBased;
@@ -926,13 +1056,56 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/api/daily-insight", async (req: Request, res: Response) => {
+  const today = new Date().toDateString();
+  const place = userLocation.city || userLocation.country || "";
+  const forceRefresh = req.query.refresh === "true";
+
+  // Return cached insight if same day and same city
+  if (!forceRefresh && dailyInsightCache && dailyInsightCache.date === today && dailyInsightCache.city === place) {
+    return res.json({ insight: dailyInsightCache.text, city: place, date: today, cached: true });
+  }
+
+  const geminiClient = getGemini();
+  const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+  const locationPhrase = place || "your area";
+
+  const prompt = `Today is ${dateLabel}. The user lives in ${locationPhrase}.
+
+Write a short, engaging daily environmental insight for someone in ${locationPhrase}. Include:
+- One specific local environmental fact, seasonal context, or climate-relevant observation for ${locationPhrase} right now
+- One practical, location-aware tip to reduce their carbon footprint today
+- A brief encouraging note about local climate action
+
+Tone: warm, conversational, like a knowledgeable friend texting you a morning tip. Under 130 words. Do not use bullet points — write it as flowing natural paragraphs.`;
+
+  try {
+    let insightText: string;
+    if (geminiClient) {
+      const response = await geminiClient.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+        config: { temperature: 0.8 },
+      });
+      insightText = response.text || "Today's a great day to take one small step for the planet. Try walking or cycling for short trips — it adds up more than you'd think.";
+    } else {
+      insightText = `Good morning from ${locationPhrase}! Today's a great opportunity to make a small difference. Try turning off devices on standby, planning a plant-based meal, or walking instead of driving for short trips. Every action counts — and your community will notice when more people make these choices together.`;
+    }
+    dailyInsightCache = { date: today, text: insightText, city: place };
+    res.json({ insight: insightText, city: place, date: dateLabel, cached: false });
+  } catch (error: any) {
+    console.error("Daily insight error:", error);
+    res.status(500).json({ error: "Could not generate today's insight." });
+  }
+});
+
 app.post("/api/sync", (req: Request, res: Response) => {
   logActivity({ time: new Date().toTimeString().split(" ")[0], text: "SYS: MISSION_CONTROL_SYNCED_OK", impact: "0.0kg", type: "SYS" });
   res.json({ success: true, logs: activityLogs });
 });
 
 app.post("/api/reset", (req: Request, res: Response) => {
-  userLocation = { name: "COMMANDER", country: "", city: "" };
+  userLocation = { name: "", country: "", city: "" };
   userTelemetry = {
     mileage: 12500, commuteFrequency: "DAILY", vehicleType: "INTERNAL_COMBUSTION_MEDIUM",
     flightsShortHaul: 0, flightsLongHaul: 0, utilityBill: 185, energySource: "mixed",
@@ -940,12 +1113,12 @@ app.post("/api/reset", (req: Request, res: Response) => {
     recycledPercent: 40, shoppingFrequency: "average", newElectronics: 0, clothingType: "none",
   };
   challenges = [
-    { id: "oper-zero-grid", title: "OPER_ZERO_GRID", description: "Offset your monthly grid consumption by investing in community wind projects.", xp: 500, status: "JOINED", participants: "12.4k PARTICIPANTS", category: "ENERGY", xpReward: 500, joinedAt: Date.now() - 15 * 24 * 60 * 60 * 1000, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm" },
-    { id: "bio-shield-alpha", title: "BIO_SHIELD_ALPHA", description: "Support massive reforestation in the Amazon basin. Target: 10k Hectares.", xp: 850, status: "AVAILABLE", participants: "9.2k PARTICIPANTS", category: "REFORESTATION", urgency: "URGENT: 48H REMAINING", xpReward: 850, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAhw0533HcolCMG68x8paQLanAnKH9csTFN5YQKyXCAHDfTeNOjVrI_Q-m1C4qw-npF27O82gDhARdro7TQDnz0b4d-WaX7XuX2msV_woaiBUHB3Jngm6Yk0YcSlB6BwZ8aBeSqpmUx84xwswf2rQ82dVOspBwVYlZ8lBfvETaCPg79DoToIhhf8p2Hj7vx09eu2IcYGutmq6xR1RUavy8tnR0pRJLSGhUng5tHQiGjH1ve7HPdEwXF_IrUHOXVbsMwLEGT6rqxmGDo" },
-    { id: "urban-refit-x", title: "URBAN_REFIT_X", description: "Pilot program for retrofitting low-income housing with smart carbon scrubbers.", xp: 1200, status: "LOCKED", participants: "COMMANDER ONLY", category: "RETROFIT", urgency: "TIER_3: COMMANDER ONLY", xpReward: 1200, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzlZYc-KyO1YrgvSoIJj3YZ2fU7kpz2L-9s68I3eQcHTNbxS7c0joara5U5HEgdwobhltvtNqZCEpU01eG-sF_5K-tKcfPOKmVGAWiWqoDFrJwxMcgcVhRp4TMjSMbFGz-MsvjiM4jUYvBB_IUwlJfUYX2wcTK45CBsB0KYcPPcf9fI1CfMYzYs44HKeFMfjyrYXhi2-HNM3cMO5z3ygVHSi-Y9Ve2EzQMhxlfcV5_4FhlUBSY0BHslkZMD43PTRoSwFYD_FPPg-_G" },
-    { id: "transit-shift", title: "TRANSIT_SHIFT", description: "Replace 3 days of personal vehicle commutes per week with public transit or cycling.", xp: 400, status: "AVAILABLE", participants: "31.7k PARTICIPANTS", category: "TRANSPORT", xpReward: 400, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm" },
-    { id: "zero-plastic-cycle", title: "ZERO_PLASTIC_CYCLE", description: "Eliminate single-use plastics across all household consumption zones for 30 days.", xp: 350, status: "AVAILABLE", participants: "18.3k PARTICIPANTS", category: "WASTE", urgency: "CHALLENGE: 14D WINDOW", xpReward: 350, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAhw0533HcolCMG68x8paQLanAnKH9csTFN5YQKyXCAHDfTeNOjVrI_Q-m1C4qw-npF27O82gDhARdro7TQDnz0b4d-WaX7XuX2msV_woaiBUHB3Jngm6Yk0YcSlB6BwZ8aBeSqpmUx84xwswf2rQ82dVOspBwVYlZ8lBfvETaCPg79DoToIhhf8p2Hj7vx09eu2IcYGutmq6xR1RUavy8tnR0pRJLSGhUng5tHQiGjH1ve7HPdEwXF_IrUHOXVbsMwLEGT6rqxmGDo" },
-    { id: "home-audit-pro", title: "HOME_AUDIT_PRO", description: "Complete an energy efficiency audit and implement at least 2 recommended optimizations.", xp: 600, status: "AVAILABLE", participants: "7.8k PARTICIPANTS", category: "ENERGY", xpReward: 600, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCzqTRPDZEtIiwFPcHVwkwRSnyHhtKodv6uMRK1nrO4wvvw6c57jO7nK3s6afGRxSmkTpUhAVXQzooq4vXkzw9gITewx6Cb2oQZE84MROiFiv7QSKoZd6YDN6txHrMn8hufR9-EY35lncm3J0l9FzsLvkIbgH5g7dmTcSMUk3b-bpSwqO0uwUy_CjQFmV1EHDhUKS-TN7r6DclCZKUCXn5fdWxH6ohjRD6kyKh0GLzfzbkwfFW5QwjhVPenNDu_42j97ANlom9SS1CN" },
+    { id: "oper-zero-grid", title: "OPER_ZERO_GRID", description: "Offset your monthly grid consumption by investing in community wind projects.", xp: 500, status: "JOINED", category: "ENERGY", xpReward: 500, joinedAt: Date.now() - 15 * 24 * 60 * 60 * 1000, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm", tasks: [{ id: "ozg-t1", label: "Sign up for a community wind or solar plan", completed: false }, { id: "ozg-t2", label: "Log your current monthly energy bill as a baseline", completed: false }, { id: "ozg-t3", label: "Track your kWh usage for one full week", completed: false }, { id: "ozg-t4", label: "Share the challenge with one friend or neighbour", completed: false }] },
+    { id: "bio-shield-alpha", title: "BIO_SHIELD_ALPHA", description: "Support massive reforestation in the Amazon basin. Target: 10k Hectares.", xp: 850, status: "AVAILABLE", category: "REFORESTATION", urgency: "URGENT: 48H REMAINING", xpReward: 850, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAhw0533HcolCMG68x8paQLanAnKH9csTFN5YQKyXCAHDfTeNOjVrI_Q-m1C4qw-npF27O82gDhARdro7TQDnz0b4d-WaX7XuX2msV_woaiBUHB3Jngm6Yk0YcSlB6BwZ8aBeSqpmUx84xwswf2rQ82dVOspBwVYlZ8lBfvETaCPg79DoToIhhf8p2Hj7vx09eu2IcYGutmq6xR1RUavy8tnR0pRJLSGhUng5tHQiGjH1ve7HPdEwXF_IrUHOXVbsMwLEGT6rqxmGDo", tasks: [{ id: "bsa-t1", label: "Research and choose a verified reforestation charity", completed: false }, { id: "bsa-t2", label: "Make a contribution to plant at least 12 trees", completed: false }, { id: "bsa-t3", label: "Post about your contribution on social media", completed: false }] },
+    { id: "urban-refit-x", title: "URBAN_REFIT_X", description: "Pilot program for retrofitting low-income housing with smart carbon scrubbers.", xp: 1200, status: "LOCKED", category: "RETROFIT", urgency: "TIER_3: COMMANDER ONLY", xpReward: 1200, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzlZYc-KyO1YrgvSoIJj3YZ2fU7kpz2L-9s68I3eQcHTNbxS7c0joara5U5HEgdwobhltvtNqZCEpU01eG-sF_5K-tKcfPOKmVGAWiWqoDFrJwxMcgcVhRp4TMjSMbFGz-MsvjiM4jUYvBB_IUwlJfUYX2wcTK45CBsB0KYcPPcf9fI1CfMYzYs44HKeFMfjyrYXhi2-HNM3cMO5z3ygVHSi-Y9Ve2EzQMhxlfcV5_4FhlUBSY0BHslkZMD43PTRoSwFYD_FPPg-_G", tasks: [{ id: "urx-t1", label: "Complete a housing retrofit feasibility survey", completed: false }, { id: "urx-t2", label: "Connect with a local housing authority or NGO", completed: false }, { id: "urx-t3", label: "Identify 3 candidate properties in your area", completed: false }, { id: "urx-t4", label: "Submit a funding application or grant proposal", completed: false }] },
+    { id: "transit-shift", title: "TRANSIT_SHIFT", description: "Replace 3 days of personal vehicle commutes per week with public transit or cycling.", xp: 400, status: "AVAILABLE", category: "TRANSPORT", xpReward: 400, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm", tasks: [{ id: "ts-t1", label: "Plan your first car-free commute route", completed: false }, { id: "ts-t2", label: "Complete 3 car-free commute days this week", completed: false }, { id: "ts-t3", label: "Download a local transit or bike-share app", completed: false }, { id: "ts-t4", label: "Log your CO2 saved compared to driving", completed: false }] },
+    { id: "zero-plastic-cycle", title: "ZERO_PLASTIC_CYCLE", description: "Eliminate single-use plastics across all household consumption zones for 30 days.", xp: 350, status: "AVAILABLE", category: "WASTE", urgency: "CHALLENGE: 14D WINDOW", xpReward: 350, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAhw0533HcolCMG68x8paQLanAnKH9csTFN5YQKyXCAHDfTeNOjVrI_Q-m1C4qw-npF27O82gDhARdro7TQDnz0b4d-WaX7XuX2msV_woaiBUHB3Jngm6Yk0YcSlB6BwZ8aBeSqpmUx84xwswf2rQ82dVOspBwVYlZ8lBfvETaCPg79DoToIhhf8p2Hj7vx09eu2IcYGutmq6xR1RUavy8tnR0pRJLSGhUng5tHQiGjH1ve7HPdEwXF_IrUHOXVbsMwLEGT6rqxmGDo", tasks: [{ id: "zpc-t1", label: "Audit your kitchen for single-use plastic items", completed: false }, { id: "zpc-t2", label: "Replace plastic bags with reusable alternatives", completed: false }, { id: "zpc-t3", label: "Switch to a reusable water bottle and coffee cup", completed: false }, { id: "zpc-t4", label: "Go 7 consecutive days without buying single-use plastic", completed: false }] },
+    { id: "home-audit-pro", title: "HOME_AUDIT_PRO", description: "Complete an energy efficiency audit and implement at least 2 recommended optimizations.", xp: 600, status: "AVAILABLE", category: "ENERGY", xpReward: 600, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCzqTRPDZEtIiwFPcHVwkwRSnyHhtKodv6uMRK1nrO4wvvw6c57jO7nK3s6afGRxSmkTpUhAVXQzooq4vXkzw9gITewx6Cb2oQZE84MROiFiv7QSKoZd6YDN6txHrMn8hufR9-EY35lncm3J0l9FzsLvkIbgH5g7dmTcSMUk3b-bpSwqO0uwUy_CjQFmV1EHDhUKS-TN7r6DclCZKUCXn5fdWxH6ohjRD6kyKh0GLzfzbkwfFW5QwjhVPenNDu_42j97ANlom9SS1CN", tasks: [{ id: "hap-t1", label: "Book or complete a home energy audit", completed: false }, { id: "hap-t2", label: "Switch all bulbs to LED lighting", completed: false }, { id: "hap-t3", label: "Install a smart thermostat or programmable timer", completed: false }, { id: "hap-t4", label: "Seal draughts around windows and doors", completed: false }] },
   ];
   activityLogs = [
     { time: "14:22:05", text: "LOG: COMMUTE_DETECTED", impact: "+2.4kg", type: "LOG" },
