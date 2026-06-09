@@ -319,7 +319,7 @@ export default function DashboardView({
                   </div>
                 ) : (
                   <div className="text-xs text-[#888888] font-mono py-2 italic text-center">
-                    Warning dispatch dismissed. Query machine again below to establish advice.
+                    Tip dismissed. Ask me anything about your footprint using the box below.
                   </div>
                 )}
               </div>
