@@ -100,7 +100,7 @@ export default function DashboardView({
         <div className="bento-card relative overflow-hidden">
           <div className="flex justify-between items-start mb-3">
             <span className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-              TELEMETRY_01: FOOTPRINT
+              Your Carbon Footprint
             </span>
             <span className="w-2.5 h-2.5 rounded-full bg-brand-green animate-pulse glow-secondary" title="System online"></span>
           </div>
@@ -109,13 +109,13 @@ export default function DashboardView({
               {breakdown.total}
             </span>
             <span className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-              MT CO2e / YR
+              t CO₂e / yr
             </span>
           </div>
           <div className="mt-4 pt-3 border-t border-brand-border flex justify-between text-[11px] font-mono">
-            <span className="text-[#888888] tracking-wider">VARIANCE</span>
+            <span className="text-[#888888] tracking-wider">Change</span>
             {variancePct === null ? (
-              <span className="text-[#555555] font-bold tracking-widest">NO DATA</span>
+              <span className="text-[#555555] font-bold tracking-widest">No data yet</span>
             ) : (
               <span className={`flex items-center font-bold tracking-widest ${variancePct <= 0 ? "text-brand-green" : "text-red-400"}`}>
                 {variancePct > 0 ? "+" : ""}{variancePct.toFixed(1)}%
@@ -129,7 +129,7 @@ export default function DashboardView({
         <div className="bento-card relative overflow-hidden">
           <div className="flex justify-between items-start mb-3">
             <span className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-              TELEMETRY_02: SCORE
+              Your Climate Score
             </span>
             <span className="w-2.5 h-2.5 rounded-full bg-brand-blue animate-pulse glow-primary" title="Sensor data synchronized"></span>
           </div>
@@ -138,7 +138,7 @@ export default function DashboardView({
               {missionScore}
             </span>
             <span className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-              / 100 INDEX
+              / 100
             </span>
           </div>
           <div className="mt-4 pt-3 border-t border-brand-border flex justify-between text-[11px] font-mono">
@@ -157,7 +157,7 @@ export default function DashboardView({
         <div className="bento-card relative overflow-hidden">
           <div className="flex justify-between items-start mb-3">
             <span className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-              IDENTITY: RANK
+              Your Rank
             </span>
             <span className="w-2.5 h-2.5 rounded-full bg-brand-orange animate-pulse glow-warning" title="Commander active"></span>
           </div>
@@ -166,7 +166,7 @@ export default function DashboardView({
               {rank.toUpperCase()}
             </span>
             <span className="text-[10px] font-mono tracking-widest text-[#888888] uppercase font-bold mt-0.5">
-              SCORE {missionScore}/100 · TIER PROGRESS
+              Score {missionScore}/100 · Tier Progress
             </span>
           </div>
           <div className="mt-3.5">
@@ -174,7 +174,7 @@ export default function DashboardView({
               <div className="h-full bg-brand-orange transition-all duration-500" style={{ width: `${tierProgress}%` }}></div>
             </div>
             <div className="flex justify-between text-[9px] font-mono text-[#888888] mt-1 tracking-wider font-bold">
-              <span>TIER_PROGRESS</span>
+              <span>Tier Progress</span>
               <span>{tierProgress}%</span>
             </div>
           </div>
@@ -190,10 +190,10 @@ export default function DashboardView({
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-xs font-mono font-bold tracking-widest text-brand-blue uppercase">
-                  EMISSION_TRAJECTORY_CHART
+                  Emissions Over Time
                 </h3>
                 <p className="text-xs text-[#888888] mt-0.5 font-medium">
-                  Live telemetry curve vs baseline emission targets (MT carbon)
+                  Your emissions curve vs climate targets
                 </p>
               </div>
               
@@ -206,7 +206,7 @@ export default function DashboardView({
                     <span className="w-2 h-2 rounded-full bg-brand-blue inline-block animate-pulse"></span>
                     <span className="w-5 h-px bg-brand-blue inline-block"></span>
                   </span>
-                  <span>ACTUAL_TRAJECTORY</span>
+                  <span>Your Emissions</span>
                 </div>
                 {/* Target line — dashed */}
                 <div className="flex items-center gap-2 text-[9px] font-mono font-bold text-brand-green">
@@ -217,7 +217,7 @@ export default function DashboardView({
                     <span className="w-1 h-px inline-block"></span>
                     <span className="w-2.5 h-px bg-brand-green inline-block"></span>
                   </span>
-                  <span>PARIS_TARGET</span>
+                  <span>Paris Target</span>
                 </div>
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function DashboardView({
               <div className="absolute inset-y-0 left-0 w-1/4 bg-linear-to-r from-transparent via-brand-blue/5 to-transparent map-sweep pointer-events-none"></div>
 
               <span className="absolute top-3 right-3 text-[9px] font-mono bg-red-950/40 border border-red-500/30 text-red-400 px-1.5 py-0.5 rounded tracking-widest font-bold">
-                TELEMETRY_LIVE
+                Live
               </span>
             </div>
           </div>
@@ -282,7 +282,7 @@ export default function DashboardView({
             {/* Header pill */}
             <div className="absolute -top-3 left-4 bg-brand-blue text-brand-black px-2 py-0.5 text-[9px] font-mono font-extrabold flex items-center gap-1 glow-primary uppercase rounded">
               <Sparkles className="w-3 h-3 text-brand-black stroke-[2.5]" />
-              AI_COMMANDER_UNIT
+              AI Advisor
             </div>
 
             <div className="flex gap-4 items-start mt-2">
@@ -303,7 +303,7 @@ export default function DashboardView({
                         onClick={() => onDeployRecommendation(commander.action)}
                         className="flex-1 bg-brand-blue/10 border border-brand-blue/30 text-brand-blue py-1.5 text-[9px] font-mono font-bold tracking-widest hover:bg-brand-blue/25 active:scale-95 transition-all text-center uppercase rounded-xl"
                       >
-                        EXECUTE_DEPLOY
+                        Apply
                       </button>
                       <button
                         onClick={onDismissRecommendation}
@@ -315,7 +315,7 @@ export default function DashboardView({
                   </div>
                 ) : commander.status === "DEPLOYED" ? (
                   <div className="p-3 bg-brand-green/10 border border-brand-green/20 text-brand-green rounded text-xs text-center font-mono font-bold tracking-wide">
-                    ✓ SEC_BRAVO DECISIONS EXECUTED AND ARMED. telemetries locked.
+                    ✓ Action applied successfully.
                   </div>
                 ) : (
                   <div className="text-xs text-[#888888] font-mono py-2 italic text-center">
@@ -332,7 +332,7 @@ export default function DashboardView({
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 disabled={isLoadingAI}
-                placeholder="PROMPT AI COMMANDER (e.g. Save 2 Tonnes...)"
+                placeholder="Ask for advice (e.g. Help me save 2 tonnes...)"
                 className="flex-1 bg-brand-black border border-brand-border text-xs font-mono text-white px-3 py-2 rounded focus:outline-none focus:border-brand-blue placeholder-[#888888]"
               />
               <button
@@ -354,17 +354,17 @@ export default function DashboardView({
           <div className="bento-card">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-                ACTIVE_MISSIONS
+                Active Challenges
               </h3>
               <span className="text-[10px] font-mono tracking-widest text-brand-green font-bold bg-brand-green/15 border border-brand-green/20 px-1.5 rounded animate-pulse">
-                LIVE_{String(joinedChallenges.length).padStart(2, "0")}
+                {joinedChallenges.length} Active
               </span>
             </div>
 
             <div className="space-y-4">
               {displayedMissions.length === 0 ? (
                 <p className="text-[10px] font-mono text-[#888888] italic text-center py-2">
-                  No missions active. Join challenges in GOALS.
+                  No challenges active. Join some in Challenges.
                 </p>
               ) : displayedMissions.map((c) => {
                 const isJoined = c.status === "JOINED";
@@ -384,7 +384,7 @@ export default function DashboardView({
                         </button>
                       ) : (
                         <span className={isCompleted ? "text-brand-green" : "text-brand-blue"}>
-                          {isCompleted ? "COMPLETED" : `${c.progress ?? 0}% ACTIVE`}
+                          {isCompleted ? "Completed" : `${c.progress ?? 0}% done`}
                         </span>
                       )}
                     </div>
@@ -405,15 +405,15 @@ export default function DashboardView({
       {/* 5. Logs console tracker directly at the bottom */}
       <section className="bento-card p-0 flex flex-col overflow-hidden">
         <div className="px-5 py-3 border-b border-brand-border bg-[#1a1c1e] flex justify-between items-center text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-          <span>RECENT_ACTIVITY_LOG</span>
+          <span>Recent Activity</span>
           <span className="text-[9px] bg-white/5 border border-brand-border px-1.5 py-0.5 rounded uppercase">
-            LIVE_FEED
+            Live
           </span>
         </div>
         <div className="divide-y divide-brand-border/55 max-h-47.5 overflow-y-auto font-mono text-[10px] tracking-wide">
           {logs.length === 0 ? (
             <div className="p-4 text-center text-[#888888] italic">
-              Telemetry feed quiet. Adjust carbon values in the calculator.
+              No activity yet. Adjust carbon values in the calculator.
             </div>
           ) : (
             logs.map((log, i) => (

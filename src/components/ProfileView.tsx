@@ -48,38 +48,38 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         <div className="flex-1 space-y-4 font-mono text-center md:text-left">
           <div>
             <div className="flex flex-col md:flex-row md:items-baseline gap-2 justify-center md:justify-start">
-              <span className="text-xl font-display font-extrabold text-white tracking-widest uppercase">CDR. {name.toUpperCase()}</span>
+              <span className="text-xl font-display font-extrabold text-white tracking-widest uppercase">{name.toUpperCase()}</span>
               <span className="text-[10px] bg-brand-blue/10 border border-brand-blue/20 text-brand-blue px-2 py-0.5 rounded font-bold tracking-widest uppercase">
                 {rank.toUpperCase().replace(/\s+/g, "_")}
               </span>
             </div>
             
             <p className="text-xs text-[#888888] mt-1.5 leading-relaxed font-sans">
-              Designated Commander of {city ? `${city}, ` : ""}{country || "Sector Bravo"} Climate Mission Operations. Sector metrics under surveillance.
+              Based in {city ? `${city}, ` : ""}{country || "unknown location"}. Tracking your climate impact.
             </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-left">
             <div className="p-3 bg-brand-black/70 border border-brand-border rounded-xl">
-              <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">STATION</span>
-              <span className="text-xs text-white font-bold tracking-wider uppercase">{city ? city.toUpperCase().replace(/\s+/g, "_") : "BRAVO_UNIT"}</span>
+              <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">Location</span>
+              <span className="text-xs text-white font-bold tracking-wider uppercase">{city ? city.toUpperCase() : "UNKNOWN"}</span>
             </div>
 
             <div className="p-3 bg-brand-black/70 border border-brand-border rounded-xl">
-              <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">SECURITY_CLEARANCE</span>
-              <span className="text-xs text-brand-green font-bold tracking-wider uppercase">TIER_{Math.ceil(missionScore / 10) || 1}_EXEC</span>
+              <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">Access Level</span>
+              <span className="text-xs text-brand-green font-bold tracking-wider uppercase">Tier {Math.ceil(missionScore / 10) || 1}</span>
             </div>
 
             <div className="p-3 bg-brand-black/70 border border-brand-border rounded-xl">
-              <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">CUMULATIVE_XP</span>
+              <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">Total XP</span>
               <span className="text-xs text-brand-orange font-bold tracking-wider uppercase">{estimatedXP.toLocaleString()} XP</span>
             </div>
 
             <div className="p-3 bg-brand-black/70 border border-brand-border rounded-xl">
-              <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">DEPLOYMENT_STREAK</span>
+              <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">Day Streak</span>
               <span className="text-xs text-red-500 font-bold tracking-wider uppercase flex items-center gap-1">
                 <Flame className="w-3.5 h-3.5 text-brand-orange fill-brand-orange animate-pulse" />
-                <span>{streak} {streak === 1 ? "CYCLE" : "CYCLES"}</span>
+                <span>{streak} {streak === 1 ? "Day" : "Days"}</span>
               </span>
             </div>
           </div>
@@ -93,13 +93,13 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         <div className="bento-card space-y-3">
           <div className="flex items-center gap-2 text-brand-green">
             <Globe className="w-4 h-4" />
-            <span className="text-[9px] font-mono tracking-widest font-bold uppercase">01_CUMULATIVE_OFFSETS</span>
+            <span className="text-[9px] font-mono tracking-widest font-bold uppercase">Carbon Saved</span>
           </div>
           <div className="text-3xl font-mono font-bold text-white">
-            {totalSaved > 0 ? `+${totalSaved.toFixed(1)}` : "0.0"} <span className="text-sm font-bold text-[#888888]">TONNES</span>
+            {totalSaved > 0 ? `+${totalSaved.toFixed(1)}` : "0.0"} <span className="text-sm font-bold text-[#888888]">tonnes</span>
           </div>
           <p className="text-xs text-[#888888] font-sans">
-            Total projected carbon footprint diverted from atmosphere cycle to cycle.
+            Total carbon you&apos;ve reduced from your projected footprint.
           </p>
         </div>
 
@@ -107,13 +107,13 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         <div className="bento-card space-y-3">
           <div className="flex items-center gap-2 text-brand-blue">
             <ShieldCheck className="w-4 h-4" />
-            <span className="text-[9px] font-mono tracking-widest font-bold uppercase">02_MISSIONS_AUTHORIZED</span>
+            <span className="text-[9px] font-mono tracking-widest font-bold uppercase">Challenges Joined</span>
           </div>
           <div className="text-3xl font-mono font-bold text-white">
-            {joinedCount} / {challenges.length || 3} <span className="text-sm font-bold text-[#888888]">ENGAGED</span>
+            {joinedCount} / {challenges.length || 3} <span className="text-sm font-bold text-[#888888]">joined</span>
           </div>
           <p className="text-xs text-[#888888] font-sans">
-            Active compliance with renewable utility matrices and transportation offsets.
+            Challenges you&apos;ve committed to across energy, transport, and lifestyle.
           </p>
         </div>
 
@@ -121,10 +121,10 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         <div className="bento-card space-y-3">
           <div className="flex items-center gap-2 text-brand-orange">
             <Award className="w-4 h-4" />
-            <span className="text-[9px] font-mono tracking-widest font-bold uppercase">03_NEXT_RANK_UPGRADE</span>
+            <span className="text-[9px] font-mono tracking-widest font-bold uppercase">Next Rank</span>
           </div>
           <div className="text-3xl font-mono font-bold text-white">
-            {tierProgress}% <span className="text-sm font-bold text-[#888888]">LOCK</span>
+            {tierProgress}% <span className="text-sm font-bold text-[#888888]">to go</span>
           </div>
           <p className="text-xs text-[#888888] font-sans">
             Current rank: {rank}. {pointsToNextRank > 0 ? `Earn ${pointsToNextRank} more score points to advance.` : "Maximum rank achieved."}
@@ -139,7 +139,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
           <div className="flex justify-between items-center mb-4 border-b border-brand-border pb-4">
             <div>
               <h3 className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-                CLEARANCE_BADGES
+                Badges
               </h3>
               <p className="text-xs text-[#888888] mt-0.5 font-sans">
                 {unlockedCount} of {achievements.length} operational achievements unlocked
@@ -164,7 +164,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
                   <p className="text-[9px] font-mono font-bold tracking-wider text-white truncate">{badge.title}</p>
                   <p className="text-[8px] text-[#888888] font-sans mt-0.5">{badge.description}</p>
                   {badge.unlocked && (
-                    <span className="text-[8px] font-mono text-brand-green font-bold tracking-wider">UNLOCKED</span>
+                    <span className="text-[8px] font-mono text-brand-green font-bold tracking-wider">unlocked</span>
                   )}
                 </div>
               </div>
@@ -178,9 +178,9 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         <div className="flex justify-between items-center mb-4 border-b border-brand-border pb-4">
           <div>
             <h3 className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">
-              OFFICER_SERVICE_RECORDS
+              Activity Log
             </h3>
-            <p className="text-xs text-[#888888] mt-0.5 font-sans">Chronicle log of all missions and telemetry events</p>
+            <p className="text-xs text-[#888888] mt-0.5 font-sans">A log of all your actions and changes</p>
           </div>
           <Calendar className="w-4 h-4 text-[#888888]" />
         </div>
@@ -195,9 +195,9 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
                   <span className={`text-[9px] px-1.5 py-0.5 rounded font-extrabold uppercase ${
                     log.type === "INIT" ? "bg-brand-green/10 text-brand-green" : log.type === "DATA" ? "bg-brand-blue/10 text-brand-blue" : "bg-white/5 text-[#888888]"
                   }`}>
-                    STREAM_TYPE: {log.type}
+                    Type: {log.type}
                   </span>
-                  <span className="text-[9px] text-[#888888] font-semibold">IMPACT: {log.impact}</span>
+                  <span className="text-[9px] text-[#888888] font-semibold">Impact: {log.impact}</span>
                 </div>
               </div>
             </div>

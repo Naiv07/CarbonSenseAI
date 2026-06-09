@@ -29,9 +29,9 @@ export default function SettingsView({ onReset }: SettingsProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ safetyThreshold, scrubberEfficiency, audioFeedback }),
       });
-      setStatusMessage("PARAMETERS SAVED & ENCRYPTED ✓");
+      setStatusMessage("Settings saved ✓");
     } catch {
-      setStatusMessage("SAVE FAILED — CHECK CONNECTION");
+      setStatusMessage("Save failed — check connection");
     }
     setTimeout(() => setStatusMessage(""), 3000);
   };
@@ -40,14 +40,14 @@ export default function SettingsView({ onReset }: SettingsProps) {
     <div className="space-y-6">
       <div className="flex items-baseline gap-4">
         <h2 className="text-xl font-display font-extrabold text-brand-blue uppercase tracking-wide">
-          Systems_Settings
+          Settings
         </h2>
         <span className="text-[10px] font-mono bg-brand-blue/10 border border-brand-blue/20 text-brand-blue px-2 py-0.5 rounded tracking-widest font-bold">
           LOCAL_SANDBOX
         </span>
       </div>
       <p className="text-xs text-[#888888] -mt-4">
-        Re-program deep space carbon offset telemetry metrics, regional baseline targets, alerts, and client preferences.
+        Adjust your regional targets, efficiency assumptions, notifications, and data preferences.
       </p>
 
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -57,14 +57,14 @@ export default function SettingsView({ onReset }: SettingsProps) {
           <div className="flex items-center gap-2 border-b border-brand-border pb-4">
             <Sliders className="w-4 h-4 text-brand-blue" />
             <h3 className="text-xs font-mono font-bold text-white tracking-widest uppercase">
-              GRID_TELEMETRY_CALIBRATION
+              Calibration
             </h3>
           </div>
 
           {/* Slider 1: Target limit threshold */}
           <div className="space-y-3">
             <div className="flex justify-between font-mono text-xs">
-              <span className="text-[#888888] font-bold">REGIONAL_TARGET_LIMIT (TONNES CO2e)</span>
+              <span className="text-[#888888] font-bold">Regional Target Limit (tonnes CO₂e)</span>
               <span className="text-brand-blue font-bold">{safetyThreshold}t</span>
             </div>
             <input
@@ -84,7 +84,7 @@ export default function SettingsView({ onReset }: SettingsProps) {
           {/* Slider 2: Scrubber threshold */}
           <div className="space-y-3 pt-4 border-t border-brand-border">
             <div className="flex justify-between font-mono text-xs">
-              <span className="text-[#888888] font-bold">SCRUBBER_CYCLES_EFFICIENCY</span>
+              <span className="text-[#888888] font-bold">Carbon Capture Efficiency</span>
               <span className="text-brand-green font-bold">{scrubberEfficiency}%</span>
             </div>
             <input
@@ -105,9 +105,9 @@ export default function SettingsView({ onReset }: SettingsProps) {
           <div className="pt-6 border-t border-brand-border space-y-4">
             <div className="flex items-center justify-between font-mono text-xs">
               <div className="space-y-1">
-                <p className="text-[#888888] font-bold">COMMAND_AUDIO_ALERTS</p>
+                <p className="text-[#888888] font-bold">Audio Alerts</p>
                 <p className="text-[10px] text-[#888888]">
-                  Enable real-time synthesized voice notification warnings on critical budget overages.
+                  Enable audio notifications when you exceed your carbon target.
                 </p>
               </div>
               <input
@@ -126,7 +126,7 @@ export default function SettingsView({ onReset }: SettingsProps) {
               className="px-5 py-2.5 bg-linear-to-r from-brand-blue to-[#0066ff] hover:opacity-90 active:scale-95 text-brand-black font-mono text-[10px] font-extrabold tracking-widest rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(0,242,255,0.2)]"
             >
               <Save className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>SAVE_CALIBRATED_CONSTANTS</span>
+              <span>Save Settings</span>
             </button>
 
             {statusMessage && (
@@ -144,12 +144,12 @@ export default function SettingsView({ onReset }: SettingsProps) {
             <div className="flex items-center gap-2 border-b border-brand-border pb-3">
               <Shield className="w-4 h-4 text-red-500" />
               <h3 className="text-xs font-mono font-bold text-white tracking-widest uppercase">
-                SYSTEM_SECURITY_PROTOCOLS
+                Data &amp; Privacy
               </h3>
             </div>
 
             <p className="text-xs text-[#888888] leading-relaxed font-sans">
-              The Climate Management Engine operates under encrypted local Sandbox boundaries. Declassifying core telemetry tables is irreversible.
+              Your data is stored locally. Erasing it is permanent and cannot be undone.
             </p>
 
             <button
@@ -157,14 +157,14 @@ export default function SettingsView({ onReset }: SettingsProps) {
               className="w-full py-2.5 bg-red-950/20 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/40 text-red-500 font-mono text-[10px] font-bold tracking-widest rounded-xl flex items-center justify-center gap-1.5 transition-all text-center"
             >
               <Trash2 className="w-3.5 h-3.5 text-red-500" />
-              <span>ERASE_DISSOLVE_ALL_DATA</span>
+              <span>Erase All My Data</span>
             </button>
           </div>
 
           <div className="bento-card space-y-3 font-mono text-[11px] text-[#888888] leading-relaxed">
             <div className="flex items-center gap-2 text-brand-blue font-bold border-b border-brand-border pb-2">
               <Cpu className="w-4 h-4 text-brand-blue" />
-              <span>SYSTEM DIAGNOSTIC</span>
+              <span>System Info</span>
             </div>
             <p><strong>CORE VM:</strong> CLOUDRUN_NODE_EAST</p>
             <p><strong>PORT:</strong> 3000 (INGRESS SAFE)</p>

@@ -111,7 +111,7 @@ export default function App() {
       setDataReady(true);
     } catch (e) {
       console.error("Error reading initial telemetry from server:", e);
-      addToast("SYS_ERR: Telemetry sync failed — showing last known values.", "WARNING");
+      addToast("Error: Sync failed — showing last known values.", "WARNING");
       setDataReady(true);
     }
   };
@@ -134,11 +134,11 @@ export default function App() {
         if (result.streak !== undefined) setStreak(result.streak);
         if (result.baselineEmissions !== undefined) setBaselineEmissions(result.baselineEmissions);
       } else {
-        addToast("SYS_WARN: Server sync partial — loading defaults. Recalibrate in Calculator.", "WARNING");
+        addToast("Warning: Server sync partial — loading defaults. Recalibrate in Calculator.", "WARNING");
       }
     } catch (e) {
       console.error("Error submitting onboarding data:", e);
-      addToast("SYS_WARN: Offline mode — baseline estimated client-side. Sync when connected.", "WARNING");
+      addToast("Warning: Offline mode — baseline estimated. Sync when connected.", "WARNING");
     }
     // Always navigate — never leave the user stranded on step 6
     localStorage.setItem("csai_onboarded", "true");
@@ -154,7 +154,7 @@ export default function App() {
       if (data) setLogs(data);
     } catch (e) {
       console.error("Error reading activity logs:", e);
-      addToast("SYS_WARN: Activity log unavailable — connection issue.", "WARNING");
+      addToast("Warning: Activity log unavailable — connection issue.", "WARNING");
     }
   };
 
@@ -165,7 +165,7 @@ export default function App() {
       if (data) setChallenges(data);
     } catch (e) {
       console.error("Error reading challenges list:", e);
-      addToast("SYS_WARN: Mission data unavailable — retrying on next sync.", "WARNING");
+      addToast("Warning: Challenge data unavailable — retrying on next sync.", "WARNING");
     }
   };
 
@@ -307,11 +307,11 @@ export default function App() {
 
   const handleDeployImmediateInitiative = () => {
     handleUpdateTelemetry({ commuteFrequency: "REMOTE" });
-    addToast("CO2_CMD: Transit initiative loaded. Commute set to REMOTE.", "SUCCESS");
+    addToast("Initiative applied. Commute set to remote.", "SUCCESS");
   };
 
   const handleResetData = async () => {
-    addToast("DIAGNOSTIC RESET: System calibrating baseline standards.", "SYS");
+    addToast("Data reset. Recalibrating your baseline.", "SYS");
     try {
       await fetch("/api/reset", { method: "POST" });
     } catch (e) {
@@ -353,7 +353,7 @@ export default function App() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-[#bec2ff] font-mono text-[11px] font-bold tracking-[0.25em] uppercase">
                 <Terminal className="w-4 h-4 text-[#bec2ff]" />
-                <span>CLIMATE COMMAND PROTOCOL</span>
+                <span>Take Control of Your Carbon</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-display font-extrabold text-white uppercase tracking-tight leading-tight">
                 Planetary-Scale <br className="hidden md:inline" />
@@ -367,16 +367,16 @@ export default function App() {
 
             <div className="grid grid-cols-3 gap-4 py-3 border-t border-b border-[#1f2023]/60 max-w-md">
               <div>
-                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">SURVEILLANCE</span>
-                <span className="text-sm font-mono text-white font-bold tracking-widest block mt-0.5">ACTIVE</span>
+                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">Tracking</span>
+                <span className="text-sm font-mono text-white font-bold tracking-widest block mt-0.5">Active</span>
               </div>
               <div>
-                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">MITIGATION</span>
-                <span className="text-sm font-mono text-white font-bold tracking-widest block mt-0.5">STABLE</span>
+                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">Reducing</span>
+                <span className="text-sm font-mono text-white font-bold tracking-widest block mt-0.5">Stable</span>
               </div>
               <div>
-                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">AI_VERSION</span>
-                <span className="text-sm font-mono text-[#bec2ff] font-bold tracking-widest block mt-0.5">V2.0_F</span>
+                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">AI Version</span>
+                <span className="text-sm font-mono text-[#bec2ff] font-bold tracking-widest block mt-0.5">v2.0</span>
               </div>
             </div>
 
@@ -388,11 +388,11 @@ export default function App() {
               {isGateLoading ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>ESTABLISHING FEED...</span>
+                  <span>Loading...</span>
                 </>
               ) : (
                 <>
-                  <span>ESTABLISH COMMAND SYNC</span>
+                  <span>Get Started</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -401,8 +401,8 @@ export default function App() {
 
           <div className="w-full lg:w-96 shrink-0 border border-[#1f2023] p-4 bg-[#0d0e0f] rounded relative flex flex-col justify-between h-96 group">
             <div className="flex justify-between items-center text-[10px] font-mono tracking-wider font-bold">
-              <span className="text-[#8f8fa1] uppercase">SATELLITE_ORBIT_GRID</span>
-              <span className="text-[#22c55e] animate-pulse">● FEED_OK</span>
+              <span className="text-[#8f8fa1] uppercase">Carbon Grid</span>
+              <span className="text-[#22c55e] animate-pulse">● Online</span>
             </div>
             <div className="h-60 w-full relative flex items-center justify-center opacity-75 group-hover:opacity-100 transition-opacity">
               <img
@@ -414,9 +414,9 @@ export default function App() {
               <div className="absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-[#5e6bff]/10 to-transparent map-sweep pointer-events-none z-20"></div>
             </div>
             <div className="flex justify-between text-[10px] font-mono tracking-wider font-bold text-[#bec2ff] uppercase">
-              <span>PHASE_1: SYNC</span>
-              <span>PHASE_2: CHOKE</span>
-              <span>PHASE_3: CAP</span>
+              <span>Step 1: Connect</span>
+              <span>Step 2: Reduce</span>
+              <span>Step 3: Cap</span>
             </div>
           </div>
         </div>

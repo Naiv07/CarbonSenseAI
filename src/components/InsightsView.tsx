@@ -67,7 +67,7 @@ export default function InsightsView({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    addToast("EXPORT_PAYLOAD: Dataset committed to local storage.", "SUCCESS");
+    addToast("Data exported successfully.", "SUCCESS");
   };
 
   return (
@@ -75,10 +75,10 @@ export default function InsightsView({
       {/* Page header */}
       <div className="flex items-baseline gap-4">
         <h2 className="text-xl font-display font-extrabold text-brand-blue uppercase tracking-wide">
-          Mission_Insights
+          Insights
         </h2>
         <span className="text-[10px] font-mono bg-brand-green/10 border border-brand-green/20 text-brand-green px-2 py-0.5 rounded tracking-widest font-bold">
-          V2.4_READY
+          v2.4
         </span>
       </div>
       <p className="text-xs text-[#888888] -mt-4">
@@ -92,15 +92,15 @@ export default function InsightsView({
         <section className="lg:col-span-7 bento-card relative overflow-hidden">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <p className="text-[9px] font-mono tracking-widest text-[#888888] font-bold">01_EMISSION_BREAKDOWN</p>
+              <p className="text-[9px] font-mono tracking-widest text-[#888888] font-bold">Emissions Breakdown</p>
               <h3 className="text-base font-display font-bold text-white uppercase tracking-tight">
-                SOURCE_TELEMETRY
+                Your Data
               </h3>
             </div>
             
             <div className="flex items-center gap-1.5 text-brand-green font-mono text-[10px] tracking-widest font-bold">
               <span className="w-2.5 h-2.5 rounded-full bg-brand-green animate-pulse glow-secondary"></span>
-              <span>LIVE_STREAM</span>
+              <span>Live</span>
             </div>
           </div>
 
@@ -170,7 +170,7 @@ export default function InsightsView({
                   className="text-[10px] font-mono font-bold tracking-widest text-brand-blue hover:underline flex items-center gap-1.5"
                 >
                   <ClipboardList className="w-3.5 h-3.5" />
-                  EXPORT_FULL_DATASET
+                  Export Data
                 </button>
               </div>
             </div>
@@ -180,9 +180,9 @@ export default function InsightsView({
         {/* Dynamic achievements badges */}
         <section className="lg:col-span-5 bento-card flex flex-col">
           <div className="mb-4">
-            <p className="text-[9px] font-mono tracking-widest text-[#888888] font-bold">02_CLEARANCE_BADGES</p>
+            <p className="text-[9px] font-mono tracking-widest text-[#888888] font-bold">Your Badges</p>
             <h3 className="text-base font-display font-bold text-white uppercase tracking-tight">
-              MISSION_COMMENDATIONS
+              Achievements
             </h3>
           </div>
 
@@ -209,10 +209,10 @@ export default function InsightsView({
                 </div>
                 <div className="font-mono">
                   <h4 className="text-xs font-bold text-white tracking-wider leading-none uppercase">
-                    {achievements.filter(a => a.unlocked).length} / {achievements.length} UNLOCKED
+                    {achievements.filter(a => a.unlocked).length} / {achievements.length} unlocked
                   </h4>
                   <p className="text-[9px] text-[#888888] tracking-wider mt-1 uppercase font-bold">
-                    COMMENDATION_CLEARANCE · OFFICER DOSSIER
+                    Your progress
                   </p>
                 </div>
               </div>
@@ -253,16 +253,16 @@ export default function InsightsView({
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-brand-border pb-5">
           <div>
             <p className="text-[9px] font-mono tracking-widest text-[#888888] font-bold uppercase">
-              03_SIMULATION_MATRIX
+              Impact Simulator
             </p>
             <h3 className="text-base font-display font-bold text-white uppercase tracking-tight">
-              IMPACT_FORECASTER
+              What-If Scenarios
             </h3>
           </div>
 
           <div className="bg-brand-black p-2 border border-brand-border rounded-2xl flex gap-4 font-mono">
             <div className="flex flex-col">
-              <span className="text-[9px] font-bold text-[#888888] tracking-widest uppercase">BASELINE_LOAD</span>
+              <span className="text-[9px] font-bold text-[#888888] tracking-widest uppercase">Current</span>
               <span className="text-[13px] font-bold text-brand-blue">
                 {baseline.toFixed(1)}t / CO2
               </span>
@@ -271,7 +271,7 @@ export default function InsightsView({
             <div className="w-px h-8 bg-brand-border self-center"></div>
             
             <div className="flex flex-col">
-              <span className="text-[9px] font-bold text-[#888888] tracking-widest uppercase">SIMULATED_LOAD</span>
+              <span className="text-[9px] font-bold text-[#888888] tracking-widest uppercase">Simulated</span>
               <span className={`text-[13px] font-bold ${currentSim < baseline ? "text-brand-green" : "text-brand-blue"}`}>
                 {currentSim.toFixed(1)}t / CO2
               </span>
@@ -294,10 +294,10 @@ export default function InsightsView({
                 />
               </div>
               <h4 className="text-[10px] font-mono font-bold tracking-widest text-white uppercase">
-                PLANT_BASED_SHIFT
+                Plant-Based Diet
               </h4>
               <p className="text-xs text-[#888888] mt-1 font-mono">
-                Restrict meat consumables by 80% across weekly cycles.
+                Reduce meat consumption by 80% each week.
               </p>
             </div>
             <div className="mt-4 text-[11px] font-mono font-bold text-brand-green tracking-wider">
@@ -318,10 +318,10 @@ export default function InsightsView({
                 />
               </div>
               <h4 className="text-[10px] font-mono font-bold tracking-widest text-white uppercase">
-                SOLAR_CONVERSION
+                Solar Panels
               </h4>
               <p className="text-xs text-[#888888] mt-1 font-mono">
-                Install local 5kW photovoltaic system linking cells to cells.
+                Install a 5kW solar system at home.
               </p>
             </div>
             <div className="mt-4 text-[11px] font-mono font-bold text-brand-green tracking-wider">
@@ -342,10 +342,10 @@ export default function InsightsView({
                 />
               </div>
               <h4 className="text-[10px] font-mono font-bold tracking-widest text-white uppercase">
-                EV_MOBILITY
+                Electric Vehicle
               </h4>
               <p className="text-xs text-[#888888] mt-1 font-mono">
-                Transition transport loops to zero carbon battery drivetrains.
+                Switch to a zero-emission electric car.
               </p>
             </div>
             <div className="mt-4 text-[11px] font-mono font-bold text-brand-green tracking-wider">
@@ -357,7 +357,7 @@ export default function InsightsView({
           <div className="p-5 bg-brand-blue/5 border border-brand-blue/20 rounded-[20px] flex flex-col justify-between">
             <div>
               <span className="text-[9px] font-mono font-bold text-brand-blue tracking-widest block uppercase">
-                PROJECTION_SUCCESS
+                Projected Reduction
               </span>
               <div className="text-lg font-display font-extrabold text-white mt-1 uppercase tracking-tight">
                 {savingsPercent}% REDUCTION
@@ -368,7 +368,7 @@ export default function InsightsView({
               onClick={onDeployPlan}
               className="w-full mt-4 py-2.5 bg-linear-to-r from-brand-blue to-[#0066ff] hover:opacity-90 active:scale-95 text-brand-black text-[10px] font-mono font-extrabold tracking-widest rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_15px_rgba(0,242,255,0.2)]"
             >
-              <span>EXECUTE_PLAN</span>
+              <span>Apply This Plan</span>
               <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
           </div>

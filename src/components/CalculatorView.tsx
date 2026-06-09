@@ -55,14 +55,14 @@ export default function CalculatorView({
       <div className="flex-1 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-mono tracking-[0.2em] text-brand-blue font-bold">MISSION_SEQUENCE</p>
-            <h1 className="text-2xl font-display font-extrabold text-white uppercase tracking-tight">Input Telemetry</h1>
+            <p className="text-[10px] font-mono tracking-[0.2em] text-brand-blue font-bold">Carbon Calculator</p>
+            <h1 className="text-2xl font-display font-extrabold text-white uppercase tracking-tight">Your Data</h1>
           </div>
           <div className="text-right font-mono">
-            <p className="text-[9px] font-bold text-[#888888] tracking-widest">SYNC_STATUS</p>
+            <p className="text-[9px] font-bold text-[#888888] tracking-widest">Sync Status</p>
             <div className="flex items-center gap-2 justify-end mt-0.5">
               <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse glow-secondary"></span>
-              <span className="text-[10px] text-brand-green font-bold tracking-widest">LIVE_FEED</span>
+              <span className="text-[10px] text-brand-green font-bold tracking-widest">Live</span>
             </div>
           </div>
         </div>
@@ -107,7 +107,7 @@ export default function CalculatorView({
 
         {/* Category Panels */}
         <div className="bento-card relative min-h-[320px] flex flex-col justify-between">
-          <div className="absolute top-3 right-3 text-[9px] font-mono text-[#888888]/35">REF_ID: TR-092-ALPHA</div>
+          <div className="absolute top-3 right-3 text-[9px] font-mono text-[#888888]/35"></div>
 
           <div>
             {/* TRANSPORT */}
@@ -116,7 +116,7 @@ export default function CalculatorView({
                 <div className="space-y-3">
                   <div className="flex justify-between items-end">
                     <div>
-                      <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">ANNUAL_MILEAGE</label>
+                      <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold">Annual Mileage</label>
                       <p className="text-xs text-[#888888] mt-0.5">Total distance traveled by vehicle per year</p>
                     </div>
                     <span className={`text-xl font-mono font-bold ${mileageIsHigh ? "text-red-400" : "text-brand-blue"}`}>
@@ -128,14 +128,14 @@ export default function CalculatorView({
                     className="w-full h-1 bg-brand-black rounded-lg cursor-pointer" />
                   {mileageIsHigh && (
                     <p className="text-[10px] font-mono text-red-400 font-bold uppercase tracking-wider">
-                      ⚠️ OVERAGE WARNING: distance exceeds eco bounds.
+                      ⚠ High mileage — consider reducing driving.
                     </p>
                   )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">COMMUTE_FREQUENCY</label>
+                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Commute Frequency</label>
                     <div className="bg-brand-black border border-brand-border p-1.5 flex rounded-xl">
                       {(["DAILY", "WEEKLY", "REMOTE"] as const).map((freq) => (
                         <button key={freq} onClick={() => onUpdateTelemetry({ commuteFrequency: freq })}
@@ -149,7 +149,7 @@ export default function CalculatorView({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">VEHICLE_TYPE_ID</label>
+                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Vehicle Type</label>
                     <select value={telemetry.vehicleType} onChange={(e) => onUpdateTelemetry({ vehicleType: e.target.value })}
                       className="w-full bg-brand-black border border-brand-border rounded-xl text-xs font-mono font-bold tracking-wider text-white p-2.5 outline-none focus:border-brand-blue">
                       <option value="INTERNAL_COMBUSTION_MEDIUM">COMBUSTION_MEDIUM</option>
@@ -163,7 +163,7 @@ export default function CalculatorView({
                 <div className="grid grid-cols-2 gap-4 pt-2 border-t border-brand-border/60">
                   <div className="space-y-2">
                     <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">
-                      FLIGHTS_SHORT_HAUL / YR
+                      Short-Haul Flights / Year
                     </label>
                     <input type="number" min="0" max="50" value={telemetry.flightsShortHaul}
                       onChange={(e) => onUpdateTelemetry({ flightsShortHaul: Number(e.target.value) })}
@@ -173,7 +173,7 @@ export default function CalculatorView({
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">
-                      FLIGHTS_LONG_HAUL / YR
+                      Long-Haul Flights / Year
                     </label>
                     <input type="number" min="0" max="20" value={telemetry.flightsLongHaul}
                       onChange={(e) => onUpdateTelemetry({ flightsLongHaul: Number(e.target.value) })}
@@ -189,7 +189,7 @@ export default function CalculatorView({
             {activeCategory === "ENERGY" && (
               <div className="space-y-6 animate-fade-in">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">AVG_UTILITY_EXPENDITURE</label>
+                  <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Monthly Energy Bill</label>
                   <p className="text-xs text-[#888888]">Average monthly electricity cost ({currencySymbol}/month)</p>
                 </div>
                 <div className="relative max-w-md">
@@ -204,7 +204,7 @@ export default function CalculatorView({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">ENERGY_SOURCE</label>
+                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Energy Source</label>
                     <div className="space-y-2">
                       {([
                         { id: "renewable", label: "RENEWABLE", desc: "Solar / Wind / Hydro — 70% factor reduction" },
@@ -225,7 +225,7 @@ export default function CalculatorView({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">HEATING_TYPE</label>
+                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Heating Type</label>
                     <div className="space-y-2">
                       {([
                         { id: "none", label: "NONE", desc: "+0.0t CO2/yr" },
@@ -254,15 +254,15 @@ export default function CalculatorView({
             {activeCategory === "FOOD" && (
               <div className="space-y-6 animate-fade-in">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">DIETARY_MEAT_CONSUMPTION</label>
-                  <p className="text-xs text-[#888888]">Nutritional selection alters strategic land utilization factors</p>
+                  <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Meat Consumption</label>
+                  <p className="text-xs text-[#888888]">Your diet has a significant impact on your carbon footprint</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 max-w-xl">
                   {[
                     { id: "DAILY", label: "DAILY MEAT", desc: "Standard protein ratios" },
                     { id: "WEEKLY", label: "WEEKLY MEAT", desc: "Mitigation factor medium" },
                     { id: "VEGETARIAN", label: "VEGETARIAN", desc: "No meat. Low index footprint." },
-                    { id: "VEGAN", label: "VEGAN PROTOCOL", desc: "Full plant based. Minimal footprint." },
+                    { id: "VEGAN", label: "VEGAN", desc: "Fully plant-based. Lowest footprint." },
                   ].map((diet) => (
                     <button key={diet.id} onClick={() => onUpdateTelemetry({ meatIntake: diet.id })}
                       className={`p-4 border text-left rounded-2xl transition-all duration-200 ${
@@ -277,7 +277,7 @@ export default function CalculatorView({
                 </div>
 
                 <div className="pt-4 border-t border-brand-border/60 space-y-3">
-                  <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">FOOD_WASTE_LEVEL</label>
+                  <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Food Waste Level</label>
                   <div className="flex gap-3">
                     {([
                       { id: "low", label: "LOW WASTE", desc: "Meal plan / minimal scraps — 0.8x multiplier" },
@@ -305,8 +305,8 @@ export default function CalculatorView({
                 <div className="space-y-3">
                   <div className="flex justify-between items-baseline">
                     <div>
-                      <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">RECYCLING_MITIGATION_EFFICIENCY</label>
-                      <p className="text-xs text-[#888888] mt-0.5">Percentage of waste streams diverted from landfill</p>
+                      <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Recycling Rate</label>
+                      <p className="text-xs text-[#888888] mt-0.5">Percentage of your waste that gets recycled</p>
                     </div>
                     <span className="text-xl font-mono text-brand-blue font-bold">{telemetry.recycledPercent}%</span>
                   </div>
@@ -326,8 +326,8 @@ export default function CalculatorView({
             {activeCategory === "SHOPPING" && (
               <div className="space-y-6 animate-fade-in">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">CONSUMER_SPENDING_FREQUENCY</label>
-                  <p className="text-xs text-[#888888]">General purchase habits beyond essentials</p>
+                  <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Shopping Frequency</label>
+                  <p className="text-xs text-[#888888]">How often do you buy non-essential items?</p>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   {([
@@ -350,7 +350,7 @@ export default function CalculatorView({
                 <div className="grid grid-cols-2 gap-6 pt-4 border-t border-brand-border/60">
                   <div className="space-y-2">
                     <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">
-                      NEW_ELECTRONICS / YR
+                      New Electronics / Year
                     </label>
                     <input type="number" min="0" max="20" value={telemetry.newElectronics}
                       onChange={(e) => onUpdateTelemetry({ newElectronics: Number(e.target.value) })}
@@ -360,7 +360,7 @@ export default function CalculatorView({
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">CLOTHING_TYPE</label>
+                    <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Clothing Type</label>
                     <div className="space-y-2">
                       {([
                         { id: "none", label: "NO NEW CLOTHING", desc: "+0.0t CO2/yr" },
@@ -389,11 +389,11 @@ export default function CalculatorView({
             <button onClick={triggerLocalSync} disabled={syncStatus !== "STABLE"}
               className="px-6 py-3 bg-brand-blue hover:brightness-110 active:scale-95 text-brand-black font-mono text-xs font-extrabold tracking-widest rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(0,242,255,0.2)]">
               {syncStatus === "SYNCING" ? (
-                <><RefreshCw className="w-4 h-4 animate-spin" /><span>SYNCHRONIZING WITH SERVER...</span></>
+                <><RefreshCw className="w-4 h-4 animate-spin" /><span>Syncing...</span></>
               ) : syncStatus === "SYNCED" ? (
-                <><Check className="w-4 h-4 text-green-700 stroke-[3]" /><span>CHOKE VALUES SYNCHRONIZED ✓</span></>
+                <><Check className="w-4 h-4 text-green-700 stroke-[3]" /><span>Synced ✓</span></>
               ) : (
-                <><RefreshCw className="w-4 h-4" /><span>EXECUTE_SYNC_TO_MISSION_CONTROL</span></>
+                <><RefreshCw className="w-4 h-4" /><span>Sync to Dashboard</span></>
               )}
             </button>
           </div>
@@ -404,7 +404,7 @@ export default function CalculatorView({
       <div className="w-full lg:w-80 shrink-0">
         <div className="bento-card space-y-6">
           <div className="flex justify-between items-center">
-            <p className="text-[10px] font-mono tracking-wider text-brand-green font-bold uppercase">LIVE_IMPACT_MONITOR</p>
+            <p className="text-[10px] font-mono tracking-wider text-brand-green font-bold uppercase">Live Impact</p>
             <span className="w-2.5 h-2.5 bg-brand-green/30 border border-brand-green/60 rounded-full flex items-center justify-center animate-pulse">
               <span className="w-1.5 h-1.5 bg-brand-green rounded-full"></span>
             </span>
@@ -425,7 +425,7 @@ export default function CalculatorView({
 
           <div className="space-y-3 pt-3 border-t border-brand-border/60">
             <div className="flex justify-between items-center text-[10px] font-mono font-bold">
-              <span className="text-[#888888] tracking-wider">SECTOR_TARGET</span>
+              <span className="text-[#888888] tracking-wider">Regional Target</span>
               <span className="text-white">5.1t</span>
             </div>
             <div className="h-1 bg-brand-black rounded overflow-hidden">
@@ -434,16 +434,16 @@ export default function CalculatorView({
             </div>
             <p className={`text-xs text-center font-mono font-bold block ${breakdown.total <= 5.1 ? "text-brand-green" : "text-red-400 animate-pulse"}`}>
               {breakdown.total <= 5.1
-                ? `✓ -${Math.round((1 - breakdown.total / 5.1) * 100)}% BELOW LIMIT AVERAGE`
-                : `⚠️ +${Math.round((breakdown.total / 5.1 - 1) * 100)}% EXCESS OF SECTOR TARGET`}
+                ? `✓ ${Math.round((1 - breakdown.total / 5.1) * 100)}% below regional target`
+                : `⚠ ${Math.round((breakdown.total / 5.1 - 1) * 100)}% above regional target`}
             </p>
           </div>
 
           <div className="space-y-2.5 pt-3 border-t border-brand-border/60 text-[10px] font-mono font-bold">
-            <p className="text-[#888888] tracking-wider uppercase mb-1">TELEMETRY_BREAKDOWN</p>
+            <p className="text-[#888888] tracking-wider uppercase mb-1">Emissions Breakdown</p>
             {[
               { color: "bg-brand-blue", label: "TRANSPORT", val: breakdown.transport },
-              { color: "bg-brand-orange", label: "ENERGY_GRID", val: breakdown.energy },
+              { color: "bg-brand-orange", label: "ENERGY", val: breakdown.energy },
               { color: "bg-brand-green", label: "FOOD & WASTE", val: breakdown.food + breakdown.waste },
               { color: "bg-[#ff6b6b]", label: "SHOPPING", val: breakdown.shopping },
             ].map((item) => (
@@ -458,11 +458,11 @@ export default function CalculatorView({
           <div className="p-4 bg-brand-orange/10 border-l-4 border-brand-orange flex gap-3 text-xs rounded-r">
             <Info className="w-5 h-5 text-brand-orange shrink-0" />
             <div>
-              <p className="font-mono font-bold text-brand-orange tracking-wider text-[10px] uppercase">MISSION_INSIGHT</p>
+              <p className="font-mono font-bold text-brand-orange tracking-wider text-[10px] uppercase">Tip</p>
               <p className="text-[#888888] mt-1 text-[11px] leading-relaxed">
                 {mileageIsHigh
-                  ? "Critically high travel telemetry. Transition commute to REMOTE to secure sector budget bounds."
-                  : "Increasing any emission sector beyond current thresholds will hazard carbon overage. Stay alert."}
+                  ? "Your mileage is very high. Consider switching to remote work or public transport to reduce emissions."
+                  : "Small changes across all categories add up. Check each section to find your biggest opportunities."}
               </p>
             </div>
           </div>

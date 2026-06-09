@@ -14,7 +14,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
       {/* View Header */}
       <div className="flex items-baseline gap-4">
         <h2 className="text-xl font-display font-extrabold text-brand-blue uppercase tracking-wide">
-          Mission_Goals
+          Challenges
         </h2>
         <span className="text-[10px] font-mono bg-brand-orange/10 border border-brand-orange/20 text-brand-orange px-2 py-0.5 rounded tracking-widest font-bold font-mono">
           ACTIVE_OPERATIONS
@@ -28,8 +28,8 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
       {challenges.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
           <ShieldAlert className="w-8 h-8 text-[#444444]" />
-          <p className="text-xs font-mono font-bold text-[#888888] tracking-widest uppercase">No active missions found</p>
-          <p className="text-[10px] font-mono text-[#555555]">Mission data is loading or unavailable. Check your connection and try refreshing.</p>
+          <p className="text-xs font-mono font-bold text-[#888888] tracking-widest uppercase">No challenges found</p>
+          <p className="text-[10px] font-mono text-[#555555]">Challenge data is unavailable. Check your connection and try refreshing.</p>
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -108,7 +108,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                         />
                       </div>
                       <span className="text-[9px] font-mono text-brand-blue font-bold tracking-widest">
-                        {challenge.progress ?? 0}% MISSION PROGRESS
+                        {challenge.progress ?? 0}% Progress
                       </span>
                     </div>
                   )}
@@ -118,7 +118,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                     <div className="w-full bg-brand-black/80 border border-brand-border py-2.5 px-4 rounded-xl flex flex-col gap-1.5 cursor-not-allowed">
                       <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-[#888888]">
                         <Lock className="w-3.5 h-3.5 shrink-0" />
-                        <span>TIER 3 COMMANDER ACCESS REQ.</span>
+                        <span>Requires Tier 3 access</span>
                       </div>
                       <div className="h-1 bg-brand-border rounded-full overflow-hidden">
                         <div
@@ -127,7 +127,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                         />
                       </div>
                       <span className="text-[9px] font-mono text-brand-orange font-bold tracking-widest">
-                        {missionScore >= 60 ? "UNLOCKING..." : `${missionScore}/60 PTS TO UNLOCK`}
+                        {missionScore >= 60 ? "Unlocking..." : `${missionScore}/60 pts to unlock`}
                       </span>
                     </div>
                   ) : (
@@ -139,7 +139,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                           : "bg-brand-blue hover:brightness-110 text-brand-black shadow-[0_4px_15px_rgba(0,242,255,0.2)]"
                       }`}
                     >
-                      {isJoined ? "LEAVE_MISSION" : "JOIN_MISSION"}
+                      {isJoined ? "Leave" : "Join"}
                     </button>
                   )}
                 </div>

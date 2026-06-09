@@ -107,7 +107,7 @@ export default function OnboardingView({ onComplete }: Props) {
 
   const validateStep = (): boolean => {
     if (step === 1) {
-      if (!data.name.trim()) { setValidationError("Commander name is required."); return false; }
+      if (!data.name.trim()) { setValidationError("Your name is required."); return false; }
       if (!data.city.trim()) { setValidationError("City is required."); return false; }
     }
     return true;
@@ -146,8 +146,8 @@ export default function OnboardingView({ onComplete }: Props) {
                 <Terminal className="w-5 h-5 text-brand-blue" />
               </div>
               <div>
-                <p className="text-[10px] font-mono font-bold text-brand-blue tracking-[0.3em] uppercase">Mission Initialization Protocol</p>
-                <p className="text-[9px] font-mono text-[#888888] tracking-wider">PROTOCOL_V1.0 · CLIMATE COMMAND SYSTEM</p>
+                <p className="text-[10px] font-mono font-bold text-brand-blue tracking-[0.3em] uppercase">Getting Started</p>
+                <p className="text-[9px] font-mono text-[#888888] tracking-wider">CarbonSense · Setup</p>
               </div>
             </div>
 
@@ -179,7 +179,7 @@ export default function OnboardingView({ onComplete }: Props) {
               onClick={() => setStep(1)}
               className="w-full py-4 bg-brand-blue text-brand-black font-mono font-extrabold text-sm tracking-widest rounded-2xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_20px_rgba(0,242,255,0.3)] uppercase"
             >
-              BEGIN INITIALIZATION
+              Get Started
               <ArrowRight className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
@@ -208,12 +208,12 @@ export default function OnboardingView({ onComplete }: Props) {
             {step === 1 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Commander Identity</h2>
-                  <p className="text-xs text-[#888888] mt-1">Who&apos;s taking command of this mission?</p>
+                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">About You</h2>
+                  <p className="text-xs text-[#888888] mt-1">Tell us a bit about yourself to get started.</p>
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-mono font-bold text-[#888888] tracking-widest uppercase">Commander Name</label>
+                    <label className="text-[10px] font-mono font-bold text-[#888888] tracking-widest uppercase">Your Name</label>
                     <input
                       type="text"
                       value={data.name}
@@ -252,7 +252,7 @@ export default function OnboardingView({ onComplete }: Props) {
             {step === 2 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Mobility Vector</h2>
+                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Transport</h2>
                   <p className="text-xs text-[#888888] mt-1">How do you get around?</p>
                 </div>
                 <div className="space-y-4">
@@ -313,7 +313,7 @@ export default function OnboardingView({ onComplete }: Props) {
             {step === 3 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Power Grid Analysis</h2>
+                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Energy</h2>
                   <p className="text-xs text-[#888888] mt-1">What powers your home?</p>
                 </div>
                 <div className="space-y-4">
@@ -369,7 +369,7 @@ export default function OnboardingView({ onComplete }: Props) {
             {step === 4 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Nutritional Matrix</h2>
+                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Diet</h2>
                   <p className="text-xs text-[#888888] mt-1">Your diet significantly impacts your carbon footprint.</p>
                 </div>
                 <div className="space-y-5">
@@ -415,7 +415,7 @@ export default function OnboardingView({ onComplete }: Props) {
             {step === 5 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Consumer Pattern</h2>
+                  <h2 className="text-xl font-display font-extrabold text-white uppercase tracking-tight">Lifestyle</h2>
                   <p className="text-xs text-[#888888] mt-1">Shopping habits and waste management.</p>
                 </div>
                 <div className="space-y-4">
@@ -490,7 +490,7 @@ export default function OnboardingView({ onComplete }: Props) {
                 </button>
                 <button onClick={handleNext}
                   className="flex items-center gap-2 px-6 py-2.5 bg-brand-blue text-brand-black font-mono text-[10px] font-extrabold tracking-widest rounded-[10px] hover:brightness-110 active:scale-95 transition-all uppercase shadow-[0_4px_15px_rgba(0,242,255,0.2)]">
-                  {step === 5 ? "COMPUTE BASELINE" : "NEXT"}
+                  {step === 5 ? "Calculate My Footprint" : "Next"}
                   <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                 </button>
               </div>
@@ -506,7 +506,7 @@ export default function OnboardingView({ onComplete }: Props) {
                 <CheckCircle className="w-6 h-6 text-brand-green" />
               </div>
               <h2 className="text-2xl font-display font-extrabold text-white uppercase tracking-tight">Baseline Computed</h2>
-              <p className="text-xs text-[#888888]">Your carbon footprint profile has been calculated, Commander.</p>
+              <p className="text-xs text-[#888888]">Your carbon footprint has been calculated.</p>
             </div>
 
             {/* Baseline result */}
@@ -540,11 +540,11 @@ export default function OnboardingView({ onComplete }: Props) {
             {/* Profile summary row */}
             <div className="grid grid-cols-2 gap-3 text-[10px] font-mono">
               <div className="p-3 bg-brand-black border border-brand-border rounded-xl">
-                <span className="text-[#888888] tracking-wider block font-bold uppercase">Commander</span>
+                <span className="text-[#888888] tracking-wider block font-bold uppercase">Name</span>
                 <span className="text-white font-bold tracking-wider uppercase">{data.name || "UNKNOWN"}</span>
               </div>
               <div className="p-3 bg-brand-black border border-brand-border rounded-xl">
-                <span className="text-[#888888] tracking-wider block font-bold uppercase">Sector</span>
+                <span className="text-[#888888] tracking-wider block font-bold uppercase">Location</span>
                 <span className="text-white font-bold tracking-wider uppercase">{data.city ? `${data.city}, ${data.country}` : data.country}</span>
               </div>
             </div>
@@ -565,9 +565,9 @@ export default function OnboardingView({ onComplete }: Props) {
                 className="flex-1 py-3 bg-brand-green text-brand-black font-mono font-extrabold text-sm tracking-widest rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_20px_rgba(0,255,102,0.25)] uppercase disabled:opacity-60"
               >
                 {isSubmitting ? (
-                  <span className="animate-pulse">INITIALIZING MISSION...</span>
+                  <span className="animate-pulse">Setting up...</span>
                 ) : (
-                  <><Rocket className="w-4 h-4" /> ENGAGE MISSION</>
+                  <><Rocket className="w-4 h-4" /> Start My Journey</>
                 )}
               </button>
             </div>

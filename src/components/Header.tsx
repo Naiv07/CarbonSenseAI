@@ -29,7 +29,7 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
       setTab(match);
       setSearchVal("");
     } else {
-      addToast(`NO_MATCH: "${searchVal.trim()}" — try DASHBOARD, CALCULATOR, GOALS, INSIGHTS, PROFILE`, "WARNING");
+      addToast(`No match for "${searchVal.trim()}" — try Dashboard, Calculator, Goals, Insights, Profile`, "WARNING");
       setSearchVal("");
     }
   };
@@ -41,7 +41,7 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
           onClick={() => setTab("DASHBOARD")}
           className="text-xl font-display font-bold tracking-tighter text-brand-blue cursor-pointer hover:opacity-80 transition-opacity"
         >
-          CLIMATE_MISSION_CONTROL
+          CarbonSense
         </span>
         <nav className="hidden lg:flex items-center gap-6">
           {["DASHBOARD", "CALCULATOR", "INSIGHTS", "GOALS", "PROFILE"].map((tab) => (
@@ -66,7 +66,7 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
           <Search className="text-[#888888] w-4 h-4 mr-2" />
           <input
             className="bg-transparent border-none text-[11px] font-mono tracking-wider focus:outline-none focus:ring-0 w-32 text-white placeholder-[#888888]"
-            placeholder="QUERY_SYSTEM..."
+            placeholder="Search..."
             type="text"
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
@@ -111,7 +111,7 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
           className="bg-brand-green/15 border border-brand-green/30 text-brand-green px-3 py-1.5 text-[11px] font-mono tracking-wider hover:bg-brand-green/25 active:scale-95 transition-all flex items-center gap-1.5 rounded"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
-          {isSyncing ? "SYNCING..." : "EXECUTE_SYNC"}
+          {isSyncing ? "Syncing..." : "Sync"}
         </button>
       </div>
     </header>
