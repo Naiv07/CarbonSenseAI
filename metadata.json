@@ -1,0 +1,6 @@
+{
+  "name": "CLIMATE_MISSION_CONTROL",
+  "description": "A planetary-scale climate dashboard to monitor, calculate, and coordinate carbon offsets featuring an immersive deep space control theme and AI Commander guidance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,506 @@
+import React, { useState, useEffect } from "react";
+import Header from "./components/Header";
+import Sidebar from "./components/Sidebar";
+import DashboardView from "./components/DashboardView";
+import CalculatorView from "./components/CalculatorView";
+import InsightsView from "./components/InsightsView";
+import GoalsView from "./components/GoalsView";
+import ProfileView from "./components/ProfileView";
+import SettingsView from "./components/SettingsView";
+import OnboardingView from "./components/OnboardingView";
+import BottomNav from "./components/BottomNav";
+
+import { TelemetryState, EmissionsBreakdown, Challenge, ActivityLog, SimulationState, CommanderState, EmissionSnapshot, Achievement } from "./types";
+import { ArrowRight, RefreshCw, Terminal } from "lucide-react";
+import { useToast } from "./context/ToastContext";
+import { getCurrencySymbol } from "./utils/currency";
+
+export default function App() {
+  const { addToast } = useToast();
+  const [isEntered, setIsEntered] = useState<boolean>(false);
+  const [hasOnboarded, setHasOnboarded] = useState<boolean>(() => localStorage.getItem("csai_onboarded") === "true");
+  const [userLocation, setUserLocation] = useState({ name: "COMMANDER", country: "", city: "" });
+  const [currentTab, setTab] = useState<string>("DASHBOARD");
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const [isGateLoading, setIsGateLoading] = useState<boolean>(false);
+  const [dataReady, setDataReady] = useState<boolean>(false);
+
+  const [telemetry, setTelemetry] = useState<TelemetryState>({
+    mileage: 12500,
+    commuteFrequency: "DAILY",
+    vehicleType: "INTERNAL_COMBUSTION_MEDIUM",
+    flightsShortHaul: 0,
+    flightsLongHaul: 0,
+    utilityBill: 185,
+    energySource: "mixed",
+    heatingType: "none",
+    category: "TRANSPORT",
+    meatIntake: "DAILY",
+    foodWaste: "medium",
+    recycledPercent: 40,
+    shoppingFrequency: "average",
+    newElectronics: 0,
+    clothingType: "none",
+  });
+
+  const [breakdown, setBreakdown] = useState<EmissionsBreakdown>({
+    transport: 2.25,
+    energy: 0.84,
+    food: 1.8,
+    waste: 0.36,
+    shopping: 0.5,
+    total: 5.8,
+  });
+
+  const [missionScore, setMissionScore] = useState<number>(50);
+  const [rank, setRank] = useState<string>("Climate Ranger");
+
+  const [simulation, setSimulation] = useState<SimulationState>({
+    plantBased: true,
+    solarConversion: false,
+    evMobility: true,
+  });
+
+  const [commander, setCommander] = useState<CommanderState>({
+    warning: "Warning: Transport emissions exceeding limits in Sector B. Deploy biking initiative.",
+    action: "EXECUTE_DEPLOY",
+    projectedSaving: "-0.4 MT",
+    sector: "Sector B",
+    status: "ACTIVE",
+  });
+
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [emissionHistory, setEmissionHistory] = useState<EmissionSnapshot[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [streak, setStreak] = useState<number>(1);
+  const [baselineEmissions, setBaselineEmissions] = useState<number>(0);
+
+  const resilientFetch = async (url: string, options?: RequestInit, retries = 4, delay = 1000): Promise<Response> => {
+    try {
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res;
+    } catch (error) {
+      if (retries > 0) {
+        console.warn(`Fetch to ${url} failed, retrying in ${delay}ms...`, error);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return resilientFetch(url, options, retries - 1, delay * 1.5);
+      }
+      throw error;
+    }
+  };
+
+  const fetchInitialTelemetry = async () => {
+    try {
+      const res = await resilientFetch("/api/telemetry");
+      const data = await res.json();
+      if (data) {
+        setTelemetry(data.telemetry);
+        setBreakdown(data.breakdown);
+        setSimulation(data.activeSimulation);
+        setCommander(data.commanderRecommendation);
+        if (data.missionScore !== undefined) setMissionScore(data.missionScore);
+        if (data.rank) setRank(data.rank);
+        if (data.userLocation) setUserLocation(data.userLocation);
+        if (data.emissionHistory) setEmissionHistory(data.emissionHistory);
+        if (data.achievements) setAchievements(data.achievements);
+        if (data.streak !== undefined) setStreak(data.streak);
+        if (data.baselineEmissions !== undefined) setBaselineEmissions(data.baselineEmissions);
+      }
+      setDataReady(true);
+    } catch (e) {
+      console.error("Error reading initial telemetry from server:", e);
+      addToast("SYS_ERR: Telemetry sync failed — showing last known values.", "WARNING");
+      setDataReady(true);
+    }
+  };
+
+  const handleOnboardingComplete = async (data: any) => {
+    try {
+      const res = await fetch("/api/onboarding", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        if (result.breakdown) setBreakdown(result.breakdown);
+        if (result.missionScore !== undefined) setMissionScore(result.missionScore);
+        if (result.rank) setRank(result.rank);
+        if (result.userLocation) setUserLocation(result.userLocation);
+        if (result.emissionHistory) setEmissionHistory(result.emissionHistory);
+        if (result.achievements) setAchievements(result.achievements);
+        if (result.streak !== undefined) setStreak(result.streak);
+        if (result.baselineEmissions !== undefined) setBaselineEmissions(result.baselineEmissions);
+      } else {
+        addToast("SYS_WARN: Server sync partial — loading defaults. Recalibrate in Calculator.", "WARNING");
+      }
+    } catch (e) {
+      console.error("Error submitting onboarding data:", e);
+      addToast("SYS_WARN: Offline mode — baseline estimated client-side. Sync when connected.", "WARNING");
+    }
+    // Always navigate — never leave the user stranded on step 6
+    localStorage.setItem("csai_onboarded", "true");
+    setHasOnboarded(true);
+    fetchInitialTelemetry();
+    fetchLogs();
+  };
+
+  const fetchLogs = async () => {
+    try {
+      const res = await resilientFetch("/api/logs");
+      const data = await res.json();
+      if (data) setLogs(data);
+    } catch (e) {
+      console.error("Error reading activity logs:", e);
+      addToast("SYS_WARN: Activity log unavailable — connection issue.", "WARNING");
+    }
+  };
+
+  const fetchChallenges = async () => {
+    try {
+      const res = await resilientFetch("/api/challenges");
+      const data = await res.json();
+      if (data) setChallenges(data);
+    } catch (e) {
+      console.error("Error reading challenges list:", e);
+      addToast("SYS_WARN: Mission data unavailable — retrying on next sync.", "WARNING");
+    }
+  };
+
+  useEffect(() => {
+    fetchInitialTelemetry();
+    fetchLogs();
+    fetchChallenges();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleUpdateTelemetry = async (updated: Partial<TelemetryState>) => {
+    setTelemetry({ ...telemetry, ...updated });
+    try {
+      const res = await fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      const data = await res.json();
+      if (data.success && data.breakdown) {
+        setBreakdown(data.breakdown);
+        if (data.missionScore !== undefined) setMissionScore(data.missionScore);
+        if (data.rank) setRank(data.rank);
+        if (data.emissionHistory) setEmissionHistory(data.emissionHistory);
+        if (data.achievements) setAchievements(data.achievements);
+        if (data.streak !== undefined) setStreak(data.streak);
+        fetchLogs();
+      }
+    } catch (e) {
+      console.error("Error committing telemetry changes to server:", e);
+    }
+  };
+
+  const handleUpdateSimulation = async (updated: Partial<SimulationState>) => {
+    setSimulation({ ...simulation, ...updated });
+    try {
+      const res = await fetch("/api/simulation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated),
+      });
+      const data = await res.json();
+      if (data.success && data.breakdown) {
+        setBreakdown(data.breakdown);
+        if (data.missionScore !== undefined) setMissionScore(data.missionScore);
+        if (data.rank) setRank(data.rank);
+        if (data.achievements) setAchievements(data.achievements);
+        if (data.streak !== undefined) setStreak(data.streak);
+        fetchLogs();
+      }
+    } catch (e) {
+      console.error("Error committing simulation updates to server:", e);
+    }
+  };
+
+  const handleJoinChallenge = async (id: string) => {
+    try {
+      const res = await fetch("/api/challenges/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success && data.challenges) {
+        setChallenges(data.challenges);
+        if (data.missionScore !== undefined) setMissionScore(data.missionScore);
+        if (data.rank) setRank(data.rank);
+        fetchLogs();
+      }
+    } catch (e) {
+      console.error("Error joining goals challenge:", e);
+    }
+  };
+
+  const handleRefreshCommander = async (customPrompt?: string) => {
+    try {
+      const res = await fetch("/api/ai/commander", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customPrompt }),
+      });
+      const data = await res.json();
+      if (data.text) {
+        fetchInitialTelemetry();
+        fetchLogs();
+      }
+    } catch (e) {
+      console.error("Error prompting AI commander stream:", e);
+    }
+  };
+
+  const handleDeployRecommendation = async (actionType: string) => {
+    try {
+      const res = await fetch("/api/commander-action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ flag: "deploy", action: actionType }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCommander(data.commanderRecommendation);
+        fetchInitialTelemetry();
+        fetchLogs();
+      }
+    } catch (e) {
+      console.error("Error deploying tactical recommendations:", e);
+    }
+  };
+
+  const handleDismissRecommendation = async () => {
+    try {
+      const res = await fetch("/api/commander-action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ flag: "dismiss" }),
+      });
+      const data = await res.json();
+      if (data.success) setCommander(data.commanderRecommendation);
+    } catch (e) {
+      console.error("Error dismissing recommendation panels:", e);
+    }
+  };
+
+  const handleExecuteSyncAll = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await fetch("/api/sync", { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        fetchInitialTelemetry();
+        fetchLogs();
+      }
+    } catch (e) {
+      console.error("Error executing unified system synchronizer:", e);
+    } finally {
+      setTimeout(() => setIsSyncing(false), 900);
+    }
+  };
+
+  const handleDeployImmediateInitiative = () => {
+    handleUpdateTelemetry({ commuteFrequency: "REMOTE" });
+    addToast("CO2_CMD: Transit initiative loaded. Commute set to REMOTE.", "SUCCESS");
+  };
+
+  const handleResetData = async () => {
+    addToast("DIAGNOSTIC RESET: System calibrating baseline standards.", "SYS");
+    try {
+      await fetch("/api/reset", { method: "POST" });
+    } catch (e) {
+      console.error("Error calling server reset:", e);
+    }
+    localStorage.removeItem("csai_onboarded");
+    setHasOnboarded(false);
+    setIsEntered(false);
+    fetchInitialTelemetry();
+    fetchLogs();
+  };
+
+  const handleEnterMissionControl = () => {
+    setIsGateLoading(true);
+    setTimeout(() => {
+      setIsEntered(true);
+      setIsGateLoading(false);
+    }, 1500);
+  };
+
+  const totalOffsetsSaved = baselineEmissions > 0 ? Math.max(0, baselineEmissions - breakdown.total) : 0;
+  const currencySymbol = getCurrencySymbol(userLocation.country);
+
+  // --- Onboarding Screen ---
+  if (isEntered && !hasOnboarded) {
+    return <OnboardingView onComplete={handleOnboardingComplete} />;
+  }
+
+  // --- Gateway / Landing Screen ---
+  if (!isEntered) {
+    return (
+      <main className="min-h-screen bg-[#070708] technical-grid relative flex items-center justify-center p-6 starfield overflow-hidden">
+        <div className="scanline"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#5e6bff]/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-120 h-120 bg-[#bec2ff]/5 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="max-w-5xl w-full bg-[#101112]/90 border border-[#1f2023] p-8 md:p-12 rounded relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col lg:flex-row gap-10 items-center">
+          <div className="flex-1 space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-[#bec2ff] font-mono text-[11px] font-bold tracking-[0.25em] uppercase">
+                <Terminal className="w-4 h-4 text-[#bec2ff]" />
+                <span>CLIMATE COMMAND PROTOCOL</span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-display font-extrabold text-white uppercase tracking-tight leading-tight">
+                Planetary-Scale <br className="hidden md:inline" />
+                <span className="text-[#bec2ff] relative">Carbon Control</span>
+              </h1>
+            </div>
+
+            <p className="text-[#c6c5d8] text-sm md:text-base leading-relaxed font-sans max-w-lg">
+              Monitor strategic transport bounds, evaluate thermal energy grids, coordinate global reforestation offsets, and execute warning mitigation matrix routines powered by AI Commander guidance.
+            </p>
+
+            <div className="grid grid-cols-3 gap-4 py-3 border-t border-b border-[#1f2023]/60 max-w-md">
+              <div>
+                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">SURVEILLANCE</span>
+                <span className="text-sm font-mono text-white font-bold tracking-widest block mt-0.5">ACTIVE</span>
+              </div>
+              <div>
+                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">MITIGATION</span>
+                <span className="text-sm font-mono text-white font-bold tracking-widest block mt-0.5">STABLE</span>
+              </div>
+              <div>
+                <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block">AI_VERSION</span>
+                <span className="text-sm font-mono text-[#bec2ff] font-bold tracking-widest block mt-0.5">V2.0_F</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleEnterMissionControl}
+              disabled={isGateLoading}
+              className="px-8 py-4 bg-[#bec2ff] text-[#000ba6] text-xs font-mono font-extrabold tracking-widest transition-all rounded shadow-[0_0_25px_rgba(190,194,255,0.35)] hover:bg-[#d0d3ff] hover:shadow-[0_0_35px_rgba(190,194,255,0.5)] active:scale-95 flex items-center gap-2 uppercase"
+            >
+              {isGateLoading ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>ESTABLISHING FEED...</span>
+                </>
+              ) : (
+                <>
+                  <span>ESTABLISH COMMAND SYNC</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="w-full lg:w-96 shrink-0 border border-[#1f2023] p-4 bg-[#0d0e0f] rounded relative flex flex-col justify-between h-96 group">
+            <div className="flex justify-between items-center text-[10px] font-mono tracking-wider font-bold">
+              <span className="text-[#8f8fa1] uppercase">SATELLITE_ORBIT_GRID</span>
+              <span className="text-[#22c55e] animate-pulse">● FEED_OK</span>
+            </div>
+            <div className="h-60 w-full relative flex items-center justify-center opacity-75 group-hover:opacity-100 transition-opacity">
+              <img
+                alt="Planetary Climate Grid Earth Map"
+                className="w-full h-full object-contain filter invert opacity-50 relative z-10"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzqTRPDZEtIiwFPcHVwkwRSnyHhtKodv6uMRK1nrO4wvvw6c57jO7nK3s6afGRxSmkTpUhAVXQzooq4vXkzw9gITewx6Cb2oQZE84MROiFiv7QSKoZd6YDN6txHrMn8hufR9-EY35lncm3J0l9FzsLvkIbgH5g7dmTcSMUk3b-bpSwqO0uwUy_CjQFmV1EHDhUKS-TN7r6DclCZKUCXn5fdWxH6ohjRD6kyKh0GLzfzbkwfFW5QwjhVPenNDu_42j97ANlom9SS1CN"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-[#5e6bff]/10 to-transparent map-sweep pointer-events-none z-20"></div>
+            </div>
+            <div className="flex justify-between text-[10px] font-mono tracking-wider font-bold text-[#bec2ff] uppercase">
+              <span>PHASE_1: SYNC</span>
+              <span>PHASE_2: CHOKE</span>
+              <span>PHASE_3: CAP</span>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // --- Main Dashboard Layout ---
+  return (
+    <main className="min-h-screen bg-[#070708] text-[#e3e2e3] font-sans pt-16 pb-20 md:pb-6">
+      <div className="scanline"></div>
+
+      <Header currentTab={currentTab} setTab={setTab} onSync={handleExecuteSyncAll} isSyncing={isSyncing} />
+
+      <div className="flex">
+        <Sidebar currentTab={currentTab} setTab={setTab} onDeployInitiative={handleDeployImmediateInitiative} onReset={handleResetData} />
+
+        <BottomNav currentTab={currentTab} setTab={setTab} />
+
+        <section className="flex-1 p-6 md:pl-[280px] min-h-[calc(100vh-64px)] overflow-x-hidden">
+          {currentTab === "DASHBOARD" && (
+            <DashboardView
+              breakdown={breakdown}
+              logs={logs}
+              challenges={challenges}
+              commander={commander}
+              missionScore={missionScore}
+              rank={rank}
+              emissionHistory={emissionHistory}
+              achievements={achievements}
+              onDeployRecommendation={handleDeployRecommendation}
+              onDismissRecommendation={handleDismissRecommendation}
+              onRefreshCommander={handleRefreshCommander}
+              onJoinChallenge={handleJoinChallenge}
+            />
+          )}
+
+          {currentTab === "CALCULATOR" && (
+            <CalculatorView
+              telemetry={telemetry}
+              breakdown={breakdown}
+              currencySymbol={currencySymbol}
+              onUpdateTelemetry={handleUpdateTelemetry}
+              onExecuteSync={handleExecuteSyncAll}
+            />
+          )}
+
+          {currentTab === "INSIGHTS" && (
+            <InsightsView
+              simulation={simulation}
+              breakdown={breakdown}
+              achievements={achievements}
+              emissionHistory={emissionHistory}
+              baselineEmissions={baselineEmissions}
+              dataReady={dataReady}
+              onUpdateSimulation={handleUpdateSimulation}
+              onDeployPlan={handleDeployImmediateInitiative}
+            />
+          )}
+
+          {currentTab === "GOALS" && (
+            <GoalsView challenges={challenges} missionScore={missionScore} onToggleChallenge={handleJoinChallenge} />
+          )}
+
+          {currentTab === "PROFILE" && (
+            <ProfileView
+              logs={logs}
+              totalSaved={totalOffsetsSaved}
+              missionScore={missionScore}
+              rank={rank}
+              name={userLocation.name}
+              city={userLocation.city}
+              country={userLocation.country}
+              streak={streak}
+              challenges={challenges}
+              achievements={achievements}
+            />
+          )}
+
+          {currentTab === "SETTINGS" && (
+            <SettingsView onReset={handleResetData} />
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}

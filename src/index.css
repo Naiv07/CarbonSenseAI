@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: "Manrope", sans-serif;
+
+  /* Custom Bento Grid Color Palette */
+  --color-brand-black: #080808;
+  --color-brand-dark: #121212;
+  --color-brand-border: #222222;
+  --color-brand-blue: #00f2ff;
+  --color-brand-green: #00ff66;
+  --color-brand-orange: #ffcc00;
+  --color-brand-purple: #00f2ff;
+  --color-brand-red: #ff3344;
+}
+
+/* Bento Box styling helper */
+.bento-card {
+  background: #121212;
+  border: 1px solid #222222;
+  border-radius: 24px;
+  padding: 24px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.bento-card:hover {
+  border-color: #00f2ff;
+  box-shadow: 0 8px 30px rgba(0, 242, 255, 0.08);
+}
+
+/* Atmospheric Scanline and Technical Background Animations */
+.scanline {
+  width: 100%;
+  height: 2px;
+  background: rgba(0, 242, 255, 0.05);
+  position: fixed;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  animation: scan 12s linear infinite;
+}
+
+@keyframes scan {
+  from { top: 0%; }
+  to { top: 100%; }
+}
+
+.technical-grid {
+  background-size: 32px 32px;
+  background-image: radial-gradient(circle, #222222 1px, transparent 1px);
+}
+
+.data-grid-overlay {
+  background-image: linear-gradient(#222222 1px, transparent 1px), linear-gradient(90deg, #222222 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Glowing atmospheric points */
+.glow-primary {
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.25);
+}
+
+.glow-secondary {
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);
+}
+
+.glow-warning {
+  box-shadow: 0 0 15px rgba(255, 204, 0, 0.25);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+}
+
+/* Custom sliders */
+input[type="range"] {
+  accent-color: #00f2ff;
+}
+
+/* Starfield atmospheric background */
+.starfield {
+  background-image: radial-gradient(1px 1px at 20px 30px, #444, rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 40px 70px, #555, rgba(0,0,0,0)),
+                    radial-gradient(1px 1px at 50px 160px, #333, rgba(0,0,0,0)),
+                    radial-gradient(2px 2px at 90px 40px, #444, rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+/* Map sweep radar effect */
+@keyframes sweep {
+  0% { transform: translateX(-100%); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+
+.map-sweep {
+  animation: sweep 8s linear infinite;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-outlined.fill {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
