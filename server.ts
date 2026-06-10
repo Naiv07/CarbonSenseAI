@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
-import { GoogleGenAI } from "@google/genai";
+import Anthropic from "@anthropic-ai/sdk";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import compression from "compression";
@@ -77,20 +77,13 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-// Initialize Gemini Client
-let ai: GoogleGenAI | null = null;
-function getGemini(): GoogleGenAI | null {
-  if (!ai && process.env.GEMINI_API_KEY) {
-    try {
-      ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
-        httpOptions: { headers: { "User-Agent": "aistudio-build" } },
-      });
-    } catch (e) {
-      console.error("Failed to initialize GoogleGenAI:", e);
-    }
+// Initialize Anthropic Client
+let anthropicClient: Anthropic | null = null;
+function getAnthropic(): Anthropic | null {
+  if (!anthropicClient && process.env.ANTHROPIC_API_KEY) {
+    anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   }
-  return ai;
+  return anthropicClient;
 }
 
 // --- Data Types ---
@@ -1074,7 +1067,7 @@ app.post("/api/commander-action", (req: Request, res: Response) => {
 
 app.post("/api/ai/commander", async (req: Request, res: Response) => {
   const { customPrompt } = req.body;
-  const geminiClient = getGemini();
+  const client = getAnthropic();
   const currentStats = calculateEmissions();
   const score = calculateMissionScore();
 
@@ -1104,13 +1097,16 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
   `;
 
   try {
-    if (geminiClient) {
-      const response = await geminiClient.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: customPrompt ? customPrompt : "Give me one practical tip to reduce my carbon footprint based on my current data.",
-        config: { systemInstruction: contextDescription, temperature: 0.75 },
+    if (client) {
+      const response = await client.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 300,
+        temperature: 0.75,
+        system: contextDescription,
+        messages: [{ role: "user", content: customPrompt || "Give me one practical tip to reduce my carbon footprint based on my current data." }],
       });
-      const responseText = response.text || "I'm ready to help! Ask me anything about your carbon footprint.";
+      const block = response.content[0];
+      const responseText = block.type === "text" ? block.text : "I'm ready to help! Ask me anything about your carbon footprint.";
       commanderRecommendation.warning = responseText;
       commanderRecommendation.status = "ACTIVE";
       res.json({ text: responseText });
@@ -1126,7 +1122,7 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
       res.json({ text: selected });
     }
   } catch (error: any) {
-    console.error("Gemini API error:", error);
+    console.error("Anthropic API error:", error);
     res.status(500).json({ error: error.message || "Couldn't reach the AI advisor right now. Try again in a moment." });
   }
 });
@@ -1142,7 +1138,7 @@ app.get("/api/daily-insight", async (req: Request, res: Response) => {
     return;
   }
 
-  const geminiClient = getGemini();
+  const client = getAnthropic();
   const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const locationPhrase = place || "your area";
 
@@ -1157,20 +1153,22 @@ Tone: warm, conversational, like a knowledgeable friend texting you a morning ti
 
   try {
     let insightText: string;
-    if (geminiClient) {
-      const response = await geminiClient.models.generateContent({
-        model: "gemini-2.0-flash",
-        contents: prompt,
-        config: { temperature: 0.8 },
+    if (client) {
+      const response = await client.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 400,
+        temperature: 0.8,
+        messages: [{ role: "user", content: prompt }],
       });
-      insightText = response.text || "Today's a great day to take one small step for the planet. Try walking or cycling for short trips — it adds up more than you'd think.";
+      const block = response.content[0];
+      insightText = block.type === "text" ? block.text : "Today's a great day to take one small step for the planet. Try walking or cycling for short trips — it adds up more than you'd think.";
     } else {
       insightText = `Good morning from ${locationPhrase}! Today's a great opportunity to make a small difference. Try turning off devices on standby, planning a plant-based meal, or walking instead of driving for short trips. Every action counts — and your community will notice when more people make these choices together.`;
     }
     dailyInsightCache = { date: today, text: insightText, city: place };
     res.json({ insight: insightText, city: place, date: dateLabel, cached: false });
   } catch (error: any) {
-    console.error("Daily insight error:", error);
+    console.error("Anthropic API error (daily-insight):", error);
     res.status(500).json({ error: "Could not generate today's insight." });
   }
 });
