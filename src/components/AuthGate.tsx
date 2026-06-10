@@ -12,6 +12,7 @@ export default function AuthGate({ children }: AuthGateProps) {
   const [loading, setLoading] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
   const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
@@ -25,11 +26,14 @@ export default function AuthGate({ children }: AuthGateProps) {
   const handleGoogleSignIn = async () => {
     setSigningIn(true);
     setError(null);
+    setHint(null);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (e: unknown) {
       const code = (e as { code?: string }).code;
-      if (code !== "auth/popup-closed-by-user") {
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
+        setHint("Sign-in was cancelled — try again or continue as guest below.");
+      } else {
         setError("Sign-in failed. Please try again.");
       }
     } finally {
@@ -114,6 +118,9 @@ export default function AuthGate({ children }: AuthGateProps) {
               {!signingIn && <ArrowRight className="w-4 h-4 ml-auto" aria-hidden="true" />}
             </button>
 
+            {hint && (
+              <p className="text-[11px] text-[#888888] font-mono text-center">{hint}</p>
+            )}
             {error && (
               <p className="text-xs text-red-400 font-mono text-center">{error}</p>
             )}
