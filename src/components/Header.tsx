@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bell, Settings, Search, RefreshCw } from "lucide-react";
+import { Bell, Settings, Search, RefreshCw, User } from "lucide-react";
 import { useToast } from "../context/ToastContext";
 
 interface HeaderProps {
@@ -7,6 +7,7 @@ interface HeaderProps {
   setTab: (tab: string) => void;
   onSync: () => void;
   isSyncing: boolean;
+  userPhotoURL?: string | null;
 }
 
 const TAB_SEARCH_MAP: Record<string, string> = {
@@ -18,7 +19,7 @@ const TAB_SEARCH_MAP: Record<string, string> = {
   settings: "SETTINGS", config: "SETTINGS",
 };
 
-export default function Header({ currentTab, setTab, onSync, isSyncing }: HeaderProps) {
+export default function Header({ currentTab, setTab, onSync, isSyncing, userPhotoURL }: HeaderProps) {
   const { addToast } = useToast();
   const [searchVal, setSearchVal] = useState("");
 
@@ -97,17 +98,23 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
           </button>
         </div>
 
-        {/* Profile Avatar Spot */}
-        <div 
+        {/* Profile Avatar */}
+        <button
           onClick={() => setTab("PROFILE")}
-          className="h-8 w-8 rounded-full overflow-hidden border border-[#888888] hover:border-brand-blue cursor-pointer transition-colors"
+          aria-label="View profile"
+          className="h-8 w-8 rounded-full overflow-hidden border border-[#888888] hover:border-brand-blue cursor-pointer transition-colors shrink-0 bg-brand-black flex items-center justify-center"
         >
-          <img
-            alt="Commander Profile"
-            className="w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5Nq-3_BTclXxH5F-jyc_7QQZyjgF9DdruLQnDxySjr7FaBZ7xnjXQP4m8bDyKKHnLpaIivwqG5mQNWwIKdQ_X1bAPms3Jno4WOeCxKZEMDLcGmqlvkmsKFsSkJY7dvPcA_zSS9dLFXfnd3vrEWNGXXV9qUo02t0Zh7wng0MraZ47jrXNvafoBsHF2JitVsn7VZ-X1VypLT1R8UXTWn36-t3Aa5nphSUsaaJ_6ZU3lHV5wi9rp_1yR5_MWd9i3dAN7LMZMX9GKUMwj"
-          />
-        </div>
+          {userPhotoURL ? (
+            <img
+              alt="Your profile"
+              className="w-full h-full object-cover"
+              src={userPhotoURL}
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <User className="w-4 h-4 text-[#888888]" aria-hidden="true" />
+          )}
+        </button>
 
         {/* Sync Trigger */}
         <button

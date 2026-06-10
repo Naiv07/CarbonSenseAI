@@ -8,6 +8,7 @@ interface ProfileViewProps {
   missionScore: number;
   rank: string;
   name?: string;
+  photoURL?: string | null;
   city?: string;
   country?: string;
   streak?: number;
@@ -24,7 +25,7 @@ const ACHIEVEMENT_ICONS: Record<string, React.ReactNode> = {
   wifi: <Wifi className="w-4 h-4" />,
 };
 
-export default function ProfileView({ logs, totalSaved, missionScore, rank, name = "", city = "", country = "", streak = 1, challenges = [], achievements = [] }: ProfileViewProps) {
+export default function ProfileView({ logs, totalSaved, missionScore, rank, name = "", photoURL, city = "", country = "", streak = 1, challenges = [], achievements = [] }: ProfileViewProps) {
   const tierProgress = missionScore % 10 === 0 && missionScore > 0 ? 100 : (missionScore % 10) * 10;
   const pointsToNextRank = missionScore >= 100 ? 0 : 10 - (missionScore % 10);
   const estimatedXP = missionScore * 150;
@@ -36,9 +37,13 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
 
       {/* Profile Section */}
       <section className="bento-card flex flex-col md:flex-row gap-6 items-center">
-        {/* Generic Avatar */}
-        <div className="h-32 w-32 rounded-full border-2 border-brand-blue/60 shrink-0 shadow-[0_4px_20px_rgba(0,242,255,0.15)] bg-brand-black flex items-center justify-center">
-          <User className="w-14 h-14 text-brand-blue/60" />
+        {/* Avatar — real Google photo or fallback icon */}
+        <div className="h-32 w-32 rounded-full border-2 border-brand-blue/60 shrink-0 shadow-[0_4px_20px_rgba(0,242,255,0.15)] bg-brand-black flex items-center justify-center overflow-hidden">
+          {photoURL ? (
+            <img src={photoURL} alt={displayName ?? "Profile"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          ) : (
+            <User className="w-14 h-14 text-brand-blue/60" />
+          )}
         </div>
 
         {/* Profile Information */}

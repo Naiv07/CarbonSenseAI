@@ -17,9 +17,16 @@ import { ArrowRight, RefreshCw, Terminal } from "lucide-react";
 import { useToast } from "./context/ToastContext";
 import { getCurrencySymbol } from "./utils/currency";
 import { auth } from "./lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
 
 export default function App() {
   const { addToast } = useToast();
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(auth.currentUser);
+
+  useEffect(() => {
+    return onAuthStateChanged(auth, (u) => setFirebaseUser(u));
+  }, []);
+
   const [isEntered, setIsEntered] = useState<boolean>(false);
   const [hasOnboarded, setHasOnboarded] = useState<boolean>(() => localStorage.getItem("csai_onboarded") === "true");
   const [userLocation, setUserLocation] = useState({ name: "", country: "", city: "" });
@@ -476,7 +483,7 @@ export default function App() {
     <main className="min-h-screen bg-[#070708] text-[#e3e2e3] font-sans pt-16 pb-20 md:pb-6">
       <div className="scanline"></div>
 
-      <Header currentTab={currentTab} setTab={setTab} onSync={handleExecuteSyncAll} isSyncing={isSyncing} />
+      <Header currentTab={currentTab} setTab={setTab} onSync={handleExecuteSyncAll} isSyncing={isSyncing} userPhotoURL={firebaseUser?.photoURL ?? null} />
 
       <div className="flex">
         <Sidebar currentTab={currentTab} setTab={setTab} onDeployInitiative={handleDeployImmediateInitiative} onReset={handleResetData} />
@@ -538,7 +545,8 @@ export default function App() {
               totalSaved={totalOffsetsSaved}
               missionScore={missionScore}
               rank={rank}
-              name={userLocation.name}
+              name={firebaseUser?.displayName ?? userLocation.name}
+              photoURL={firebaseUser?.photoURL ?? null}
               city={userLocation.city}
               country={userLocation.country}
               streak={streak}
