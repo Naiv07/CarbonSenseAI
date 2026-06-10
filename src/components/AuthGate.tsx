@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { onAuthStateChanged, signInWithPopup, User } from "firebase/auth";
-import { auth, googleProvider } from "../lib/firebase";
+import type { User } from "firebase/auth";
 import { Terminal, ArrowRight, RefreshCw } from "lucide-react";
 
 interface AuthGateProps {
@@ -16,11 +15,16 @@ export default function AuthGate({ children }: AuthGateProps) {
   const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return unsubscribe;
+    let unsubscribe: (() => void) | undefined;
+    Promise.all([import("../lib/firebase"), import("firebase/auth")]).then(
+      ([{ auth }, { onAuthStateChanged }]) => {
+        unsubscribe = onAuthStateChanged(auth, (u) => {
+          setUser(u);
+          setLoading(false);
+        });
+      }
+    );
+    return () => unsubscribe?.();
   }, []);
 
   const handleGoogleSignIn = async () => {
@@ -28,6 +32,10 @@ export default function AuthGate({ children }: AuthGateProps) {
     setError(null);
     setHint(null);
     try {
+      const [{ auth, googleProvider }, { signInWithPopup }] = await Promise.all([
+        import("../lib/firebase"),
+        import("firebase/auth"),
+      ]);
       await signInWithPopup(auth, googleProvider);
     } catch (e: unknown) {
       const code = (e as { code?: string }).code;

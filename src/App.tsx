@@ -17,15 +17,20 @@ import { TelemetryState, EmissionsBreakdown, Challenge, ActivityLog, SimulationS
 import { ArrowRight, RefreshCw, Terminal } from "lucide-react";
 import { useToast } from "./context/ToastContext";
 import { getCurrencySymbol } from "./utils/currency";
-import { auth } from "./lib/firebase";
-import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import type { User } from "firebase/auth";
 
 export default function App() {
   const { addToast } = useToast();
-  const [firebaseUser, setFirebaseUser] = useState<User | null>(auth.currentUser);
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
 
   useEffect(() => {
-    return onAuthStateChanged(auth, (u) => setFirebaseUser(u));
+    let unsubscribe: (() => void) | undefined;
+    Promise.all([import("./lib/firebase"), import("firebase/auth")]).then(
+      ([{ auth }, { onAuthStateChanged }]) => {
+        unsubscribe = onAuthStateChanged(auth, (u) => setFirebaseUser(u));
+      }
+    );
+    return () => unsubscribe?.();
   }, []);
 
   const [isEntered, setIsEntered] = useState<boolean>(false);
@@ -89,6 +94,7 @@ export default function App() {
   const [baselineEmissions, setBaselineEmissions] = useState<number>(0);
 
   const withAuth = async (options: RequestInit = {}): Promise<RequestInit> => {
+    const { auth } = await import("./lib/firebase");
     const token = await auth.currentUser?.getIdToken().catch(() => null);
     if (!token) return options;
     return {
@@ -404,6 +410,10 @@ export default function App() {
 
   const handleLogout = async () => {
     try {
+      const [{ auth }, { signOut }] = await Promise.all([
+        import("./lib/firebase"),
+        import("firebase/auth"),
+      ]);
       await signOut(auth);
       addToast("Signed out successfully.", "SYS");
     } catch (e) {
