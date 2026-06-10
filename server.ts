@@ -9,6 +9,7 @@ import rateLimit from "express-rate-limit";
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", 1); // Railway runs behind a reverse proxy
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 // Security headers
