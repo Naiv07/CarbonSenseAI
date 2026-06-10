@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
-import DashboardView from "./components/DashboardView";
-import CalculatorView from "./components/CalculatorView";
-import InsightsView from "./components/InsightsView";
-import GoalsView from "./components/GoalsView";
-import ProfileView from "./components/ProfileView";
-import SettingsView from "./components/SettingsView";
-import OnboardingView from "./components/OnboardingView";
-import InfoView from "./components/InfoView";
-import DailyView from "./components/DailyView";
 import BottomNav from "./components/BottomNav";
 import AuthGate from "./components/AuthGate";
+
+const DashboardView = React.lazy(() => import("./components/DashboardView"));
+const CalculatorView = React.lazy(() => import("./components/CalculatorView"));
+const InsightsView = React.lazy(() => import("./components/InsightsView"));
+const GoalsView = React.lazy(() => import("./components/GoalsView"));
+const ProfileView = React.lazy(() => import("./components/ProfileView"));
+const SettingsView = React.lazy(() => import("./components/SettingsView"));
+const OnboardingView = React.lazy(() => import("./components/OnboardingView"));
+const InfoView = React.lazy(() => import("./components/InfoView"));
+const DailyView = React.lazy(() => import("./components/DailyView"));
 
 import { TelemetryState, EmissionsBreakdown, Challenge, ActivityLog, SimulationState, CommanderState, EmissionSnapshot, Achievement } from "./types";
 import { ArrowRight, RefreshCw, Terminal } from "lucide-react";
@@ -432,21 +433,29 @@ export default function App() {
   const totalOffsetsSaved = baselineEmissions > 0 ? Math.max(0, baselineEmissions - breakdown.total) : 0;
   const currencySymbol = getCurrencySymbol(userLocation.country);
 
+  const suspenseFallback = (
+    <div className="min-h-screen bg-[#070708] flex items-center justify-center">
+      <div className="w-5 h-5 border-2 border-[#00f2ff]/30 border-t-[#00f2ff] rounded-full animate-spin" />
+    </div>
+  );
+
   // --- Info Screen (shown once to all new visitors, including guests) ---
   if (isEntered && !hasSeenInfo) {
     return (
-      <InfoView
-        onContinue={() => {
-          localStorage.setItem("csai_info_seen", "true");
-          setHasSeenInfo(true);
-        }}
-      />
+      <Suspense fallback={suspenseFallback}>
+        <InfoView
+          onContinue={() => {
+            localStorage.setItem("csai_info_seen", "true");
+            setHasSeenInfo(true);
+          }}
+        />
+      </Suspense>
     );
   }
 
   // --- Onboarding Screen (no auth required — anyone can fill in their data) ---
   if (isEntered && !hasOnboarded) {
-    return <OnboardingView onComplete={handleOnboardingComplete} />;
+    return <Suspense fallback={suspenseFallback}><OnboardingView onComplete={handleOnboardingComplete} /></Suspense>;
   }
 
   // --- Gateway / Landing Screen ---
@@ -549,6 +558,7 @@ export default function App() {
         <BottomNav currentTab={currentTab} setTab={setTab} />
 
         <section className="flex-1 p-3 sm:p-4 md:p-6 md:pl-[280px] min-h-[calc(100vh-64px)] overflow-x-hidden">
+          <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-5 h-5 border-2 border-[#00f2ff]/30 border-t-[#00f2ff] rounded-full animate-spin" /></div>}>
           {currentTab === "DASHBOARD" && (
             <DashboardView
               breakdown={breakdown}
@@ -617,6 +627,7 @@ export default function App() {
           {currentTab === "SETTINGS" && (
             <SettingsView onReset={handleResetData} />
           )}
+          </Suspense>
         </section>
       </div>
     </main>

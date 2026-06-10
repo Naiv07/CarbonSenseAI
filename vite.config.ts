@@ -12,7 +12,7 @@ export default defineConfig(() => {
       },
     },
     build: {
-      minify: 'terser',
+      minify: 'terser' as const,
       terserOptions: {
         compress: {
           drop_console: true,
@@ -20,6 +20,14 @@ export default defineConfig(() => {
           passes: 2,
         },
         mangle: true,
+      },
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            lucide: ['lucide-react'],
+          },
+        },
       },
     },
     server: {
