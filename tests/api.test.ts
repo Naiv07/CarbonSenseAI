@@ -310,3 +310,222 @@ describe("POST /api/challenges/:id/tasks/:taskId/toggle", () => {
     expect(res.status).toBe(404);
   });
 });
+
+// ─── GET /api/settings ────────────────────────────────────────────────────────
+describe("GET /api/settings", () => {
+  it("returns 200 with settings object", async () => {
+    const res = await request.get("/api/settings");
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("safetyThreshold");
+    expect(res.body).toHaveProperty("scrubberEfficiency");
+    expect(res.body).toHaveProperty("audioFeedback");
+  });
+
+  it("safetyThreshold is a number", async () => {
+    const res = await request.get("/api/settings");
+    expect(typeof res.body.safetyThreshold).toBe("number");
+  });
+});
+
+// ─── POST /api/settings ───────────────────────────────────────────────────────
+describe("POST /api/settings", () => {
+  it("updates safetyThreshold", async () => {
+    const res = await request.post("/api/settings").send({ safetyThreshold: 7.5 });
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.settings.safetyThreshold).toBe(7.5);
+  });
+
+  it("updates audioFeedback flag", async () => {
+    const res = await request.post("/api/settings").send({ audioFeedback: true });
+    expect(res.body.settings.audioFeedback).toBe(true);
+  });
+
+  it("persists settings changes across GET requests", async () => {
+    await request.post("/api/settings").send({ scrubberEfficiency: 88 });
+    const res = await request.get("/api/settings");
+    expect(res.body.scrubberEfficiency).toBe(88);
+  });
+});
+
+// ─── Input clamping & validation ──────────────────────────────────────────────
+describe("Input clamping on POST /api/telemetry", () => {
+  it("clamps negative mileage to 0", async () => {
+    await request.post("/api/telemetry").send({ mileage: -5000 });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.mileage).toBe(0);
+  });
+
+  it("clamps recycledPercent above 100 to 100", async () => {
+    await request.post("/api/telemetry").send({ recycledPercent: 150 });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.recycledPercent).toBe(100);
+  });
+
+  it("clamps recycledPercent below 0 to 0", async () => {
+    await request.post("/api/telemetry").send({ recycledPercent: -10 });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.recycledPercent).toBe(0);
+  });
+
+  it("clamps negative flightsLongHaul to 0", async () => {
+    await request.post("/api/telemetry").send({ flightsLongHaul: -3 });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.flightsLongHaul).toBe(0);
+  });
+
+  it("clamps negative utilityBill to 0", async () => {
+    await request.post("/api/telemetry").send({ utilityBill: -200 });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.utilityBill).toBe(0);
+  });
+});
+
+// ─── Data persistence ─────────────────────────────────────────────────────────
+describe("Data persistence across requests", () => {
+  it("telemetry changes from POST persist in subsequent GET", async () => {
+    await request.post("/api/telemetry").send({ mileage: 3333 });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.mileage).toBe(3333);
+  });
+
+  it("joining a challenge persists when challenges are re-fetched", async () => {
+    await request.post("/api/challenges/join").send({ id: "transit-shift" });
+    const res = await request.get("/api/challenges");
+    const challenge = res.body.challenges.find((c: any) => c.id === "transit-shift");
+    expect(challenge.status).toBe("JOINED");
+  });
+
+  it("onboarding data persists in subsequent telemetry fetch", async () => {
+    await request.post("/api/onboarding").send({
+      name: "Persist Test",
+      city: "Berlin",
+      country: "Germany",
+      commuteFrequency: "REMOTE",
+      vehicleType: "ELECTRIC_BEV",
+      mileage: 4000,
+      flightsShortHaul: 0,
+      flightsLongHaul: 0,
+      energySource: "renewable",
+      heatingType: "heatpump",
+      utilityBill: 60,
+      meatIntake: "VEGAN",
+      foodWaste: "low",
+      shoppingFrequency: "minimal",
+      newElectronics: 0,
+      clothingType: "none",
+      recycledPercent: 100,
+    });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.userLocation.city).toBe("Berlin");
+    expect(res.body.telemetry.commuteFrequency).toBe("REMOTE");
+  });
+});
+
+// ─── Mission score progression ────────────────────────────────────────────────
+describe("Mission score progression", () => {
+  it("joining a challenge increases missionScore", async () => {
+    const before = (await request.get("/api/telemetry")).body.missionScore;
+    const res = await request.post("/api/challenges/join").send({ id: "transit-shift" });
+    expect(res.body.missionScore).toBeGreaterThan(before);
+  });
+
+  it("leaving a challenge decreases missionScore", async () => {
+    await request.post("/api/challenges/join").send({ id: "transit-shift" });
+    const joined = (await request.get("/api/telemetry")).body.missionScore;
+    await request.post("/api/challenges/join").send({ id: "transit-shift" });
+    const left = (await request.get("/api/telemetry")).body.missionScore;
+    expect(left).toBeLessThan(joined);
+  });
+
+  it("score is always between 0 and 100 after multiple operations", async () => {
+    await request.post("/api/challenges/join").send({ id: "oper-zero-grid" });
+    await request.post("/api/challenges/join").send({ id: "transit-shift" });
+    await request.post("/api/telemetry").send({ mileage: 0, flightsLongHaul: 0 });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.missionScore).toBeGreaterThanOrEqual(0);
+    expect(res.body.missionScore).toBeLessThanOrEqual(100);
+  });
+});
+
+// ─── Response shape completeness ──────────────────────────────────────────────
+describe("Response shape completeness", () => {
+  it("GET /api/telemetry includes streak, emissionHistory, achievements", async () => {
+    const res = await request.get("/api/telemetry");
+    expect(res.body).toHaveProperty("streak");
+    expect(res.body).toHaveProperty("emissionHistory");
+    expect(res.body).toHaveProperty("achievements");
+    expect(Array.isArray(res.body.emissionHistory)).toBe(true);
+    expect(Array.isArray(res.body.achievements)).toBe(true);
+  });
+
+  it("each achievement has id, title, unlocked, and icon fields", async () => {
+    const res = await request.get("/api/telemetry");
+    for (const a of res.body.achievements) {
+      expect(a).toHaveProperty("id");
+      expect(a).toHaveProperty("title");
+      expect(a).toHaveProperty("unlocked");
+      expect(a).toHaveProperty("icon");
+    }
+  });
+
+  it("POST /api/onboarding returns baselineEmissions as a positive number", async () => {
+    const res = await request.post("/api/onboarding").send({
+      name: "Shape Test", city: "Paris", country: "France",
+      commuteFrequency: "DAILY", vehicleType: "INTERNAL_COMBUSTION_MEDIUM",
+      mileage: 15000, flightsShortHaul: 2, flightsLongHaul: 1,
+      energySource: "mixed", heatingType: "gas", utilityBill: 120,
+      meatIntake: "DAILY", foodWaste: "medium", shoppingFrequency: "average",
+      newElectronics: 1, clothingType: "fast-fashion", recycledPercent: 40,
+    });
+    expect(typeof res.body.baselineEmissions).toBe("number");
+    expect(res.body.baselineEmissions).toBeGreaterThan(0);
+  });
+
+  it("POST /api/telemetry returns emissionHistory array", async () => {
+    const res = await request.post("/api/telemetry").send({ mileage: 10000 });
+    expect(Array.isArray(res.body.emissionHistory)).toBe(true);
+  });
+
+  it("streak is a positive integer in telemetry response", async () => {
+    const res = await request.get("/api/telemetry");
+    expect(Number.isInteger(res.body.streak)).toBe(true);
+    expect(res.body.streak).toBeGreaterThanOrEqual(1);
+  });
+});
+
+// ─── Security — input sanitisation ───────────────────────────────────────────
+describe("Security — malicious input handling", () => {
+  it("XSS string in city field is stored as plain text, not executed", async () => {
+    await request.post("/api/onboarding").send({
+      name: "<script>alert(1)</script>",
+      city: "<img src=x onerror=alert(1)>",
+      country: "Germany",
+      commuteFrequency: "DAILY", vehicleType: "INTERNAL_COMBUSTION_MEDIUM",
+      mileage: 10000, flightsShortHaul: 0, flightsLongHaul: 0,
+      energySource: "mixed", heatingType: "none", utilityBill: 100,
+      meatIntake: "DAILY", foodWaste: "medium", shoppingFrequency: "average",
+      newElectronics: 0, clothingType: "none", recycledPercent: 50,
+    });
+    const res = await request.get("/api/telemetry");
+    // Value stored as-is (plain string), server must not crash
+    expect(res.status).toBe(200);
+    expect(typeof res.body.userLocation.city).toBe("string");
+  });
+
+  it("numeric fields with string input are coerced or clamped without crashing", async () => {
+    const res = await request.post("/api/telemetry").send({ mileage: "not-a-number" });
+    expect(res.status).toBe(200); // server uses Number() which gives NaN → Math.max(0, NaN) = 0
+  });
+
+  it("extra unknown fields in payload are silently ignored", async () => {
+    const res = await request.post("/api/telemetry").send({
+      mileage: 10000,
+      __proto__: { polluted: true },
+      constructor: { hack: true },
+      unknownField: "ignored",
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+  });
+});

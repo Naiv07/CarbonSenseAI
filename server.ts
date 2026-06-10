@@ -32,10 +32,10 @@ const aiLimiter = rateLimit({
   message: { error: "Too many requests — please wait a moment." },
 });
 
-// General API limiter
+// General API limiter (disabled during tests to avoid rate-limit false positives)
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 120,
+  max: process.env.VITEST ? 10000 : 120,
   standardHeaders: true,
   legacyHeaders: false,
 });
