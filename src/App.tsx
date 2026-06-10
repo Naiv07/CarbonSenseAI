@@ -509,6 +509,7 @@ export default function App() {
                 className="w-full h-full object-contain filter invert opacity-50 relative z-10"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzqTRPDZEtIiwFPcHVwkwRSnyHhtKodv6uMRK1nrO4wvvw6c57jO7nK3s6afGRxSmkTpUhAVXQzooq4vXkzw9gITewx6Cb2oQZE84MROiFiv7QSKoZd6YDN6txHrMn8hufR9-EY35lncm3J0l9FzsLvkIbgH5g7dmTcSMUk3b-bpSwqO0uwUy_CjQFmV1EHDhUKS-TN7r6DclCZKUCXn5fdWxH6ohjRD6kyKh0GLzfzbkwfFW5QwjhVPenNDu_42j97ANlom9SS1CN"
                 referrerPolicy="no-referrer"
+                loading="lazy"
               />
               <div className="absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-[#5e6bff]/10 to-transparent map-sweep pointer-events-none z-20"></div>
             </div>

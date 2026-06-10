@@ -110,6 +110,7 @@ export default function Header({ currentTab, setTab, onSync, isSyncing, userPhot
               className="w-full h-full object-cover"
               src={userPhotoURL}
               referrerPolicy="no-referrer"
+              loading="eager"
             />
           ) : (
             <User className="w-4 h-4 text-[#888888]" aria-hidden="true" />

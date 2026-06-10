@@ -41,7 +41,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         {/* Avatar — real Google photo or fallback icon */}
         <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 rounded-full border-2 border-brand-blue/60 shrink-0 shadow-[0_4px_20px_rgba(0,242,255,0.15)] bg-brand-black flex items-center justify-center overflow-hidden">
           {photoURL ? (
-            <img src={photoURL} alt={displayName ?? "Profile"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+            <img src={photoURL} alt={displayName ?? "Profile"} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
           ) : (
             <User className="w-14 h-14 text-brand-blue/60" />
           )}

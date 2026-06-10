@@ -54,6 +54,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   src={challenge.image}
                   referrerPolicy="no-referrer"
+                  loading="lazy"
                 />
                 
                 {/* Visual Category Label */}
