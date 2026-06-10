@@ -434,13 +434,9 @@ export default function App() {
     );
   }
 
-  // --- Onboarding Screen ---
+  // --- Onboarding Screen (no auth required — anyone can fill in their data) ---
   if (isEntered && !hasOnboarded) {
-    return (
-      <AuthGate>
-        <OnboardingView onComplete={handleOnboardingComplete} />
-      </AuthGate>
-    );
+    return <OnboardingView onComplete={handleOnboardingComplete} />;
   }
 
   // --- Gateway / Landing Screen ---
