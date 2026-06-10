@@ -12,7 +12,9 @@ const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 // Security headers
-app.use(helmet({ contentSecurityPolicy: false }));
+// crossOriginOpenerPolicy disabled — signInWithPopup requires the popup window
+// to communicate back to the opener; COOP: same-origin silently breaks that.
+app.use(helmet({ contentSecurityPolicy: false, crossOriginOpenerPolicy: false }));
 
 // Gzip compression
 app.use(compression());
