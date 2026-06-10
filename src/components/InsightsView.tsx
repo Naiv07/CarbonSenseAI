@@ -4,12 +4,12 @@ import { Award, Zap, Compass, Leaf, ArrowRight, ClipboardList, RefreshCw, Sun, P
 import { useToast } from "../context/ToastContext";
 
 const ACHIEVEMENT_ICONS: Record<string, React.ReactNode> = {
-  recycle: <RefreshCw className="w-4 h-4" />,
-  sun: <Sun className="w-4 h-4" />,
-  leaf: <Leaf className="w-4 h-4" />,
-  plane: <Plane className="w-4 h-4" />,
-  zap: <Zap className="w-4 h-4" />,
-  wifi: <Wifi className="w-4 h-4" />,
+  recycle: <RefreshCw className="w-4 h-4" aria-hidden="true" />,
+  sun: <Sun className="w-4 h-4" aria-hidden="true" />,
+  leaf: <Leaf className="w-4 h-4" aria-hidden="true" />,
+  plane: <Plane className="w-4 h-4" aria-hidden="true" />,
+  zap: <Zap className="w-4 h-4" aria-hidden="true" />,
+  wifi: <Wifi className="w-4 h-4" aria-hidden="true" />,
 };
 
 interface InsightsViewProps {
@@ -169,7 +169,7 @@ export default function InsightsView({
                   onClick={handleExportCSV}
                   className="text-[10px] font-mono font-bold tracking-widest text-brand-blue hover:underline flex items-center gap-1.5"
                 >
-                  <ClipboardList className="w-3.5 h-3.5" />
+                  <ClipboardList className="w-3.5 h-3.5" aria-hidden="true" />
                   Export Data
                 </button>
               </div>
@@ -205,7 +205,7 @@ export default function InsightsView({
               {/* Unlocked count header */}
               <div className="flex items-center gap-4 mb-4 p-3 bg-brand-black/80 border border-brand-border rounded-2xl">
                 <div className="w-10 h-10 rounded-full border-2 border-brand-green flex items-center justify-center bg-brand-green/10 glow-secondary shrink-0">
-                  <Award className="text-brand-green w-5 h-5 stroke-[2]" />
+                  <Award className="text-brand-green w-5 h-5 stroke-[2]" aria-hidden="true" />
                 </div>
                 <div className="font-mono">
                   <h4 className="text-xs font-bold text-white tracking-wider leading-none uppercase">
@@ -232,7 +232,7 @@ export default function InsightsView({
                     <div className={`w-9 h-9 mb-1.5 rounded flex items-center justify-center ${
                       badge.unlocked ? "bg-brand-green/20 text-brand-green" : "bg-brand-border text-[#555555]"
                     }`}>
-                      {ACHIEVEMENT_ICONS[badge.icon] ?? <Award className="w-4 h-4" />}
+                      {ACHIEVEMENT_ICONS[badge.icon] ?? <Award className="w-4 h-4" aria-hidden="true" />}
                     </div>
                     <span className="text-[7.5px] font-mono font-bold text-center tracking-wider uppercase leading-tight text-[#888888]">
                       {badge.title.replace(/_/g, " ")}
@@ -285,9 +285,10 @@ export default function InsightsView({
           <div className="p-4 bg-brand-black border border-brand-border rounded-[20px] hover:border-brand-blue transition-colors flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-3">
-                <Leaf className="w-5 h-5 text-brand-green" />
+                <Leaf className="w-5 h-5 text-brand-green" aria-hidden="true" />
                 <input
                   type="checkbox"
+                  aria-label="Simulate plant-based diet"
                   checked={simulation.plantBased}
                   onChange={(e) => onUpdateSimulation({ plantBased: e.target.checked })}
                   className="rounded border-brand-border bg-brand-black text-brand-blue h-4 w-4 focus:ring-0 cursor-pointer"
@@ -309,9 +310,10 @@ export default function InsightsView({
           <div className="p-4 bg-brand-black border border-brand-border rounded-[20px] hover:border-brand-blue transition-colors flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-3">
-                <Zap className="w-5 h-5 text-brand-orange" />
+                <Zap className="w-5 h-5 text-brand-orange" aria-hidden="true" />
                 <input
                   type="checkbox"
+                  aria-label="Simulate solar panel installation"
                   checked={simulation.solarConversion}
                   onChange={(e) => onUpdateSimulation({ solarConversion: e.target.checked })}
                   className="rounded border-brand-border bg-brand-black text-brand-blue h-4 w-4 focus:ring-0 cursor-pointer"
@@ -333,9 +335,10 @@ export default function InsightsView({
           <div className="p-4 bg-brand-black border border-brand-border rounded-[20px] hover:border-brand-blue transition-colors flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-3">
-                <Compass className="w-5 h-5 text-brand-blue" />
+                <Compass className="w-5 h-5 text-brand-blue" aria-hidden="true" />
                 <input
                   type="checkbox"
+                  aria-label="Simulate electric vehicle switch"
                   checked={simulation.evMobility}
                   onChange={(e) => onUpdateSimulation({ evMobility: e.target.checked })}
                   className="rounded border-brand-border bg-brand-black text-brand-blue h-4 w-4 focus:ring-0 cursor-pointer"
@@ -369,7 +372,7 @@ export default function InsightsView({
               className="w-full mt-4 py-2.5 bg-linear-to-r from-brand-blue to-[#0066ff] hover:opacity-90 active:scale-95 text-brand-black text-[10px] font-mono font-extrabold tracking-widest rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-[0_4px_15px_rgba(0,242,255,0.2)]"
             >
               <span>Apply This Plan</span>
-              <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+              <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
             </button>
           </div>
 

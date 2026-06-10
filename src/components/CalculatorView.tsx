@@ -84,13 +84,16 @@ export default function CalculatorView({
         </div>
 
         {/* Category Tab Grid */}
-        <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+        <div role="tablist" aria-label="Emission categories" className="grid grid-cols-3 md:grid-cols-5 gap-3">
           {categories.map((cat) => {
             const Icon = cat.icon;
             const isSel = activeCategory === cat.id;
             return (
               <button
                 key={cat.id}
+                role="tab"
+                aria-selected={isSel}
+                aria-controls={`panel-${cat.id}`}
                 onClick={() => setActiveCategory(cat.id)}
                 className={`p-3 flex flex-col items-center gap-2 border transition-all text-center rounded-[20px] ${
                   isSel
@@ -98,7 +101,7 @@ export default function CalculatorView({
                     : "bg-brand-dark border-brand-border text-[#888888] hover:bg-brand-border hover:text-white"
                 }`}
               >
-                <Icon className={`w-5 h-5 ${isSel ? "text-brand-blue" : "text-[#888888]"}`} />
+                <Icon className={`w-5 h-5 ${isSel ? "text-brand-blue" : "text-[#888888]"}`} aria-hidden="true" />
                 <span className="text-[9px] font-mono tracking-widest font-bold">{cat.label}</span>
               </button>
             );
@@ -112,7 +115,7 @@ export default function CalculatorView({
           <div>
             {/* TRANSPORT */}
             {activeCategory === "TRANSPORT" && (
-              <div className="space-y-6 animate-fade-in">
+              <div id="panel-TRANSPORT" role="tabpanel" aria-label="Transport emissions" className="space-y-6 animate-fade-in">
                 <div className="space-y-3">
                   <div className="flex justify-between items-end">
                     <div>
@@ -187,7 +190,7 @@ export default function CalculatorView({
 
             {/* ENERGY */}
             {activeCategory === "ENERGY" && (
-              <div className="space-y-6 animate-fade-in">
+              <div id="panel-ENERGY" role="tabpanel" aria-label="Energy emissions" className="space-y-6 animate-fade-in">
                 <div className="space-y-2">
                   <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Monthly Energy Bill</label>
                   <p className="text-xs text-[#888888]">Average monthly electricity cost ({currencySymbol}/month)</p>
@@ -252,7 +255,7 @@ export default function CalculatorView({
 
             {/* FOOD */}
             {activeCategory === "FOOD" && (
-              <div className="space-y-6 animate-fade-in">
+              <div id="panel-FOOD" role="tabpanel" aria-label="Food emissions" className="space-y-6 animate-fade-in">
                 <div className="space-y-2">
                   <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Meat Consumption</label>
                   <p className="text-xs text-[#888888]">Your diet has a significant impact on your carbon footprint</p>
@@ -301,7 +304,7 @@ export default function CalculatorView({
 
             {/* WASTE */}
             {activeCategory === "WASTE" && (
-              <div className="space-y-6 animate-fade-in">
+              <div id="panel-WASTE" role="tabpanel" aria-label="Waste emissions" className="space-y-6 animate-fade-in">
                 <div className="space-y-3">
                   <div className="flex justify-between items-baseline">
                     <div>
@@ -324,7 +327,7 @@ export default function CalculatorView({
 
             {/* SHOPPING */}
             {activeCategory === "SHOPPING" && (
-              <div className="space-y-6 animate-fade-in">
+              <div id="panel-SHOPPING" role="tabpanel" aria-label="Shopping emissions" className="space-y-6 animate-fade-in">
                 <div className="space-y-2">
                   <label className="text-[10px] font-mono tracking-widest text-[#888888] font-bold uppercase">Shopping Frequency</label>
                   <p className="text-xs text-[#888888]">How often do you buy non-essential items?</p>

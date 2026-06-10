@@ -28,7 +28,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
       {/* Challenge Grid cards */}
       {challenges.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center space-y-3">
-          <ShieldAlert className="w-8 h-8 text-[#444444]" />
+          <ShieldAlert className="w-8 h-8 text-[#444444]" aria-hidden="true" />
           <p className="text-xs font-mono font-bold text-[#888888] tracking-widest uppercase">No challenges found</p>
           <p className="text-[10px] font-mono text-[#555555]">Challenge data is unavailable. Check your connection and try refreshing.</p>
         </div>
@@ -64,7 +64,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
 
                 {challenge.urgency && (
                   <div className="absolute bottom-3 left-3 bg-red-950/95 border border-red-500/30 text-red-500 px-2.5 py-1 text-[8px] font-mono font-bold tracking-wider flex items-center gap-1 uppercase rounded-sm">
-                    <ShieldAlert className="w-3 h-3 animate-pulse text-red-500" />
+                    <ShieldAlert className="w-3 h-3 animate-pulse text-red-500" aria-hidden="true" />
                     <span>{challenge.urgency}</span>
                   </div>
                 )}
@@ -78,7 +78,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                       {challenge.title}
                     </h3>
                     <div className="flex items-center gap-1 text-[10px] font-mono font-bold text-brand-blue shrink-0">
-                      <Award className="w-4.5 h-4.5 text-brand-blue" />
+                      <Award className="w-4.5 h-4.5 text-brand-blue" aria-hidden="true" />
                       <span>+{challenge.xpReward} XP</span>
                     </div>
                   </div>
@@ -121,7 +121,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                                   ? "bg-brand-green border-brand-green"
                                   : "border-[#444444] group-hover/task:border-brand-blue"
                               }`}>
-                                {task.completed && <Check className="w-2.5 h-2.5 text-brand-black" />}
+                                {task.completed && <Check className="w-2.5 h-2.5 text-brand-black" aria-hidden="true" />}
                               </div>
                               <span className={`text-[10px] font-mono leading-tight ${
                                 task.completed ? "line-through text-[#555555]" : "text-[#888888]"
@@ -139,7 +139,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                   {isLocked ? (
                     <div className="w-full bg-brand-black/80 border border-brand-border py-2.5 px-4 rounded-xl flex flex-col gap-1.5 cursor-not-allowed">
                       <div className="flex items-center gap-2 text-[10px] font-mono font-bold text-[#888888]">
-                        <Lock className="w-3.5 h-3.5 shrink-0" />
+                        <Lock className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                         <span>Requires Tier 3 access</span>
                       </div>
                       <div className="h-1 bg-brand-border rounded-full overflow-hidden">
@@ -155,6 +155,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
                   ) : (
                     <button
                       onClick={() => onToggleChallenge(challenge.id)}
+                      aria-label={isJoined ? `Leave challenge: ${challenge.title}` : `Join challenge: ${challenge.title}`}
                       className={`w-full py-2.5 text-[10px] font-mono font-extrabold tracking-widest uppercase transition-all rounded-xl ${
                         isJoined
                           ? "bg-brand-green text-brand-black hover:opacity-90 shadow-[0_4px_15px_rgba(0,255,102,0.2)]"

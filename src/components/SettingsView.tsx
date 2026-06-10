@@ -55,7 +55,7 @@ export default function SettingsView({ onReset }: SettingsProps) {
         {/* Core Calibration Parameters */}
         <div className="lg:col-span-8 bento-card space-y-6">
           <div className="flex items-center gap-2 border-b border-brand-border pb-4">
-            <Sliders className="w-4 h-4 text-brand-blue" />
+            <Sliders className="w-4 h-4 text-brand-blue" aria-hidden="true" />
             <h3 className="text-xs font-mono font-bold text-white tracking-widest uppercase">
               Calibration
             </h3>
@@ -64,11 +64,15 @@ export default function SettingsView({ onReset }: SettingsProps) {
           {/* Slider 1: Target limit threshold */}
           <div className="space-y-3">
             <div className="flex justify-between font-mono text-xs">
-              <span className="text-[#888888] font-bold">Regional Target Limit (tonnes CO₂e)</span>
-              <span className="text-brand-blue font-bold">{safetyThreshold}t</span>
+              <span id="safetyThreshold-label" className="text-[#888888] font-bold">Regional Target Limit (tonnes CO₂e)</span>
+              <span className="text-brand-blue font-bold" aria-live="polite">{safetyThreshold}t</span>
             </div>
             <input
               type="range"
+              aria-labelledby="safetyThreshold-label"
+              aria-valuenow={safetyThreshold}
+              aria-valuemin={3.0}
+              aria-valuemax={9.0}
               min="3.0"
               max="9.0"
               step="0.1"
@@ -84,11 +88,15 @@ export default function SettingsView({ onReset }: SettingsProps) {
           {/* Slider 2: Scrubber threshold */}
           <div className="space-y-3 pt-4 border-t border-brand-border">
             <div className="flex justify-between font-mono text-xs">
-              <span className="text-[#888888] font-bold">Carbon Capture Efficiency</span>
-              <span className="text-brand-green font-bold">{scrubberEfficiency}%</span>
+              <span id="scrubberEfficiency-label" className="text-[#888888] font-bold">Carbon Capture Efficiency</span>
+              <span className="text-brand-green font-bold" aria-live="polite">{scrubberEfficiency}%</span>
             </div>
             <input
               type="range"
+              aria-labelledby="scrubberEfficiency-label"
+              aria-valuenow={scrubberEfficiency}
+              aria-valuemin={50}
+              aria-valuemax={100}
               min="50"
               max="100"
               step="5"
@@ -112,6 +120,7 @@ export default function SettingsView({ onReset }: SettingsProps) {
               </div>
               <input
                 type="checkbox"
+                aria-label="Enable audio alerts"
                 checked={audioFeedback}
                 onChange={(e) => setAudioFeedback(e.target.checked)}
                 className="rounded border-brand-border text-brand-blue h-4.5 w-4.5 bg-brand-black focus:ring-0 cursor-pointer"
@@ -125,13 +134,13 @@ export default function SettingsView({ onReset }: SettingsProps) {
               onClick={handleSave}
               className="px-5 py-2.5 bg-linear-to-r from-brand-blue to-[#0066ff] hover:opacity-90 active:scale-95 text-brand-black font-mono text-[10px] font-extrabold tracking-widest rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_15px_rgba(0,242,255,0.2)]"
             >
-              <Save className="w-3.5 h-3.5 stroke-[2.5]" />
+              <Save className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
               <span>Save Settings</span>
             </button>
 
             {statusMessage && (
               <p className="text-xs font-mono text-brand-green font-bold animate-fade-in flex items-center gap-1.5">
-                <Check className="w-4 h-4 stroke-[2.5]" />
+                <Check className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
                 {statusMessage}
               </p>
             )}
@@ -142,7 +151,7 @@ export default function SettingsView({ onReset }: SettingsProps) {
         <div className="lg:col-span-4 flex flex-col gap-6">
           <div className="bento-card space-y-4">
             <div className="flex items-center gap-2 border-b border-brand-border pb-3">
-              <Shield className="w-4 h-4 text-red-500" />
+              <Shield className="w-4 h-4 text-red-500" aria-hidden="true" />
               <h3 className="text-xs font-mono font-bold text-white tracking-widest uppercase">
                 Data &amp; Privacy
               </h3>
@@ -156,14 +165,14 @@ export default function SettingsView({ onReset }: SettingsProps) {
               onClick={onReset}
               className="w-full py-2.5 bg-red-950/20 hover:bg-red-500/10 border border-red-500/20 hover:border-red-500/40 text-red-500 font-mono text-[10px] font-bold tracking-widest rounded-xl flex items-center justify-center gap-1.5 transition-all text-center"
             >
-              <Trash2 className="w-3.5 h-3.5 text-red-500" />
+              <Trash2 className="w-3.5 h-3.5 text-red-500" aria-hidden="true" />
               <span>Erase All My Data</span>
             </button>
           </div>
 
           <div className="bento-card space-y-3 font-mono text-[11px] text-[#888888] leading-relaxed">
             <div className="flex items-center gap-2 text-brand-blue font-bold border-b border-brand-border pb-2">
-              <Cpu className="w-4 h-4 text-brand-blue" />
+              <Cpu className="w-4 h-4 text-brand-blue" aria-hidden="true" />
               <span>System Info</span>
             </div>
             <p><strong>CORE VM:</strong> CLOUDRUN_NODE_EAST</p>

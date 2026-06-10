@@ -43,7 +43,7 @@ export default function Sidebar({ currentTab, setTab, onDeployInitiative, onRese
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav aria-label="Main navigation" className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const IconComponent = item.icon;
           const isActive = currentTab === item.id;
@@ -51,13 +51,14 @@ export default function Sidebar({ currentTab, setTab, onDeployInitiative, onRese
             <button
               key={item.id}
               onClick={() => setTab(item.id)}
+              aria-current={isActive ? "page" : undefined}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded text-xs font-mono tracking-widest font-bold transition-all ${
                 isActive
                   ? "bg-brand-green/10 text-brand-green border-r-4 border-brand-green glow-secondary/10"
                   : "text-[#888888] hover:text-white hover:bg-brand-border"
               }`}
             >
-              <IconComponent className={`w-4 h-4 ${isActive ? "text-brand-green" : "text-[#888888]"}`} />
+              <IconComponent className={`w-4 h-4 ${isActive ? "text-brand-green" : "text-[#888888]"}`} aria-hidden="true" />
               <span>{item.label}</span>
             </button>
           );
@@ -68,6 +69,7 @@ export default function Sidebar({ currentTab, setTab, onDeployInitiative, onRese
       <div className="p-4 border-t border-brand-border space-y-2 bg-brand-black/30">
         <button
           onClick={onDeployInitiative}
+          aria-label="Apply immediate carbon reduction initiative"
           className="w-full bg-linear-to-r from-brand-blue to-[#0066ff] hover:opacity-90 text-brand-black py-3 text-[11px] font-mono font-extrabold tracking-widest active:scale-95 transition-all rounded-xl shadow-[0_4px_20px_rgba(0,242,255,0.25)] uppercase animate-pulse-subtle"
         >
           Take Action
@@ -75,13 +77,14 @@ export default function Sidebar({ currentTab, setTab, onDeployInitiative, onRese
 
         <button
           onClick={() => setTab("SETTINGS")}
+          aria-current={currentTab === "SETTINGS" ? "page" : undefined}
           className={`w-full flex items-center gap-3 px-4 py-2.5 rounded text-[10px] font-mono tracking-widest transition-colors ${
             currentTab === "SETTINGS"
               ? "text-brand-green bg-brand-green/10 border-r-4 border-brand-green"
               : "text-[#888888] hover:text-white hover:bg-brand-border"
           }`}
         >
-          <Settings className={`w-3.5 h-3.5 ${currentTab === "SETTINGS" ? "text-brand-green" : ""}`} />
+          <Settings className={`w-3.5 h-3.5 ${currentTab === "SETTINGS" ? "text-brand-green" : ""}`} aria-hidden="true" />
           <span>Settings</span>
         </button>
 

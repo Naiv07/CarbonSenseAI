@@ -143,7 +143,7 @@ export default function OnboardingView({ onComplete }: Props) {
           <div className="bg-[#101112]/95 border border-[#1f2023] rounded-3xl p-8 md:p-12 space-y-8 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-brand-blue/10 border border-brand-blue/20 rounded flex items-center justify-center">
-                <Terminal className="w-5 h-5 text-brand-blue" />
+                <Terminal className="w-5 h-5 text-brand-blue" aria-hidden="true" />
               </div>
               <div>
                 <p className="text-[10px] font-mono font-bold text-brand-blue tracking-[0.3em] uppercase">Getting Started</p>
@@ -168,7 +168,7 @@ export default function OnboardingView({ onComplete }: Props) {
                 { icon: ShoppingBag, label: "LIFESTYLE", desc: "Diet & shopping" },
               ].map(({ icon: Icon, label, desc }) => (
                 <div key={label} className="p-3 bg-brand-black border border-[#1f2023] rounded-xl flex flex-col gap-1.5">
-                  <Icon className="w-4 h-4 text-brand-blue" />
+                  <Icon className="w-4 h-4 text-brand-blue" aria-hidden="true" />
                   <span className="font-bold text-white tracking-widest">{label}</span>
                   <span className="text-[#888888]">{desc}</span>
                 </div>
@@ -180,7 +180,7 @@ export default function OnboardingView({ onComplete }: Props) {
               className="w-full py-4 bg-brand-blue text-brand-black font-mono font-extrabold text-sm tracking-widest rounded-2xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_20px_rgba(0,242,255,0.3)] uppercase"
             >
               Get Started
-              <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+              <ArrowRight className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
             </button>
           </div>
         )}
@@ -261,6 +261,7 @@ export default function OnboardingView({ onComplete }: Props) {
                     <div className="bg-brand-black border border-brand-border p-1.5 flex rounded-xl">
                       {(["DAILY", "WEEKLY", "REMOTE"] as const).map(f => (
                         <button key={f} onClick={() => set({ commuteFrequency: f })}
+                          aria-pressed={data.commuteFrequency === f}
                           className={`flex-1 py-2 text-[10px] font-mono font-bold tracking-wider rounded-[8px] uppercase transition-colors ${data.commuteFrequency === f ? "bg-brand-blue text-brand-black" : "text-[#888888] hover:text-white"}`}>
                           {f}
                         </button>
@@ -281,10 +282,12 @@ export default function OnboardingView({ onComplete }: Props) {
 
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <label className="text-[10px] font-mono font-bold text-[#888888] tracking-widest uppercase">Annual Mileage</label>
-                      <span className="text-sm font-mono font-bold text-brand-blue">{data.mileage.toLocaleString()} KM</span>
+                      <label id="mileage-label" className="text-[10px] font-mono font-bold text-[#888888] tracking-widest uppercase">Annual Mileage</label>
+                      <span className="text-sm font-mono font-bold text-brand-blue" aria-live="polite">{data.mileage.toLocaleString()} KM</span>
                     </div>
                     <input type="range" min="1000" max="60000" step="500" value={data.mileage}
+                      aria-labelledby="mileage-label"
+                      aria-valuenow={data.mileage} aria-valuemin={1000} aria-valuemax={60000}
                       onChange={e => set({ mileage: Number(e.target.value) })}
                       className="w-full h-1 bg-brand-black rounded-lg cursor-pointer" />
                   </div>
@@ -326,6 +329,7 @@ export default function OnboardingView({ onComplete }: Props) {
                         { id: "fossil", label: "FOSSIL FUEL", sub: "Coal / Gas" },
                       ] as const).map(s => (
                         <button key={s.id} onClick={() => set({ energySource: s.id })}
+                          aria-pressed={data.energySource === s.id}
                           className={`p-3 border rounded-xl text-center transition-all ${data.energySource === s.id ? "bg-brand-blue/10 border-brand-blue text-white" : "bg-brand-black border-brand-border text-[#888888] hover:text-white hover:bg-brand-border"}`}>
                           <span className="block text-[10px] font-mono font-bold tracking-widest">{s.label}</span>
                           <span className="block text-[9px] font-mono text-[#888888] mt-0.5">{s.sub}</span>
@@ -345,6 +349,7 @@ export default function OnboardingView({ onComplete }: Props) {
                         { id: "oil", label: "OIL" },
                       ] as const).map(h => (
                         <button key={h.id} onClick={() => set({ heatingType: h.id })}
+                          aria-pressed={data.heatingType === h.id}
                           className={`p-2.5 border rounded-[10px] text-center transition-all ${data.heatingType === h.id ? "bg-brand-blue/10 border-brand-blue text-white" : "bg-brand-black border-brand-border text-[#888888] hover:text-white hover:bg-brand-border"}`}>
                           <span className="text-[9px] font-mono font-bold tracking-widest">{h.label}</span>
                         </button>
@@ -354,10 +359,12 @@ export default function OnboardingView({ onComplete }: Props) {
 
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <label className="text-[10px] font-mono font-bold text-[#888888] tracking-widest uppercase">Monthly Electricity Bill</label>
-                      <span className="text-sm font-mono font-bold text-brand-blue">{currencySymbol}{data.utilityBill}/mo</span>
+                      <label id="utilityBill-label" className="text-[10px] font-mono font-bold text-[#888888] tracking-widest uppercase">Monthly Electricity Bill</label>
+                      <span className="text-sm font-mono font-bold text-brand-blue" aria-live="polite">{currencySymbol}{data.utilityBill}/mo</span>
                     </div>
                     <input type="range" min="10" max="500" step="10" value={data.utilityBill}
+                      aria-labelledby="utilityBill-label"
+                      aria-valuenow={data.utilityBill} aria-valuemin={10} aria-valuemax={500}
                       onChange={e => set({ utilityBill: Number(e.target.value) })}
                       className="w-full h-1 bg-brand-black rounded-lg cursor-pointer" />
                   </div>
@@ -383,6 +390,7 @@ export default function OnboardingView({ onComplete }: Props) {
                         { id: "VEGAN", label: "VEGAN", sub: "0.5t CO2/yr baseline" },
                       ].map(d => (
                         <button key={d.id} onClick={() => set({ meatIntake: d.id })}
+                          aria-pressed={data.meatIntake === d.id}
                           className={`p-3 border rounded-xl text-left transition-all ${data.meatIntake === d.id ? "bg-brand-blue/10 border-brand-blue text-white" : "bg-brand-black border-brand-border text-[#888888] hover:text-white hover:bg-brand-border"}`}>
                           <span className="block text-[10px] font-mono font-bold tracking-widest">{d.label}</span>
                           <span className="block text-[9px] font-mono text-[#888888] mt-0.5">{d.sub}</span>
@@ -400,6 +408,7 @@ export default function OnboardingView({ onComplete }: Props) {
                         { id: "high", label: "HIGH", sub: "Frequent disposal" },
                       ] as const).map(fw => (
                         <button key={fw.id} onClick={() => set({ foodWaste: fw.id })}
+                          aria-pressed={data.foodWaste === fw.id}
                           className={`p-3 border rounded-xl text-center transition-all ${data.foodWaste === fw.id ? "bg-brand-green/10 border-brand-green text-white" : "bg-brand-black border-brand-border text-[#888888] hover:text-white hover:bg-brand-border"}`}>
                           <span className="block text-[10px] font-mono font-bold tracking-widest">{fw.label}</span>
                           <span className="block text-[9px] font-mono text-[#888888] mt-0.5">{fw.sub}</span>
@@ -428,6 +437,7 @@ export default function OnboardingView({ onComplete }: Props) {
                         { id: "frequent", label: "FREQUENT", sub: "High consumption" },
                       ] as const).map(s => (
                         <button key={s.id} onClick={() => set({ shoppingFrequency: s.id })}
+                          aria-pressed={data.shoppingFrequency === s.id}
                           className={`p-3 border rounded-xl text-center transition-all ${data.shoppingFrequency === s.id ? "bg-brand-blue/10 border-brand-blue text-white" : "bg-brand-black border-brand-border text-[#888888] hover:text-white hover:bg-brand-border"}`}>
                           <span className="block text-[10px] font-mono font-bold tracking-widest">{s.label}</span>
                           <span className="block text-[9px] font-mono text-[#888888] mt-0.5">{s.sub}</span>
@@ -445,6 +455,7 @@ export default function OnboardingView({ onComplete }: Props) {
                         { id: "fast-fashion", label: "FAST FASHION", sub: "+0.8t CO2" },
                       ] as const).map(ct => (
                         <button key={ct.id} onClick={() => set({ clothingType: ct.id })}
+                          aria-pressed={data.clothingType === ct.id}
                           className={`p-3 border rounded-xl text-center transition-all ${data.clothingType === ct.id ? "bg-brand-blue/10 border-brand-blue text-white" : "bg-brand-black border-brand-border text-[#888888] hover:text-white hover:bg-brand-border"}`}>
                           <span className="block text-[10px] font-mono font-bold tracking-widest">{ct.label}</span>
                           <span className="block text-[9px] font-mono text-[#888888] mt-0.5">{ct.sub}</span>
@@ -463,10 +474,12 @@ export default function OnboardingView({ onComplete }: Props) {
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <label className="text-[10px] font-mono font-bold text-[#888888] tracking-widest uppercase">Recycling %</label>
-                        <span className="text-sm font-mono font-bold text-brand-blue">{data.recycledPercent}%</span>
+                        <label id="recycledPercent-label" className="text-[10px] font-mono font-bold text-[#888888] tracking-widest uppercase">Recycling %</label>
+                        <span className="text-sm font-mono font-bold text-brand-blue" aria-live="polite">{data.recycledPercent}%</span>
                       </div>
                       <input type="range" min="0" max="100" step="5" value={data.recycledPercent}
+                        aria-labelledby="recycledPercent-label"
+                        aria-valuenow={data.recycledPercent} aria-valuemin={0} aria-valuemax={100}
                         onChange={e => set({ recycledPercent: Number(e.target.value) })}
                         className="w-full h-1 bg-brand-black rounded-lg cursor-pointer mt-3" />
                     </div>
@@ -485,13 +498,13 @@ export default function OnboardingView({ onComplete }: Props) {
               <div className="flex justify-between items-center">
                 <button onClick={() => { setValidationError(""); setStep(s => s - 1); }}
                   className="flex items-center gap-2 px-4 py-2.5 border border-brand-border text-[#888888] font-mono text-[10px] font-bold tracking-widest rounded-[10px] hover:bg-brand-border hover:text-white transition-all uppercase">
-                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
                   BACK
                 </button>
                 <button onClick={handleNext}
                   className="flex items-center gap-2 px-6 py-2.5 bg-brand-blue text-brand-black font-mono text-[10px] font-extrabold tracking-widest rounded-[10px] hover:brightness-110 active:scale-95 transition-all uppercase shadow-[0_4px_15px_rgba(0,242,255,0.2)]">
                   {step === 5 ? "Calculate My Footprint" : "Next"}
-                  <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -503,7 +516,7 @@ export default function OnboardingView({ onComplete }: Props) {
           <div className="bg-[#101112]/95 border border-[#1f2023] rounded-3xl p-8 space-y-6 shadow-[0_0_60px_rgba(0,0,0,0.8)]">
             <div className="text-center space-y-2">
               <div className="w-12 h-12 mx-auto bg-brand-green/10 border border-brand-green/20 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-brand-green" />
+                <CheckCircle className="w-6 h-6 text-brand-green" aria-hidden="true" />
               </div>
               <h2 className="text-2xl font-display font-extrabold text-white uppercase tracking-tight">Baseline Computed</h2>
               <p className="text-xs text-[#888888]">Your carbon footprint has been calculated.</p>
@@ -556,7 +569,7 @@ export default function OnboardingView({ onComplete }: Props) {
             <div className="flex gap-3 pt-2 border-t border-[#1f2023]">
               <button onClick={() => setStep(5)}
                 className="px-4 py-2.5 border border-brand-border text-[#888888] font-mono text-[10px] font-bold tracking-widest rounded-[10px] hover:bg-brand-border hover:text-white transition-all uppercase flex items-center gap-1.5">
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
                 BACK
               </button>
               <button
@@ -567,7 +580,7 @@ export default function OnboardingView({ onComplete }: Props) {
                 {isSubmitting ? (
                   <span className="animate-pulse">Setting up...</span>
                 ) : (
-                  <><Rocket className="w-4 h-4" /> Start My Journey</>
+                  <><Rocket className="w-4 h-4" aria-hidden="true" /> Start My Journey</>
                 )}
               </button>
             </div>

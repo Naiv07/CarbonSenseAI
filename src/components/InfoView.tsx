@@ -48,7 +48,7 @@ export default function InfoView({ onContinue }: InfoViewProps) {
         {/* Header */}
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-brand-blue font-mono text-[11px] font-bold tracking-[0.25em] uppercase">
-            <Terminal className="w-4 h-4" />
+            <Terminal className="w-4 h-4" aria-hidden="true" />
             <span>General Briefing · Mission Overview</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-display font-extrabold text-white uppercase tracking-tight leading-tight">
@@ -65,7 +65,7 @@ export default function InfoView({ onContinue }: InfoViewProps) {
           {FEATURES.map(({ icon: Icon, color, bg, title, desc }) => (
             <div key={title} className={`p-4 border rounded-2xl flex gap-3 bg-[#101112]/80 ${bg}`}>
               <div className={`w-8 h-8 shrink-0 rounded-lg border flex items-center justify-center ${bg}`}>
-                <Icon className={`w-4 h-4 ${color}`} />
+                <Icon className={`w-4 h-4 ${color}`} aria-hidden="true" />
               </div>
               <div>
                 <p className={`text-[10px] font-mono font-bold tracking-widest uppercase ${color}`}>{title}</p>
@@ -77,7 +77,7 @@ export default function InfoView({ onContinue }: InfoViewProps) {
 
         {/* Data commitment */}
         <div className="p-4 border border-brand-green/20 bg-brand-green/5 rounded-2xl flex gap-3">
-          <ShieldCheck className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
+          <ShieldCheck className="w-5 h-5 text-brand-green shrink-0 mt-0.5" aria-hidden="true" />
           <div>
             <p className="text-[10px] font-mono font-bold text-brand-green tracking-widest uppercase">Your Data Stays Private</p>
             <p className="text-xs text-[#888888] font-sans mt-1 leading-relaxed">
@@ -103,7 +103,7 @@ export default function InfoView({ onContinue }: InfoViewProps) {
           className="w-full py-4 bg-brand-blue text-brand-black font-mono font-extrabold text-sm tracking-widest rounded-2xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-[0_4px_20px_rgba(0,242,255,0.3)] uppercase"
         >
           I Understand — Enter Mission Control
-          <ArrowRight className="w-4 h-4 stroke-[2.5]" />
+          <ArrowRight className="w-4 h-4 stroke-[2.5]" aria-hidden="true" />
         </button>
 
         <p className="text-[10px] text-[#444444] font-sans text-center">

@@ -18,12 +18,12 @@ interface ProfileViewProps {
 }
 
 const ACHIEVEMENT_ICONS: Record<string, React.ReactNode> = {
-  recycle: <RefreshCw className="w-4 h-4" />,
-  sun: <Sun className="w-4 h-4" />,
-  leaf: <Leaf className="w-4 h-4" />,
-  plane: <Plane className="w-4 h-4" />,
-  zap: <Zap className="w-4 h-4" />,
-  wifi: <Wifi className="w-4 h-4" />,
+  recycle: <RefreshCw className="w-4 h-4" aria-hidden="true" />,
+  sun: <Sun className="w-4 h-4" aria-hidden="true" />,
+  leaf: <Leaf className="w-4 h-4" aria-hidden="true" />,
+  plane: <Plane className="w-4 h-4" aria-hidden="true" />,
+  zap: <Zap className="w-4 h-4" aria-hidden="true" />,
+  wifi: <Wifi className="w-4 h-4" aria-hidden="true" />,
 };
 
 export default function ProfileView({ logs, totalSaved, missionScore, rank, name = "", photoURL, city = "", country = "", streak = 1, challenges = [], achievements = [], onLogout }: ProfileViewProps) {
@@ -43,7 +43,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
           {photoURL ? (
             <img src={photoURL} alt={displayName ?? "Profile"} className="w-full h-full object-cover" referrerPolicy="no-referrer" loading="lazy" />
           ) : (
-            <User className="w-14 h-14 text-brand-blue/60" />
+            <User className="w-14 h-14 text-brand-blue/60" aria-hidden="true" />
           )}
         </div>
 
@@ -83,7 +83,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
             <div className="p-3 bg-brand-black/70 border border-brand-border rounded-xl">
               <span className="text-[8px] text-[#888888] tracking-widest block font-bold uppercase">Day Streak</span>
               <span className="text-xs text-red-500 font-bold tracking-wider uppercase flex items-center gap-1">
-                <Flame className="w-3.5 h-3.5 text-brand-orange fill-brand-orange animate-pulse" />
+                <Flame className="w-3.5 h-3.5 text-brand-orange fill-brand-orange animate-pulse" aria-hidden="true" />
                 <span>{streak} {streak === 1 ? "Day" : "Days"}</span>
               </span>
             </div>
@@ -109,7 +109,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         {/* Cumulative Savings Scoreboard */}
         <div className="bento-card space-y-3">
           <div className="flex items-center gap-2 text-brand-green">
-            <Globe className="w-4 h-4" />
+            <Globe className="w-4 h-4" aria-hidden="true" />
             <span className="text-[9px] font-mono tracking-widest font-bold uppercase">Carbon Saved</span>
           </div>
           <div className="text-3xl font-mono font-bold text-white">
@@ -123,7 +123,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         {/* Missions Authorized */}
         <div className="bento-card space-y-3">
           <div className="flex items-center gap-2 text-brand-blue">
-            <ShieldCheck className="w-4 h-4" />
+            <ShieldCheck className="w-4 h-4" aria-hidden="true" />
             <span className="text-[9px] font-mono tracking-widest font-bold uppercase">Challenges Joined</span>
           </div>
           <div className="text-3xl font-mono font-bold text-white">
@@ -137,7 +137,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
         {/* Next Rank Qualification */}
         <div className="bento-card space-y-3">
           <div className="flex items-center gap-2 text-brand-orange">
-            <Award className="w-4 h-4" />
+            <Award className="w-4 h-4" aria-hidden="true" />
             <span className="text-[9px] font-mono tracking-widest font-bold uppercase">Next Rank</span>
           </div>
           <div className="text-3xl font-mono font-bold text-white">
@@ -162,7 +162,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
                 {unlockedCount} of {achievements.length} operational achievements unlocked
               </p>
             </div>
-            <Award className="w-4 h-4 text-brand-orange" />
+            <Award className="w-4 h-4 text-brand-orange" aria-hidden="true" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {achievements.map(badge => (
@@ -175,7 +175,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
                 }`}
               >
                 <div className={`w-8 h-8 shrink-0 rounded flex items-center justify-center ${badge.unlocked ? "bg-brand-green/20 text-brand-green" : "bg-brand-border text-[#555555]"}`}>
-                  {ACHIEVEMENT_ICONS[badge.icon] ?? <Award className="w-4 h-4" />}
+                  {ACHIEVEMENT_ICONS[badge.icon] ?? <Award className="w-4 h-4" aria-hidden="true" />}
                 </div>
                 <div className="min-w-0">
                   <p className="text-[9px] font-mono font-bold tracking-wider text-white truncate">{badge.title}</p>
@@ -199,7 +199,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
             </h3>
             <p className="text-xs text-[#888888] mt-0.5 font-sans">A log of all your actions and changes</p>
           </div>
-          <Calendar className="w-4 h-4 text-[#888888]" />
+          <Calendar className="w-4 h-4 text-[#888888]" aria-hidden="true" />
         </div>
 
         <div className="space-y-4 font-mono text-xs">

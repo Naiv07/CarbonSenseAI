@@ -119,7 +119,7 @@ export default function DashboardView({
             ) : (
               <span className={`flex items-center font-bold tracking-widest ${variancePct <= 0 ? "text-brand-green" : "text-red-400"}`}>
                 {variancePct > 0 ? "+" : ""}{variancePct.toFixed(1)}%
-                <ArrowUpRight className={`w-3.5 h-3.5 inline ml-0.5 ${variancePct <= 0 ? "rotate-180" : ""}`} />
+                <ArrowUpRight className={`w-3.5 h-3.5 inline ml-0.5 ${variancePct <= 0 ? "rotate-180" : ""}`} aria-hidden="true" />
               </span>
             )}
           </div>
@@ -281,13 +281,13 @@ export default function DashboardView({
           <div className="bento-card border-brand-blue relative shadow-[0_4px_25px_rgba(0,242,255,0.05)]">
             {/* Header pill */}
             <div className="absolute -top-3 left-4 bg-brand-blue text-brand-black px-2 py-0.5 text-[9px] font-mono font-extrabold flex items-center gap-1 glow-primary uppercase rounded">
-              <Sparkles className="w-3 h-3 text-brand-black stroke-[2.5]" />
+              <Sparkles className="w-3 h-3 text-brand-black stroke-[2.5]" aria-hidden="true" />
               AI Advisor
             </div>
 
             <div className="flex gap-4 items-start mt-2">
               <div className="shrink-0 h-10 w-10 bg-brand-blue/10 flex items-center justify-center border border-brand-blue/20 rounded">
-                <Cpu className="text-brand-blue w-5 h-5 animate-pulse" />
+                <Cpu className="text-brand-blue w-5 h-5 animate-pulse" aria-hidden="true" />
               </div>
 
               <div className="flex-1 space-y-3">
@@ -301,12 +301,14 @@ export default function DashboardView({
                     <div className="flex gap-2">
                       <button
                         onClick={() => onDeployRecommendation(commander.action)}
+                        aria-label="Apply AI recommendation"
                         className="flex-1 bg-brand-blue/10 border border-brand-blue/30 text-brand-blue py-1.5 text-[9px] font-mono font-bold tracking-widest hover:bg-brand-blue/25 active:scale-95 transition-all text-center uppercase rounded-xl"
                       >
                         Apply
                       </button>
                       <button
                         onClick={onDismissRecommendation}
+                        aria-label="Dismiss AI recommendation"
                         className="flex-1 border border-brand-border text-[#888888] py-1.5 text-[9px] font-mono font-bold tracking-widest hover:bg-brand-border transition-all text-center uppercase rounded-xl"
                       >
                         DISMISS
@@ -344,9 +346,9 @@ export default function DashboardView({
                 aria-label="Send message to AI advisor"
               >
                 {isLoadingAI ? (
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
                 ) : (
-                  <Send className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <Send className="w-3.5 h-3.5 stroke-[2.5]" aria-hidden="true" />
                 )}
               </button>
             </form>
@@ -380,6 +382,7 @@ export default function DashboardView({
                       {!isJoined && !isCompleted ? (
                         <button
                           onClick={() => onJoinChallenge(c.id)}
+                          aria-label={`Join challenge: ${c.title}`}
                           className="text-brand-blue hover:text-white tracking-widest shrink-0 transition-colors"
                         >
                           JOIN +
@@ -412,7 +415,7 @@ export default function DashboardView({
             Live
           </span>
         </div>
-        <div className="divide-y divide-brand-border/55 max-h-47.5 overflow-y-auto font-mono text-[10px] tracking-wide">
+        <div aria-live="polite" aria-label="Recent activity log" className="divide-y divide-brand-border/55 max-h-47.5 overflow-y-auto font-mono text-[10px] tracking-wide">
           {logs.length === 0 ? (
             <div className="p-4 text-center text-[#888888] italic">
               No activity yet. Adjust carbon values in the calculator.

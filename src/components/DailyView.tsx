@@ -58,12 +58,12 @@ export default function DailyView({ city = "", country = "" }: DailyViewProps) {
       {/* Meta row */}
       <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-[#555555] font-bold tracking-widest uppercase">
         <span className="flex items-center gap-1.5">
-          <MapPin className="w-3 h-3" />
+          <MapPin className="w-3 h-3" aria-hidden="true" />
           {locationLabel}
         </span>
         {insight && (
           <span className="flex items-center gap-1.5">
-            <Calendar className="w-3 h-3" />
+            <Calendar className="w-3 h-3" aria-hidden="true" />
             {insight.date}
           </span>
         )}
@@ -74,7 +74,7 @@ export default function DailyView({ city = "", country = "" }: DailyViewProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-brand-green/10 border border-brand-green/20 flex items-center justify-center">
-              <Leaf className="w-4 h-4 text-brand-green" />
+              <Leaf className="w-4 h-4 text-brand-green" aria-hidden="true" />
             </div>
             <div>
               <p className="text-[10px] font-mono font-bold tracking-widest text-[#888888] uppercase">
@@ -88,41 +88,44 @@ export default function DailyView({ city = "", country = "" }: DailyViewProps) {
           <button
             onClick={() => fetchInsight(true)}
             disabled={loading}
+            aria-label={loading ? "Loading daily insight…" : "Refresh daily insight"}
             className="flex items-center gap-1.5 px-3 py-1.5 text-[9px] font-mono font-bold tracking-widest uppercase border border-brand-border text-[#888888] hover:text-white hover:border-brand-blue/50 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} aria-hidden="true" />
             Refresh
           </button>
         </div>
 
-        {loading && (
-          <div className="space-y-3 animate-pulse">
-            <div className="h-3 bg-brand-border rounded w-full" />
-            <div className="h-3 bg-brand-border rounded w-5/6" />
-            <div className="h-3 bg-brand-border rounded w-4/6" />
-            <div className="h-3 bg-brand-border rounded w-full mt-4" />
-            <div className="h-3 bg-brand-border rounded w-3/4" />
-          </div>
-        )}
+        <div aria-live="polite" aria-atomic="true">
+          {loading && (
+            <div className="space-y-3 animate-pulse" aria-label="Loading insight…">
+              <div className="h-3 bg-brand-border rounded w-full" />
+              <div className="h-3 bg-brand-border rounded w-5/6" />
+              <div className="h-3 bg-brand-border rounded w-4/6" />
+              <div className="h-3 bg-brand-border rounded w-full mt-4" />
+              <div className="h-3 bg-brand-border rounded w-3/4" />
+            </div>
+          )}
 
-        {!loading && error && (
-          <div className="text-center py-8 space-y-2">
-            <Newspaper className="w-8 h-8 text-[#444444] mx-auto" />
-            <p className="text-xs font-mono text-[#888888]">{error}</p>
-            <button
-              onClick={() => fetchInsight()}
-              className="text-[10px] font-mono font-bold text-brand-blue hover:opacity-80 tracking-widest uppercase mt-2"
-            >
-              Try again
-            </button>
-          </div>
-        )}
+          {!loading && error && (
+            <div className="text-center py-8 space-y-2">
+              <Newspaper className="w-8 h-8 text-[#444444] mx-auto" aria-hidden="true" />
+              <p className="text-xs font-mono text-[#888888]">{error}</p>
+              <button
+                onClick={() => fetchInsight()}
+                className="text-[10px] font-mono font-bold text-brand-blue hover:opacity-80 tracking-widest uppercase mt-2"
+              >
+                Try again
+              </button>
+            </div>
+          )}
 
-        {!loading && insight && !error && (
-          <p className="text-sm text-[#cccccc] leading-relaxed font-sans whitespace-pre-wrap">
-            {insight.insight}
-          </p>
-        )}
+          {!loading && insight && !error && (
+            <p className="text-sm text-[#cccccc] leading-relaxed font-sans whitespace-pre-wrap">
+              {insight.insight}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Tip card */}

@@ -46,10 +46,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
+      <div
+        role="region"
+        aria-label="Notifications"
+        aria-live="polite"
+        aria-atomic="false"
+        className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"
+      >
         {toasts.map(toast => (
           <div
             key={toast.id}
+            role="alert"
+            aria-atomic="true"
             className={`pointer-events-auto bg-brand-dark border border-brand-border border-l-4 px-4 py-3 min-w-[280px] max-w-[380px] shadow-[0_4px_20px_rgba(0,0,0,0.6)] transition-opacity duration-300 ${TYPE_COLORS[toast.type]} ${toast.isExiting ? "opacity-0" : "opacity-100"}`}
           >
             <span className="text-[9px] font-mono font-extrabold tracking-[0.2em] block mb-0.5 opacity-70">

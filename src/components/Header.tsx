@@ -38,12 +38,13 @@ export default function Header({ currentTab, setTab, onSync, isSyncing, userPhot
   return (
     <header className="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-brand-dark/95 backdrop-blur-md border-b border-brand-border">
       <div className="flex items-center gap-8">
-        <span 
+        <button
           onClick={() => setTab("DASHBOARD")}
-          className="text-xl font-display font-bold tracking-tighter text-brand-blue cursor-pointer hover:opacity-80 transition-opacity"
+          aria-label="CarbonSense home"
+          className="text-xl font-display font-bold tracking-tighter text-brand-blue cursor-pointer hover:opacity-80 transition-opacity bg-transparent border-none p-0"
         >
           CarbonSense
-        </span>
+        </button>
         <nav className="hidden lg:flex items-center gap-6">
           {["DASHBOARD", "CALCULATOR", "INSIGHTS", "GOALS", "PROFILE"].map((tab) => (
             <button
