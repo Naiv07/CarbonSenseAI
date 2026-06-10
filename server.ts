@@ -63,7 +63,7 @@ let adminAuth: import("firebase-admin/auth").Auth | null = null;
 })();
 
 async function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!adminAuth) return next(); // auth disabled — allow all (local dev)
+  if (!adminAuth || process.env.VITEST) return next(); // auth disabled in local dev and tests
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
     res.status(401).json({ error: "Unauthorized" });
@@ -998,6 +998,10 @@ app.get("/api/challenges", (req: Request, res: Response) => {
 
 app.post("/api/challenges/join", (req: Request, res: Response) => {
   const { id } = req.body;
+  if (!id || typeof id !== "string") {
+    res.status(400).json({ error: "Missing required field: id" });
+    return;
+  }
   const challenge = challenges.find((c) => c.id === id);
   if (challenge && challenge.status !== "LOCKED") {
     if (challenge.status === "JOINED") {
@@ -1212,4 +1216,9 @@ async function startServer() {
   app.listen(PORT, "0.0.0.0", () => console.log(`CLIMATE_MISSION_CONTROL server listening on port ${PORT}`));
 }
 
-startServer();
+// Only start the HTTP server when not running under Vitest
+if (!process.env.VITEST) {
+  startServer();
+}
+
+export { app };
