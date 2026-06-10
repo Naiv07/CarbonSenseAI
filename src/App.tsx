@@ -136,6 +136,28 @@ export default function App() {
         if (data.achievements) setAchievements(data.achievements);
         if (data.streak !== undefined) setStreak(data.streak);
         if (data.baselineEmissions !== undefined) setBaselineEmissions(data.baselineEmissions);
+
+        // Server lost state (restart/redeploy) — re-hydrate from cached onboarding data
+        const serverLocationEmpty = !data.userLocation?.country && !data.userLocation?.city;
+        const cached = localStorage.getItem("csai_onboarding_data");
+        if (serverLocationEmpty && cached) {
+          const rehydrateRes = await fetch("/api/onboarding", await withAuth({
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: cached,
+          }));
+          if (rehydrateRes.ok) {
+            const r = await rehydrateRes.json();
+            if (r.breakdown) setBreakdown(r.breakdown);
+            if (r.missionScore !== undefined) setMissionScore(r.missionScore);
+            if (r.rank) setRank(r.rank);
+            if (r.userLocation) setUserLocation(r.userLocation);
+            if (r.emissionHistory) setEmissionHistory(r.emissionHistory);
+            if (r.achievements) setAchievements(r.achievements);
+            if (r.streak !== undefined) setStreak(r.streak);
+            if (r.baselineEmissions !== undefined) setBaselineEmissions(r.baselineEmissions);
+          }
+        }
       }
       setDataReady(true);
     } catch (e) {
@@ -169,6 +191,8 @@ export default function App() {
       console.error("Error submitting onboarding data:", e);
       addToast("Warning: Offline mode — baseline estimated. Sync when connected.", "WARNING");
     }
+    // Cache onboarding payload so we can re-hydrate the server after restarts
+    localStorage.setItem("csai_onboarding_data", JSON.stringify(data));
     // Always navigate — never leave the user stranded on step 6
     localStorage.setItem("csai_onboarded", "true");
     setHasOnboarded(true);
@@ -401,6 +425,7 @@ export default function App() {
       console.error("Error calling server reset:", e);
     }
     localStorage.removeItem("csai_onboarded");
+    localStorage.removeItem("csai_onboarding_data");
     localStorage.removeItem("csai_info_seen");
     setHasOnboarded(false);
     setHasSeenInfo(false);
