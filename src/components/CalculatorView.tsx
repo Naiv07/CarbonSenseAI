@@ -411,14 +411,14 @@ export default function CalculatorView({
           </div>
 
           {/* SVG Circular Gauge */}
-          <div className="relative flex justify-center py-4">
-            <svg className="w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 transform -rotate-90">
+          <div className="relative flex justify-center py-2 sm:py-4">
+            <svg viewBox="0 0 176 176" className="w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 transform -rotate-90">
               <circle cx="88" cy="88" r="80" fill="transparent" stroke="#222222" strokeWidth="6" />
               <circle cx="88" cy="88" r="80" fill="transparent" stroke="#00ff66" strokeWidth="8"
                 strokeDasharray={circ} strokeDashoffset={offset} className="transition-all duration-300" />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="text-4xl font-mono font-bold text-white tracking-widest">{breakdown.total}</span>
+              <span className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold text-white tracking-widest">{breakdown.total}</span>
               <span className="text-[10px] font-mono tracking-wider text-[#888888] font-bold mt-1">TONNES CO2e</span>
             </div>
           </div>
