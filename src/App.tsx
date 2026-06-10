@@ -266,12 +266,25 @@ export default function App() {
   };
 
   const toggleChallengeTask = async (challengeId: string, taskId: string) => {
+    // Optimistic update — flip the task immediately so the UI feels instant
+    setChallenges(prev =>
+      prev.map(c =>
+        c.id !== challengeId ? c : {
+          ...c,
+          tasks: c.tasks?.map(t =>
+            t.id === taskId ? { ...t, completed: !t.completed } : t
+          ),
+        }
+      )
+    );
     try {
-      const res = await resilientFetch(
+      const res = await fetch(
         `/api/challenges/${challengeId}/tasks/${taskId}/toggle`,
-        { method: "POST" }
+        await withAuth({ method: "POST" })
       );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      // Sync with server's authoritative state (progress recalculated server-side)
       setChallenges(prev =>
         prev.map(c =>
           c.id !== challengeId ? c : {
@@ -283,6 +296,18 @@ export default function App() {
       );
     } catch (e) {
       console.error("Error toggling challenge task:", e);
+      // Revert the optimistic update on failure
+      setChallenges(prev =>
+        prev.map(c =>
+          c.id !== challengeId ? c : {
+            ...c,
+            tasks: c.tasks?.map(t =>
+              t.id === taskId ? { ...t, completed: !t.completed } : t
+            ),
+          }
+        )
+      );
+      addToast("Sign in to save task progress across sessions.", "WARNING");
     }
   };
 

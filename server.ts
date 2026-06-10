@@ -185,10 +185,9 @@ let challenges: Challenge[] = [
     title: "OPER_ZERO_GRID",
     description: "Offset your monthly grid consumption by investing in community wind projects.",
     xp: 500,
-    status: "JOINED",
+    status: "AVAILABLE",
     category: "ENERGY",
     xpReward: 500,
-    joinedAt: Date.now() - 15 * 24 * 60 * 60 * 1000,
     image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm",
     tasks: [
       { id: "ozg-t1", label: "Sign up for a community wind or solar plan", completed: false },
@@ -680,12 +679,6 @@ function generatePersonalizedChallenges(
     const prev = existingMap.get(c.id);
     return prev ? { ...c, status: prev.status, joinedAt: prev.joinedAt, tasks: prev.tasks ?? c.tasks } : c;
   });
-
-  // Ensure at least one JOINED challenge for demo purposes
-  if (!result.some(c => c.status === "JOINED" || c.status === "COMPLETED")) {
-    result[0].status = "JOINED";
-    result[0].joinedAt = Date.now() - 15 * 24 * 60 * 60 * 1000;
-  }
 
   // ── TIER 3 LOCKED (always appended) ──────────────────────────────────────
   const prevUrban = existingMap.get("urban-refit-x");
@@ -1196,7 +1189,7 @@ app.post("/api/reset", (req: Request, res: Response) => {
     recycledPercent: 40, shoppingFrequency: "average", newElectronics: 0, clothingType: "none",
   };
   challenges = [
-    { id: "oper-zero-grid", title: "OPER_ZERO_GRID", description: "Offset your monthly grid consumption by investing in community wind projects.", xp: 500, status: "JOINED", category: "ENERGY", xpReward: 500, joinedAt: Date.now() - 15 * 24 * 60 * 60 * 1000, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm", tasks: [{ id: "ozg-t1", label: "Sign up for a community wind or solar plan", completed: false }, { id: "ozg-t2", label: "Log your current monthly energy bill as a baseline", completed: false }, { id: "ozg-t3", label: "Track your kWh usage for one full week", completed: false }, { id: "ozg-t4", label: "Share the challenge with one friend or neighbour", completed: false }] },
+    { id: "oper-zero-grid", title: "OPER_ZERO_GRID", description: "Offset your monthly grid consumption by investing in community wind projects.", xp: 500, status: "AVAILABLE", category: "ENERGY", xpReward: 500, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm", tasks: [{ id: "ozg-t1", label: "Sign up for a community wind or solar plan", completed: false }, { id: "ozg-t2", label: "Log your current monthly energy bill as a baseline", completed: false }, { id: "ozg-t3", label: "Track your kWh usage for one full week", completed: false }, { id: "ozg-t4", label: "Share the challenge with one friend or neighbour", completed: false }] },
     { id: "bio-shield-alpha", title: "BIO_SHIELD_ALPHA", description: "Support massive reforestation in the Amazon basin. Target: 10k Hectares.", xp: 850, status: "AVAILABLE", category: "REFORESTATION", urgency: "URGENT: 48H REMAINING", xpReward: 850, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAhw0533HcolCMG68x8paQLanAnKH9csTFN5YQKyXCAHDfTeNOjVrI_Q-m1C4qw-npF27O82gDhARdro7TQDnz0b4d-WaX7XuX2msV_woaiBUHB3Jngm6Yk0YcSlB6BwZ8aBeSqpmUx84xwswf2rQ82dVOspBwVYlZ8lBfvETaCPg79DoToIhhf8p2Hj7vx09eu2IcYGutmq6xR1RUavy8tnR0pRJLSGhUng5tHQiGjH1ve7HPdEwXF_IrUHOXVbsMwLEGT6rqxmGDo", tasks: [{ id: "bsa-t1", label: "Research and choose a verified reforestation charity", completed: false }, { id: "bsa-t2", label: "Make a contribution to plant at least 12 trees", completed: false }, { id: "bsa-t3", label: "Post about your contribution on social media", completed: false }] },
     { id: "urban-refit-x", title: "URBAN_REFIT_X", description: "Pilot program for retrofitting low-income housing with smart carbon scrubbers.", xp: 1200, status: "LOCKED", category: "RETROFIT", urgency: "TIER_3: COMMANDER ONLY", xpReward: 1200, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBzlZYc-KyO1YrgvSoIJj3YZ2fU7kpz2L-9s68I3eQcHTNbxS7c0joara5U5HEgdwobhltvtNqZCEpU01eG-sF_5K-tKcfPOKmVGAWiWqoDFrJwxMcgcVhRp4TMjSMbFGz-MsvjiM4jUYvBB_IUwlJfUYX2wcTK45CBsB0KYcPPcf9fI1CfMYzYs44HKeFMfjyrYXhi2-HNM3cMO5z3ygVHSi-Y9Ve2EzQMhxlfcV5_4FhlUBSY0BHslkZMD43PTRoSwFYD_FPPg-_G", tasks: [{ id: "urx-t1", label: "Complete a housing retrofit feasibility survey", completed: false }, { id: "urx-t2", label: "Connect with a local housing authority or NGO", completed: false }, { id: "urx-t3", label: "Identify 3 candidate properties in your area", completed: false }, { id: "urx-t4", label: "Submit a funding application or grant proposal", completed: false }] },
     { id: "transit-shift", title: "TRANSIT_SHIFT", description: "Replace 3 days of personal vehicle commutes per week with public transit or cycling.", xp: 400, status: "AVAILABLE", category: "TRANSPORT", xpReward: 400, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCEt1grbf_Yb95wstRr_Bw2z1yybN5XgYYFqEP81PKRdSOtWohaTGSmyPF0OCDh0_WvMHbAmDFiCfqNFMxEdg_EnklZj3i1ZPTNhPBDYIgmL8NhUlqj9HJW6f10pXFO-0Xids0VOduMx0wF8arHiBwPGeLGGJjd1ZwWCmi_9YCLOph3JDqsk2JSdtemrX2-uM_qwmhjkASEwgltmmMORoYzhuXJK4HtAPiHKB6X-isQ8oUt1sNW1tN2BGLcVsPJuajQhwcvIZZdMGWm", tasks: [{ id: "ts-t1", label: "Plan your first car-free commute route", completed: false }, { id: "ts-t2", label: "Complete 3 car-free commute days this week", completed: false }, { id: "ts-t3", label: "Download a local transit or bike-share app", completed: false }, { id: "ts-t4", label: "Log your CO2 saved compared to driving", completed: false }] },
