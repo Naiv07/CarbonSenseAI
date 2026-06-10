@@ -1,14 +1,79 @@
-import express, { Request, Response } from "express";
+import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
+import helmet from "helmet";
+import compression from "compression";
+import rateLimit from "express-rate-limit";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
-app.use(express.json());
+// Security headers
+app.use(helmet({ contentSecurityPolicy: false }));
+
+// Gzip compression
+app.use(compression());
+
+app.use(express.json({ limit: "32kb" }));
+
+// Rate limiters for AI endpoints (expensive Gemini calls)
+const aiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests — please wait a moment." },
+});
+
+// General API limiter
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use("/api", apiLimiter);
+app.use("/api/ai/commander", aiLimiter);
+app.use("/api/daily-insight", aiLimiter);
+
+// --- Firebase Admin Auth (optional — skipped if FIREBASE_SERVICE_ACCOUNT not set) ---
+let adminAuth: import("firebase-admin/auth").Auth | null = null;
+(async () => {
+  const svcAccount = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (!svcAccount) return;
+  try {
+    const { initializeApp, getApps, cert } = await import("firebase-admin/app");
+    const { getAuth } = await import("firebase-admin/auth");
+    if (!getApps().length) {
+      initializeApp({ credential: cert(JSON.parse(svcAccount) as object) });
+    }
+    adminAuth = getAuth();
+    console.log("Firebase Admin initialised.");
+  } catch (e) {
+    console.error("Firebase Admin init failed:", e);
+  }
+})();
+
+async function requireAuth(req: Request, res: Response, next: NextFunction) {
+  if (!adminAuth) return next(); // auth disabled — allow all (local dev)
+  const header = req.headers.authorization;
+  if (!header?.startsWith("Bearer ")) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+  try {
+    const token = header.slice(7);
+    const decoded = await adminAuth.verifyIdToken(token);
+    (req as any).uid = decoded.uid;
+    next();
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
+  }
+}
 
 // Initialize Gemini Client
 let ai: GoogleGenAI | null = null;
@@ -781,7 +846,18 @@ function getRank(score: number): string {
   return "Earth Sentinel";
 }
 
+// --- Input validation helpers ---
+function pickEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  return allowed.includes(value as T) ? (value as T) : fallback;
+}
+
 // --- API Endpoints ---
+
+// Protect all state-mutating endpoints when Firebase Admin is configured
+app.use("/api", (req: Request, res: Response, next: NextFunction) => {
+  if (req.method === "GET") return next();
+  return requireAuth(req, res, next);
+});
 
 app.get("/api/telemetry", (req: Request, res: Response) => {
   updateStreak();
@@ -872,10 +948,15 @@ app.post("/api/telemetry", (req: Request, res: Response) => {
     logActivity({ time: new Date().toTimeString().split(" ")[0], text: `DATA: ANNUAL_MILEAGE_UPDATE -> ${mileage} KM`, impact: "CALC", type: "DATA" });
   }
   if (commuteFrequency !== undefined) {
-    userTelemetry.commuteFrequency = commuteFrequency;
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `SYS: COMMUTE_CYCLES -> ${commuteFrequency}`, impact: "OK", type: "SYS" });
+    userTelemetry.commuteFrequency = pickEnum(commuteFrequency, ["DAILY", "WEEKLY", "REMOTE"] as const, "DAILY");
+    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `SYS: COMMUTE_CYCLES -> ${userTelemetry.commuteFrequency}`, impact: "OK", type: "SYS" });
   }
-  if (vehicleType !== undefined) userTelemetry.vehicleType = vehicleType;
+  if (vehicleType !== undefined) {
+    userTelemetry.vehicleType = pickEnum(vehicleType, [
+      "INTERNAL_COMBUSTION_SMALL","INTERNAL_COMBUSTION_MEDIUM","INTERNAL_COMBUSTION_LARGE",
+      "HYBRID","ELECTRIC","NONE",
+    ] as const, "INTERNAL_COMBUSTION_MEDIUM");
+  }
   if (flightsShortHaul !== undefined) {
     userTelemetry.flightsShortHaul = Math.max(0, Number(flightsShortHaul));
     logActivity({ time: new Date().toTimeString().split(" ")[0], text: `DATA: FLIGHT_SHORT_HAUL -> ${flightsShortHaul}`, impact: "CALC", type: "DATA" });
@@ -889,15 +970,15 @@ app.post("/api/telemetry", (req: Request, res: Response) => {
     logActivity({ time: new Date().toTimeString().split(" ")[0], text: `DATA: UTILITY_BILL -> $${utilityBill}`, impact: "CALC", type: "DATA" });
   }
   if (energySource !== undefined) {
-    userTelemetry.energySource = energySource;
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `SYS: ENERGY_SOURCE -> ${energySource.toUpperCase()}`, impact: "OK", type: "SYS" });
+    userTelemetry.energySource = pickEnum(energySource, ["renewable","mixed","fossil"] as const, "mixed");
+    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `SYS: ENERGY_SOURCE -> ${userTelemetry.energySource.toUpperCase()}`, impact: "OK", type: "SYS" });
   }
-  if (heatingType !== undefined) userTelemetry.heatingType = heatingType;
-  if (meatIntake !== undefined) userTelemetry.meatIntake = meatIntake;
-  if (foodWaste !== undefined) userTelemetry.foodWaste = foodWaste;
-  if (shoppingFrequency !== undefined) userTelemetry.shoppingFrequency = shoppingFrequency;
-  if (newElectronics !== undefined) userTelemetry.newElectronics = Math.max(0, Number(newElectronics));
-  if (clothingType !== undefined) userTelemetry.clothingType = clothingType;
+  if (heatingType !== undefined) userTelemetry.heatingType = pickEnum(heatingType, ["gas","electric","oil","heatpump","none"] as const, "none");
+  if (meatIntake !== undefined) userTelemetry.meatIntake = pickEnum(meatIntake, ["DAILY","WEEKLY","RARELY","NEVER"] as const, "WEEKLY");
+  if (foodWaste !== undefined) userTelemetry.foodWaste = pickEnum(foodWaste, ["low","medium","high"] as const, "medium");
+  if (shoppingFrequency !== undefined) userTelemetry.shoppingFrequency = pickEnum(shoppingFrequency, ["minimal","average","frequent"] as const, "average");
+  if (newElectronics !== undefined) userTelemetry.newElectronics = Math.max(0, Math.min(20, Number(newElectronics)));
+  if (clothingType !== undefined) userTelemetry.clothingType = pickEnum(clothingType, ["fast-fashion","sustainable","none"] as const, "none");
   if (recycledPercent !== undefined) userTelemetry.recycledPercent = Math.min(100, Math.max(0, Number(recycledPercent)));
 
   pushHistorySnapshot("DATA_UPDATE");
@@ -964,9 +1045,9 @@ app.post("/api/challenges/join", (req: Request, res: Response) => {
 
 app.post("/api/challenges/:id/tasks/:taskId/toggle", (req: Request, res: Response) => {
   const challenge = challenges.find(c => c.id === req.params.id);
-  if (!challenge || !challenge.tasks) return res.status(404).json({ error: "Challenge or tasks not found" });
+  if (!challenge || !challenge.tasks) { res.status(404).json({ error: "Challenge or tasks not found" }); return; }
   const task = challenge.tasks.find(t => t.id === req.params.taskId);
-  if (!task) return res.status(404).json({ error: "Task not found" });
+  if (!task) { res.status(404).json({ error: "Task not found" }); return; }
   task.completed = !task.completed;
   task.completedAt = task.completed ? Date.now() : undefined;
   res.json({ task, progress: computeChallengeProgress(challenge) });
@@ -1001,7 +1082,6 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
   const geminiClient = getGemini();
   const currentStats = calculateEmissions();
   const score = calculateMissionScore();
-  const rank = getRank(score);
 
   const contextDescription = `
     You are CarbonSense AI — a caring, personal carbon advisor who genuinely wants to help this person reduce their environmental impact. Think of yourself as a warm, knowledgeable friend, not a formal assistant or report system.
@@ -1063,7 +1143,8 @@ app.get("/api/daily-insight", async (req: Request, res: Response) => {
 
   // Return cached insight if same day and same city
   if (!forceRefresh && dailyInsightCache && dailyInsightCache.date === today && dailyInsightCache.city === place) {
-    return res.json({ insight: dailyInsightCache.text, city: place, date: today, cached: true });
+    res.json({ insight: dailyInsightCache.text, city: place, date: today, cached: true });
+    return;
   }
 
   const geminiClient = getGemini();

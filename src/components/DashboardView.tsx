@@ -224,7 +224,7 @@ export default function DashboardView({
 
             {/* Real data trajectory SVG */}
             <div className="h-68 w-full border-l border-b border-brand-border relative flex items-end bg-brand-black/30 rounded-xl overflow-hidden">
-              <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1020 400">
+              <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1020 400" role="img" aria-label="Carbon emission trajectory chart showing your actual emissions versus the Paris Agreement target">
                 {/* Horizontal grid lines + Y-axis labels */}
                 {[3, 6, 9].map(val => {
                   const y = toSvgY(val);
@@ -333,6 +333,7 @@ export default function DashboardView({
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 disabled={isLoadingAI}
                 placeholder="Ask for advice (e.g. Help me save 2 tonnes...)"
+                aria-label="Ask the AI advisor a question"
                 className="flex-1 bg-brand-black border border-brand-border text-xs font-mono text-white px-3 py-2 rounded focus:outline-none focus:border-brand-blue placeholder-[#888888]"
               />
               <button
@@ -340,6 +341,7 @@ export default function DashboardView({
                 disabled={isLoadingAI || !customPrompt.trim()}
                 className="bg-brand-blue hover:brightness-110 active:scale-95 text-brand-black p-2 rounded transition-all flex items-center justify-center cursor-pointer"
                 title="Send instruction order to Gemini AI model"
+                aria-label="Send message to AI advisor"
               >
                 {isLoadingAI ? (
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />

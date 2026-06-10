@@ -10,11 +10,13 @@ import SettingsView from "./components/SettingsView";
 import OnboardingView from "./components/OnboardingView";
 import DailyView from "./components/DailyView";
 import BottomNav from "./components/BottomNav";
+import AuthGate from "./components/AuthGate";
 
 import { TelemetryState, EmissionsBreakdown, Challenge, ActivityLog, SimulationState, CommanderState, EmissionSnapshot, Achievement } from "./types";
 import { ArrowRight, RefreshCw, Terminal } from "lucide-react";
 import { useToast } from "./context/ToastContext";
 import { getCurrencySymbol } from "./utils/currency";
+import { auth } from "./lib/firebase";
 
 export default function App() {
   const { addToast } = useToast();
@@ -77,9 +79,19 @@ export default function App() {
   const [streak, setStreak] = useState<number>(1);
   const [baselineEmissions, setBaselineEmissions] = useState<number>(0);
 
+  const withAuth = async (options: RequestInit = {}): Promise<RequestInit> => {
+    const token = await auth.currentUser?.getIdToken().catch(() => null);
+    if (!token) return options;
+    return {
+      ...options,
+      headers: { ...(options.headers ?? {}), Authorization: `Bearer ${token}` },
+    };
+  };
+
   const resilientFetch = async (url: string, options?: RequestInit, retries = 4, delay = 1000): Promise<Response> => {
     try {
-      const res = await fetch(url, options);
+      const authedOptions = await withAuth(options);
+      const res = await fetch(url, authedOptions);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res;
     } catch (error) {
@@ -119,11 +131,11 @@ export default function App() {
 
   const handleOnboardingComplete = async (data: any) => {
     try {
-      const res = await fetch("/api/onboarding", {
+      const res = await fetch("/api/onboarding", await withAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      });
+      }));
       if (res.ok) {
         const result = await res.json();
         if (result.breakdown) setBreakdown(result.breakdown);
@@ -185,11 +197,11 @@ export default function App() {
   const handleUpdateTelemetry = async (updated: Partial<TelemetryState>) => {
     setTelemetry({ ...telemetry, ...updated });
     try {
-      const res = await fetch("/api/telemetry", {
+      const res = await fetch("/api/telemetry", await withAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated),
-      });
+      }));
       const data = await res.json();
       if (data.success && data.breakdown) {
         setBreakdown(data.breakdown);
@@ -208,11 +220,11 @@ export default function App() {
   const handleUpdateSimulation = async (updated: Partial<SimulationState>) => {
     setSimulation({ ...simulation, ...updated });
     try {
-      const res = await fetch("/api/simulation", {
+      const res = await fetch("/api/simulation", await withAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated),
-      });
+      }));
       const data = await res.json();
       if (data.success && data.breakdown) {
         setBreakdown(data.breakdown);
@@ -229,11 +241,11 @@ export default function App() {
 
   const handleJoinChallenge = async (id: string) => {
     try {
-      const res = await fetch("/api/challenges/join", {
+      const res = await fetch("/api/challenges/join", await withAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
-      });
+      }));
       const data = await res.json();
       if (data.success && data.challenges) {
         setChallenges(data.challenges);
@@ -269,11 +281,11 @@ export default function App() {
 
   const handleRefreshCommander = async (customPrompt?: string) => {
     try {
-      const res = await fetch("/api/ai/commander", {
+      const res = await fetch("/api/ai/commander", await withAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ customPrompt }),
-      });
+      }));
       const data = await res.json();
       if (data.text) {
         setCommander(prev => ({ ...prev, warning: data.text, status: "ACTIVE" }));
@@ -289,11 +301,11 @@ export default function App() {
 
   const handleDeployRecommendation = async (actionType: string) => {
     try {
-      const res = await fetch("/api/commander-action", {
+      const res = await fetch("/api/commander-action", await withAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ flag: "deploy", action: actionType }),
-      });
+      }));
       const data = await res.json();
       if (data.success) {
         setCommander(data.commanderRecommendation);
@@ -307,11 +319,11 @@ export default function App() {
 
   const handleDismissRecommendation = async () => {
     try {
-      const res = await fetch("/api/commander-action", {
+      const res = await fetch("/api/commander-action", await withAuth({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ flag: "dismiss" }),
-      });
+      }));
       const data = await res.json();
       if (data.success) setCommander(data.commanderRecommendation);
     } catch (e) {
@@ -322,7 +334,7 @@ export default function App() {
   const handleExecuteSyncAll = async () => {
     setIsSyncing(true);
     try {
-      const res = await fetch("/api/sync", { method: "POST" });
+      const res = await fetch("/api/sync", await withAuth({ method: "POST" }));
       const data = await res.json();
       if (data.success) {
         fetchInitialTelemetry();
@@ -343,7 +355,7 @@ export default function App() {
   const handleResetData = async () => {
     addToast("Data reset. Recalibrating your baseline.", "SYS");
     try {
-      await fetch("/api/reset", { method: "POST" });
+      await fetch("/api/reset", await withAuth({ method: "POST" }));
     } catch (e) {
       console.error("Error calling server reset:", e);
     }
@@ -367,7 +379,11 @@ export default function App() {
 
   // --- Onboarding Screen ---
   if (isEntered && !hasOnboarded) {
-    return <OnboardingView onComplete={handleOnboardingComplete} />;
+    return (
+      <AuthGate>
+        <OnboardingView onComplete={handleOnboardingComplete} />
+      </AuthGate>
+    );
   }
 
   // --- Gateway / Landing Screen ---
@@ -456,6 +472,7 @@ export default function App() {
 
   // --- Main Dashboard Layout ---
   return (
+    <AuthGate>
     <main className="min-h-screen bg-[#070708] text-[#e3e2e3] font-sans pt-16 pb-20 md:pb-6">
       <div className="scanline"></div>
 
@@ -536,5 +553,6 @@ export default function App() {
         </section>
       </div>
     </main>
+    </AuthGate>
   );
 }

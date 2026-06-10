@@ -17,18 +17,20 @@ const NAV_ITEMS = [
 
 export default function BottomNav({ currentTab, setTab }: BottomNavProps) {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-brand-dark/95 backdrop-blur-md border-t border-brand-border flex">
+    <nav aria-label="Main navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-brand-dark/95 backdrop-blur-md border-t border-brand-border flex">
       {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
         const isActive = currentTab === id;
         return (
           <button
             key={id}
             onClick={() => setTab(id)}
+            aria-label={label.charAt(0) + label.slice(1).toLowerCase()}
+            aria-current={isActive ? "page" : undefined}
             className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors ${
               isActive ? "text-brand-green" : "text-[#555555] hover:text-[#888888]"
             }`}
           >
-            <Icon className="w-5 h-5" />
+            <Icon className="w-5 h-5" aria-hidden="true" />
             <span className={`text-[8px] font-mono font-bold tracking-widest uppercase ${isActive ? "text-brand-green" : ""}`}>
               {label}
             </span>

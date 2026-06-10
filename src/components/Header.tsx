@@ -48,6 +48,7 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
             <button
               key={tab}
               onClick={() => setTab(tab)}
+              aria-current={currentTab === tab ? "page" : undefined}
               className={`text-xs font-mono tracking-widest font-bold py-5 px-1 border-b-2 transition-all duration-200 ${
                 currentTab === tab
                   ? "text-brand-blue border-brand-blue"
@@ -63,11 +64,12 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
       <div className="flex items-center gap-4">
         {/* Search bar */}
         <div className="hidden md:flex bg-brand-black items-center px-3 py-1.5 rounded-xl border border-brand-border focus-within:border-brand-blue">
-          <Search className="text-[#888888] w-4 h-4 mr-2" />
+          <Search className="text-[#888888] w-4 h-4 mr-2" aria-hidden="true" />
           <input
             className="bg-transparent border-none text-[11px] font-mono tracking-wider focus:outline-none focus:ring-0 w-32 text-white placeholder-[#888888]"
             placeholder="Search..."
-            type="text"
+            type="search"
+            aria-label="Navigate to section"
             value={searchVal}
             onChange={e => setSearchVal(e.target.value)}
             onKeyDown={handleSearchKey}
@@ -80,15 +82,18 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
             onClick={() => setTab("DASHBOARD")}
             className="text-brand-blue hover:bg-brand-border p-2 rounded transition-colors"
             title="View mission status"
+            aria-label="View mission status"
           >
-            <Bell className="w-4 h-4" />
+            <Bell className="w-4 h-4" aria-hidden="true" />
           </button>
-          <button 
+          <button
             onClick={() => setTab("SETTINGS")}
             className={`p-2 rounded transition-colors ${currentTab === "SETTINGS" ? "text-white bg-brand-border" : "text-brand-blue hover:bg-brand-border"}`}
             title="Systems Configuration"
+            aria-label="Settings"
+            aria-current={currentTab === "SETTINGS" ? "page" : undefined}
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
 
@@ -108,9 +113,10 @@ export default function Header({ currentTab, setTab, onSync, isSyncing }: Header
         <button
           onClick={onSync}
           disabled={isSyncing}
+          aria-label={isSyncing ? "Syncing data…" : "Sync data"}
           className="bg-brand-green/15 border border-brand-green/30 text-brand-green px-3 py-1.5 text-[11px] font-mono tracking-wider hover:bg-brand-green/25 active:scale-95 transition-all flex items-center gap-1.5 rounded"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin" : ""}`} aria-hidden="true" />
           {isSyncing ? "Syncing..." : "Sync"}
         </button>
       </div>
