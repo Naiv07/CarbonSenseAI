@@ -81,6 +81,28 @@ describe("computeEmissions", () => {
     const sum = Number((r.transport + r.energy + r.food + r.waste + r.shopping).toFixed(1));
     expect(r.total).toBe(sum);
   });
+
+  it("zero mileage still produces transport emissions from flights", () => {
+    const result = computeEmissions({ ...base, mileage: 0, flightsLongHaul: 1 });
+    expect(result.transport).toBeGreaterThan(0);
+  });
+
+  it("10 long-haul flights produces large transport figure", () => {
+    const result = computeEmissions({ ...base, mileage: 0, flightsLongHaul: 10 });
+    expect(result.transport).toBeGreaterThan(10);
+  });
+
+  it("gas heating adds to energy emissions vs no heating", () => {
+    const noHeat = computeEmissions({ ...base, heatingType: "none" });
+    const gasHeat = computeEmissions({ ...base, heatingType: "gas" });
+    expect(gasHeat.energy).toBeGreaterThan(noHeat.energy);
+  });
+
+  it("5 new electronics increases shopping emissions", () => {
+    const noElec = computeEmissions({ ...base, newElectronics: 0 });
+    const withElec = computeEmissions({ ...base, newElectronics: 5 });
+    expect(withElec.shopping).toBeGreaterThan(noElec.shopping);
+  });
 });
 
 describe("computeMissionScore", () => {
@@ -101,5 +123,15 @@ describe("computeMissionScore", () => {
 
   it("lower emissions → higher score", () => {
     expect(computeMissionScore(3)).toBeGreaterThan(computeMissionScore(7));
+  });
+
+  it("exactly 4t (global average) → score between 50 and 80", () => {
+    const score = computeMissionScore(4);
+    expect(score).toBeGreaterThan(50);
+    expect(score).toBeLessThanOrEqual(80);
+  });
+
+  it("negative emissions → clamps to 100", () => {
+    expect(computeMissionScore(-1)).toBe(100);
   });
 });

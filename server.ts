@@ -1,6 +1,7 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import Groq from "groq-sdk";
+import { getRank } from "./src/lib/rank";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import compression from "compression";
@@ -822,18 +823,7 @@ function calculateMissionScore(): number {
   return score;
 }
 
-function getRank(score: number): string {
-  if (score <= 10) return "Recruit";
-  if (score <= 20) return "Carbon Cadet";
-  if (score <= 30) return "Eco Trainee";
-  if (score <= 40) return "Green Operative";
-  if (score <= 50) return "Climate Ranger";
-  if (score <= 60) return "Sustainability Scout";
-  if (score <= 70) return "Eco Specialist";
-  if (score <= 80) return "Carbon Commander";
-  if (score <= 90) return "Climate Guardian";
-  return "Earth Sentinel";
-}
+// getRank imported from src/lib/rank.ts
 
 // --- Input validation helpers ---
 function pickEnum<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
