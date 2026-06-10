@@ -16,7 +16,36 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 // Security headers
 // crossOriginOpenerPolicy disabled — signInWithPopup requires the popup window
 // to communicate back to the opener; COOP: same-origin silently breaks that.
-app.use(helmet({ contentSecurityPolicy: false, crossOriginOpenerPolicy: false }));
+app.use(helmet({
+  crossOriginOpenerPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:     ["'self'"],
+      scriptSrc:      ["'self'"],
+      styleSrc:       ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      imgSrc:         ["'self'", "data:", "https://lh3.googleusercontent.com"],
+      connectSrc:     [
+        "'self'",
+        "https://identitytoolkit.googleapis.com",
+        "https://securetoken.googleapis.com",
+        "https://www.googleapis.com",
+        "https://accounts.google.com",
+      ],
+      fontSrc:        ["'self'", "https://fonts.gstatic.com"],
+      frameSrc:       ["https://accounts.google.com"],
+      objectSrc:      ["'none'"],
+      baseUri:        ["'self'"],
+      formAction:     ["'self'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+}));
+
+// Restrict browser feature access
+app.use((_req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=(), usb=()");
+  next();
+});
 
 // Gzip compression
 app.use(compression());
@@ -830,6 +859,12 @@ function pickEnum<T extends string>(value: unknown, allowed: readonly T[], fallb
   return allowed.includes(value as T) ? (value as T) : fallback;
 }
 
+/** Coerce to string, strip surrounding whitespace, enforce max length. */
+function clampStr(val: unknown, maxLen: number): string {
+  if (typeof val !== "string") return "";
+  return val.trim().slice(0, maxLen);
+}
+
 // --- API Endpoints ---
 
 // Protect all state-mutating endpoints when Firebase Admin is configured
@@ -868,11 +903,11 @@ app.post("/api/onboarding", (req: Request, res: Response) => {
     recycledPercent,
   } = req.body;
 
-  // Update user identity
+  // Update user identity (clamp string inputs to prevent oversized payloads)
   userLocation = {
-    name: name || "COMMANDER",
-    country: country || "",
-    city: city || "",
+    name: clampStr(name, 100) || "COMMANDER",
+    country: clampStr(country, 100),
+    city: clampStr(city, 100),
   };
 
   // Update all telemetry fields (clamp numeric inputs to valid ranges)
@@ -979,9 +1014,15 @@ app.get("/api/settings", (_req: Request, res: Response) => {
 
 app.post("/api/settings", (req: Request, res: Response) => {
   const { safetyThreshold, scrubberEfficiency, audioFeedback } = req.body;
-  if (safetyThreshold !== undefined) appSettings.safetyThreshold = safetyThreshold;
-  if (scrubberEfficiency !== undefined) appSettings.scrubberEfficiency = scrubberEfficiency;
-  if (audioFeedback !== undefined) appSettings.audioFeedback = audioFeedback;
+  if (safetyThreshold !== undefined) {
+    const val = Number(safetyThreshold);
+    if (!isNaN(val)) appSettings.safetyThreshold = Number(Math.min(9, Math.max(3, val)).toFixed(1));
+  }
+  if (scrubberEfficiency !== undefined) {
+    const val = Number(scrubberEfficiency);
+    if (!isNaN(val)) appSettings.scrubberEfficiency = Math.min(100, Math.max(50, Math.round(val)));
+  }
+  if (audioFeedback !== undefined) appSettings.audioFeedback = audioFeedback === true;
   res.json({ success: true, settings: appSettings });
 });
 
@@ -998,7 +1039,7 @@ app.get("/api/challenges", (req: Request, res: Response) => {
 
 app.post("/api/challenges/join", (req: Request, res: Response) => {
   const { id } = req.body;
-  if (!id || typeof id !== "string") {
+  if (!id || typeof id !== "string" || id.length > 100) {
     res.status(400).json({ error: "Missing required field: id" });
     return;
   }
@@ -1027,9 +1068,14 @@ app.post("/api/challenges/join", (req: Request, res: Response) => {
 });
 
 app.post("/api/challenges/:id/tasks/:taskId/toggle", (req: Request, res: Response) => {
-  const challenge = challenges.find(c => c.id === req.params.id);
+  const { id: challengeId, taskId } = req.params;
+  if (challengeId.length > 100 || taskId.length > 100) {
+    res.status(400).json({ error: "Invalid parameters" });
+    return;
+  }
+  const challenge = challenges.find(c => c.id === challengeId);
   if (!challenge || !challenge.tasks) { res.status(404).json({ error: "Challenge or tasks not found" }); return; }
-  const task = challenge.tasks.find(t => t.id === req.params.taskId);
+  const task = challenge.tasks.find(t => t.id === taskId);
   if (!task) { res.status(404).json({ error: "Task not found" }); return; }
   task.completed = !task.completed;
   task.completedAt = task.completed ? Date.now() : undefined;
@@ -1061,7 +1107,7 @@ app.post("/api/commander-action", (req: Request, res: Response) => {
 });
 
 app.post("/api/ai/commander", async (req: Request, res: Response) => {
-  const { customPrompt } = req.body;
+  const promptText = clampStr(req.body?.customPrompt, 500);
   const client = getGroq();
   const currentStats = calculateEmissions();
   const score = calculateMissionScore();
@@ -1099,7 +1145,7 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
         temperature: 0.75,
         messages: [
           { role: "system", content: contextDescription },
-          { role: "user", content: customPrompt || "Give me one practical tip to reduce my carbon footprint based on my current data." },
+          { role: "user", content: promptText || "Give me one practical tip to reduce my carbon footprint based on my current data." },
         ],
       });
       const responseText = response.choices[0]?.message?.content ?? "I'm ready to help! Ask me anything about your carbon footprint.";
