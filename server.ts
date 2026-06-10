@@ -18,6 +18,11 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 // to communicate back to the opener; COOP: same-origin silently breaks that.
 app.use(helmet({
   crossOriginOpenerPolicy: false,
+  strictTransportSecurity: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
   contentSecurityPolicy: {
     directives: {
       defaultSrc:     ["'self'"],
@@ -1256,8 +1261,17 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req: Request, res: Response) => res.sendFile(path.join(distPath, "index.html")));
+    // Hashed JS/CSS bundles (e.g. /assets/index-abc123.js) — immutable, 1 year cache
+    app.use("/assets", express.static(path.join(distPath, "assets"), {
+      maxAge: "1y",
+      immutable: true,
+    }));
+    // Everything else (index.html, favicon, etc.) — short cache, always revalidate
+    app.use(express.static(distPath, { maxAge: "5m" }));
+    app.get("*", (_req: Request, res: Response) => {
+      res.setHeader("Cache-Control", "no-cache");
+      res.sendFile(path.join(distPath, "index.html"));
+    });
   }
   app.listen(PORT, "0.0.0.0", () => console.log(`CLIMATE_MISSION_CONTROL server listening on port ${PORT}`));
 }
