@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import path from "path";
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import compression from "compression";
@@ -78,13 +78,13 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-// Initialize Anthropic Client
-let anthropicClient: Anthropic | null = null;
-function getAnthropic(): Anthropic | null {
-  if (!anthropicClient && process.env.ANTHROPIC_API_KEY) {
-    anthropicClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Initialize Groq Client
+let groqClient: Groq | null = null;
+function getGroq(): Groq | null {
+  if (!groqClient && process.env.GROQ_API_KEY) {
+    groqClient = new Groq({ apiKey: process.env.GROQ_API_KEY });
   }
-  return anthropicClient;
+  return groqClient;
 }
 
 // --- Data Types ---
@@ -1068,7 +1068,7 @@ app.post("/api/commander-action", (req: Request, res: Response) => {
 
 app.post("/api/ai/commander", async (req: Request, res: Response) => {
   const { customPrompt } = req.body;
-  const client = getAnthropic();
+  const client = getGroq();
   const currentStats = calculateEmissions();
   const score = calculateMissionScore();
 
@@ -1099,15 +1099,16 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
 
   try {
     if (client) {
-      const response = await client.messages.create({
-        model: "claude-haiku-4-5-20251001",
+      const response = await client.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
         max_tokens: 300,
         temperature: 0.75,
-        system: contextDescription,
-        messages: [{ role: "user", content: customPrompt || "Give me one practical tip to reduce my carbon footprint based on my current data." }],
+        messages: [
+          { role: "system", content: contextDescription },
+          { role: "user", content: customPrompt || "Give me one practical tip to reduce my carbon footprint based on my current data." },
+        ],
       });
-      const block = response.content[0];
-      const responseText = block.type === "text" ? block.text : "I'm ready to help! Ask me anything about your carbon footprint.";
+      const responseText = response.choices[0]?.message?.content ?? "I'm ready to help! Ask me anything about your carbon footprint.";
       commanderRecommendation.warning = responseText;
       commanderRecommendation.status = "ACTIVE";
       res.json({ text: responseText });
@@ -1123,7 +1124,7 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
       res.json({ text: selected });
     }
   } catch (error: any) {
-    console.error("Anthropic API error:", error);
+    console.error("Groq API error:", error);
     res.status(500).json({ error: error.message || "Couldn't reach the AI advisor right now. Try again in a moment." });
   }
 });
@@ -1139,7 +1140,7 @@ app.get("/api/daily-insight", async (req: Request, res: Response) => {
     return;
   }
 
-  const client = getAnthropic();
+  const client = getGroq();
   const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const locationPhrase = place || "your area";
 
@@ -1155,21 +1156,20 @@ Tone: warm, conversational, like a knowledgeable friend texting you a morning ti
   try {
     let insightText: string;
     if (client) {
-      const response = await client.messages.create({
-        model: "claude-haiku-4-5-20251001",
+      const response = await client.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
         max_tokens: 400,
         temperature: 0.8,
         messages: [{ role: "user", content: prompt }],
       });
-      const block = response.content[0];
-      insightText = block.type === "text" ? block.text : "Today's a great day to take one small step for the planet. Try walking or cycling for short trips — it adds up more than you'd think.";
+      insightText = response.choices[0]?.message?.content ?? "Today's a great day to take one small step for the planet. Try walking or cycling for short trips — it adds up more than you'd think.";
     } else {
       insightText = `Good morning from ${locationPhrase}! Today's a great opportunity to make a small difference. Try turning off devices on standby, planning a plant-based meal, or walking instead of driving for short trips. Every action counts — and your community will notice when more people make these choices together.`;
     }
     dailyInsightCache = { date: today, text: insightText, city: place };
     res.json({ insight: insightText, city: place, date: dateLabel, cached: false });
   } catch (error: any) {
-    console.error("Anthropic API error (daily-insight):", error);
+    console.error("Groq API error (daily-insight):", error);
     res.status(500).json({ error: "Could not generate today's insight." });
   }
 });
