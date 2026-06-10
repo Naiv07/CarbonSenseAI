@@ -8,6 +8,7 @@ import GoalsView from "./components/GoalsView";
 import ProfileView from "./components/ProfileView";
 import SettingsView from "./components/SettingsView";
 import OnboardingView from "./components/OnboardingView";
+import InfoView from "./components/InfoView";
 import DailyView from "./components/DailyView";
 import BottomNav from "./components/BottomNav";
 import AuthGate from "./components/AuthGate";
@@ -28,6 +29,7 @@ export default function App() {
   }, []);
 
   const [isEntered, setIsEntered] = useState<boolean>(false);
+  const [hasSeenInfo, setHasSeenInfo] = useState<boolean>(() => localStorage.getItem("csai_info_seen") === "true");
   const [hasOnboarded, setHasOnboarded] = useState<boolean>(() => localStorage.getItem("csai_onboarded") === "true");
   const [userLocation, setUserLocation] = useState({ name: "", country: "", city: "" });
   const [currentTab, setTab] = useState<string>("DASHBOARD");
@@ -392,7 +394,9 @@ export default function App() {
       console.error("Error calling server reset:", e);
     }
     localStorage.removeItem("csai_onboarded");
+    localStorage.removeItem("csai_info_seen");
     setHasOnboarded(false);
+    setHasSeenInfo(false);
     setIsEntered(false);
     fetchInitialTelemetry();
     fetchLogs();
@@ -417,6 +421,18 @@ export default function App() {
 
   const totalOffsetsSaved = baselineEmissions > 0 ? Math.max(0, baselineEmissions - breakdown.total) : 0;
   const currencySymbol = getCurrencySymbol(userLocation.country);
+
+  // --- Info Screen (shown once to all new visitors, including guests) ---
+  if (isEntered && !hasSeenInfo) {
+    return (
+      <InfoView
+        onContinue={() => {
+          localStorage.setItem("csai_info_seen", "true");
+          setHasSeenInfo(true);
+        }}
+      />
+    );
+  }
 
   // --- Onboarding Screen ---
   if (isEntered && !hasOnboarded) {

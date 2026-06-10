@@ -80,7 +80,7 @@ export default function AuthGate({ children }: AuthGateProps) {
             </div>
             <div>
               <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block uppercase">AI Model</span>
-              <span className="text-sm font-mono text-brand-blue font-bold tracking-widest block mt-0.5">Gemini</span>
+              <span className="text-sm font-mono text-brand-blue font-bold tracking-widest block mt-0.5">Groq</span>
             </div>
             <div>
               <span className="text-[9px] font-mono font-bold text-[#8f8fa1] tracking-wider block uppercase">Status</span>
