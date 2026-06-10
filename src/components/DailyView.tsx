@@ -56,7 +56,7 @@ export default function DailyView({ city = "", country = "" }: DailyViewProps) {
       </p>
 
       {/* Meta row */}
-      <div className="flex items-center gap-4 text-[10px] font-mono text-[#555555] font-bold tracking-widest uppercase">
+      <div className="flex flex-wrap items-center gap-3 text-[10px] font-mono text-[#555555] font-bold tracking-widest uppercase">
         <span className="flex items-center gap-1.5">
           <MapPin className="w-3 h-3" />
           {locationLabel}

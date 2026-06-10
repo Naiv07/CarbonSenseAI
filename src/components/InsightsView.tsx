@@ -86,7 +86,7 @@ export default function InsightsView({
       </p>
 
       {/* Top row: Emission Breakdown chart and Badges Patches */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
         
         {/* Emission Breakdown Concentric Rings Tile */}
         <section className="lg:col-span-7 bento-card relative overflow-hidden">
@@ -279,7 +279,7 @@ export default function InsightsView({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           
           {/* Card Control 1 */}
           <div className="p-4 bg-brand-black border border-brand-border rounded-[20px] hover:border-brand-blue transition-colors flex flex-col justify-between">

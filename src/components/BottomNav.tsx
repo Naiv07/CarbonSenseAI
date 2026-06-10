@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 
 export default function BottomNav({ currentTab, setTab }: BottomNavProps) {
   return (
-    <nav aria-label="Main navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-brand-dark/95 backdrop-blur-md border-t border-brand-border flex">
+    <nav aria-label="Main navigation" className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-brand-dark/95 backdrop-blur-md border-t border-brand-border flex pb-safe" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0px)" }}>
       {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
         const isActive = currentTab === id;
         return (
@@ -26,16 +26,16 @@ export default function BottomNav({ currentTab, setTab }: BottomNavProps) {
             onClick={() => setTab(id)}
             aria-label={label.charAt(0) + label.slice(1).toLowerCase()}
             aria-current={isActive ? "page" : undefined}
-            className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors ${
+            className={`flex-1 flex flex-col items-center justify-center py-3 gap-1 transition-colors relative ${
               isActive ? "text-brand-green" : "text-[#555555] hover:text-[#888888]"
             }`}
           >
             <Icon className="w-5 h-5" aria-hidden="true" />
-            <span className={`text-[8px] font-mono font-bold tracking-widest uppercase ${isActive ? "text-brand-green" : ""}`}>
+            <span className={`text-[8px] font-mono font-bold tracking-wider uppercase ${isActive ? "text-brand-green" : ""}`}>
               {label}
             </span>
             {isActive && (
-              <span className="absolute bottom-0 w-8 h-0.5 bg-brand-green rounded-t-full" />
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-brand-green rounded-t-full" />
             )}
           </button>
         );

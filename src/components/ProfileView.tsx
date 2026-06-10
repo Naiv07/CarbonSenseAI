@@ -39,7 +39,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
       {/* Profile Section */}
       <section className="bento-card flex flex-col md:flex-row gap-6 items-center relative">
         {/* Avatar — real Google photo or fallback icon */}
-        <div className="h-32 w-32 rounded-full border-2 border-brand-blue/60 shrink-0 shadow-[0_4px_20px_rgba(0,242,255,0.15)] bg-brand-black flex items-center justify-center overflow-hidden">
+        <div className="h-20 w-20 sm:h-24 sm:w-24 md:h-32 md:w-32 rounded-full border-2 border-brand-blue/60 shrink-0 shadow-[0_4px_20px_rgba(0,242,255,0.15)] bg-brand-black flex items-center justify-center overflow-hidden">
           {photoURL ? (
             <img src={photoURL} alt={displayName ?? "Profile"} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           ) : (
@@ -95,7 +95,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
           <button
             onClick={onLogout}
             aria-label="Sign out"
-            className="absolute top-4 right-4 flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest uppercase text-[#888888] hover:text-red-400 border border-[#2a2a2e] hover:border-red-400/40 px-2.5 py-1.5 rounded transition-all"
+            className="self-start md:absolute md:top-4 md:right-4 flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest uppercase text-[#888888] hover:text-red-400 border border-[#2a2a2e] hover:border-red-400/40 px-2.5 py-1.5 rounded transition-all"
           >
             <LogOut className="w-3 h-3" aria-hidden="true" />
             Sign Out

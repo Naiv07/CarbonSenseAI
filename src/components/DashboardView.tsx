@@ -182,7 +182,7 @@ export default function DashboardView({
       </section>
 
       {/* Trajectory Chart and AI Commander Columns */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
         
         {/* Emission Trajectory Chart */}
         <div className="lg:col-span-8 bento-card flex flex-col justify-between">
@@ -223,7 +223,7 @@ export default function DashboardView({
             </div>
 
             {/* Real data trajectory SVG */}
-            <div className="h-68 w-full border-l border-b border-brand-border relative flex items-end bg-brand-black/30 rounded-xl overflow-hidden">
+            <div className="h-40 sm:h-52 md:h-64 lg:h-68 w-full border-l border-b border-brand-border relative flex items-end bg-brand-black/30 rounded-xl overflow-hidden">
               <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 1020 400" role="img" aria-label="Carbon emission trajectory chart showing your actual emissions versus the Paris Agreement target">
                 {/* Horizontal grid lines + Y-axis labels */}
                 {[3, 6, 9].map(val => {

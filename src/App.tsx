@@ -435,7 +435,7 @@ export default function App() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#5e6bff]/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-1/3 right-1/4 w-120 h-120 bg-[#bec2ff]/5 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="max-w-5xl w-full bg-[#101112]/90 border border-[#1f2023] p-8 md:p-12 rounded relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col lg:flex-row gap-10 items-center">
+        <div className="max-w-5xl w-full bg-[#101112]/90 border border-[#1f2023] p-5 sm:p-8 md:p-10 lg:p-12 rounded relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col lg:flex-row gap-8 lg:gap-10 items-center">
           <div className="flex-1 space-y-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-[#bec2ff] font-mono text-[11px] font-bold tracking-[0.25em] uppercase">
@@ -486,7 +486,7 @@ export default function App() {
             </button>
           </div>
 
-          <div className="w-full lg:w-96 shrink-0 border border-[#1f2023] p-4 bg-[#0d0e0f] rounded relative flex flex-col justify-between h-96 group">
+          <div className="hidden sm:flex w-full lg:w-96 shrink-0 border border-[#1f2023] p-4 bg-[#0d0e0f] rounded relative flex-col justify-between h-72 sm:h-80 lg:h-96 group">
             <div className="flex justify-between items-center text-[10px] font-mono tracking-wider font-bold">
               <span className="text-[#8f8fa1] uppercase">Carbon Grid</span>
               <span className="text-[#22c55e] animate-pulse">● Online</span>
@@ -514,7 +514,7 @@ export default function App() {
   // --- Main Dashboard Layout ---
   return (
     <AuthGate>
-    <main className="min-h-screen bg-[#070708] text-[#e3e2e3] font-sans pt-16 pb-20 md:pb-6">
+    <main className="min-h-screen bg-[#070708] text-[#e3e2e3] font-sans pt-16 pb-24 md:pb-6">
       <div className="scanline"></div>
 
       <Header currentTab={currentTab} setTab={setTab} onSync={handleExecuteSyncAll} isSyncing={isSyncing} userPhotoURL={firebaseUser?.photoURL ?? null} />
@@ -524,7 +524,7 @@ export default function App() {
 
         <BottomNav currentTab={currentTab} setTab={setTab} />
 
-        <section className="flex-1 p-6 md:pl-[280px] min-h-[calc(100vh-64px)] overflow-x-hidden">
+        <section className="flex-1 p-3 sm:p-4 md:p-6 md:pl-[280px] min-h-[calc(100vh-64px)] overflow-x-hidden">
           {currentTab === "DASHBOARD" && (
             <DashboardView
               breakdown={breakdown}

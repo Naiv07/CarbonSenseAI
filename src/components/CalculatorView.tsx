@@ -401,7 +401,7 @@ export default function CalculatorView({
       </div>
 
       {/* Right Circular Impact Monitor */}
-      <div className="w-full lg:w-80 shrink-0">
+      <div className="w-full lg:w-72 xl:w-80 shrink-0">
         <div className="bento-card space-y-6">
           <div className="flex justify-between items-center">
             <p className="text-[10px] font-mono tracking-wider text-brand-green font-bold uppercase">Live Impact</p>
@@ -412,7 +412,7 @@ export default function CalculatorView({
 
           {/* SVG Circular Gauge */}
           <div className="relative flex justify-center py-4">
-            <svg className="w-44 h-44 transform -rotate-90">
+            <svg className="w-36 h-36 sm:w-40 sm:h-40 md:w-44 md:h-44 transform -rotate-90">
               <circle cx="88" cy="88" r="80" fill="transparent" stroke="#222222" strokeWidth="6" />
               <circle cx="88" cy="88" r="80" fill="transparent" stroke="#00ff66" strokeWidth="8"
                 strokeDasharray={circ} strokeDashoffset={offset} className="transition-all duration-300" />

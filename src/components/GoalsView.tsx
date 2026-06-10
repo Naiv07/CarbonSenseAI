@@ -33,7 +33,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
           <p className="text-[10px] font-mono text-[#555555]">Challenge data is unavailable. Check your connection and try refreshing.</p>
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {challenges.map((challenge) => {
           const isJoined = challenge.status === "JOINED";
           const isLocked = challenge.status === "LOCKED";
@@ -48,7 +48,7 @@ export default function GoalsView({ challenges, missionScore = 0, onToggleChalle
               }`}
             >
               {/* Image hotlink cover */}
-              <div className="h-44 w-full overflow-hidden relative bg-brand-black">
+              <div className="h-32 sm:h-36 md:h-44 w-full overflow-hidden relative bg-brand-black">
                 <img
                   alt={challenge.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
