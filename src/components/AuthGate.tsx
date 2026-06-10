@@ -12,6 +12,7 @@ export default function AuthGate({ children }: AuthGateProps) {
   const [loading, setLoading] = useState(true);
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (u) => {
@@ -44,7 +45,7 @@ export default function AuthGate({ children }: AuthGateProps) {
     );
   }
 
-  if (!user) {
+  if (!user && !isGuest) {
     return (
       <main className="min-h-screen bg-[#070708] technical-grid relative flex items-center justify-center p-6 starfield overflow-hidden">
         <div className="scanline" />
@@ -116,6 +117,23 @@ export default function AuthGate({ children }: AuthGateProps) {
             {error && (
               <p className="text-xs text-red-400 font-mono text-center">{error}</p>
             )}
+
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-[#1f2023]" />
+              <span className="text-[10px] font-mono text-[#555555] tracking-widest uppercase">or</span>
+              <div className="flex-1 h-px bg-[#1f2023]" />
+            </div>
+
+            <button
+              onClick={() => setIsGuest(true)}
+              aria-label="Continue as guest without signing in"
+              className="w-full flex items-center justify-center gap-2 border border-[#2a2a2e] hover:border-[#3a3a3e] bg-transparent hover:bg-[#1a1a1c] text-[#888888] hover:text-white text-sm py-2.5 px-4 rounded transition-all active:scale-95"
+            >
+              Continue as Guest
+            </button>
+            <p className="text-[10px] text-[#444444] font-sans text-center">
+              Guest progress is not saved between sessions
+            </p>
           </div>
 
           <p className="text-[10px] text-[#555555] font-sans text-center mt-4">
