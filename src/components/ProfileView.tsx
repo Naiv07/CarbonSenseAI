@@ -1,6 +1,6 @@
 import React from "react";
 import { ActivityLog, Challenge, Achievement } from "../types";
-import { ShieldCheck, Award, Zap, Globe, Flame, Calendar, Leaf, Sun, Plane, Wifi, RefreshCw, User } from "lucide-react";
+import { ShieldCheck, Award, Zap, Globe, Flame, Calendar, Leaf, Sun, Plane, Wifi, RefreshCw, User, LogOut } from "lucide-react";
 
 interface ProfileViewProps {
   logs: ActivityLog[];
@@ -14,6 +14,7 @@ interface ProfileViewProps {
   streak?: number;
   challenges?: Challenge[];
   achievements?: Achievement[];
+  onLogout?: () => void;
 }
 
 const ACHIEVEMENT_ICONS: Record<string, React.ReactNode> = {
@@ -25,7 +26,7 @@ const ACHIEVEMENT_ICONS: Record<string, React.ReactNode> = {
   wifi: <Wifi className="w-4 h-4" />,
 };
 
-export default function ProfileView({ logs, totalSaved, missionScore, rank, name = "", photoURL, city = "", country = "", streak = 1, challenges = [], achievements = [] }: ProfileViewProps) {
+export default function ProfileView({ logs, totalSaved, missionScore, rank, name = "", photoURL, city = "", country = "", streak = 1, challenges = [], achievements = [], onLogout }: ProfileViewProps) {
   const tierProgress = missionScore % 10 === 0 && missionScore > 0 ? 100 : (missionScore % 10) * 10;
   const pointsToNextRank = missionScore >= 100 ? 0 : 10 - (missionScore % 10);
   const estimatedXP = missionScore * 150;
@@ -36,7 +37,7 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
     <div className="space-y-6">
 
       {/* Profile Section */}
-      <section className="bento-card flex flex-col md:flex-row gap-6 items-center">
+      <section className="bento-card flex flex-col md:flex-row gap-6 items-center relative">
         {/* Avatar — real Google photo or fallback icon */}
         <div className="h-32 w-32 rounded-full border-2 border-brand-blue/60 shrink-0 shadow-[0_4px_20px_rgba(0,242,255,0.15)] bg-brand-black flex items-center justify-center overflow-hidden">
           {photoURL ? (
@@ -88,6 +89,18 @@ export default function ProfileView({ logs, totalSaved, missionScore, rank, name
             </div>
           </div>
         </div>
+
+        {/* Logout button — only shown for signed-in users */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            aria-label="Sign out"
+            className="absolute top-4 right-4 flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest uppercase text-[#888888] hover:text-red-400 border border-[#2a2a2e] hover:border-red-400/40 px-2.5 py-1.5 rounded transition-all"
+          >
+            <LogOut className="w-3 h-3" aria-hidden="true" />
+            Sign Out
+          </button>
+        )}
       </section>
 
       {/* Impact Scoreboard Metrics */}

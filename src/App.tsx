@@ -17,7 +17,7 @@ import { ArrowRight, RefreshCw, Terminal } from "lucide-react";
 import { useToast } from "./context/ToastContext";
 import { getCurrencySymbol } from "./utils/currency";
 import { auth } from "./lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
 
 export default function App() {
   const { addToast } = useToast();
@@ -398,6 +398,15 @@ export default function App() {
     fetchLogs();
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      addToast("Signed out successfully.", "SYS");
+    } catch (e) {
+      console.error("Sign out error:", e);
+    }
+  };
+
   const handleEnterMissionControl = () => {
     setIsGateLoading(true);
     setTimeout(() => {
@@ -577,6 +586,7 @@ export default function App() {
               streak={streak}
               challenges={challenges}
               achievements={achievements}
+              onLogout={firebaseUser ? handleLogout : undefined}
             />
           )}
 
