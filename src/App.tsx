@@ -16,6 +16,7 @@ const DailyView = React.lazy(() => import("./components/DailyView"));
 
 import { TelemetryState, EmissionsBreakdown, Challenge, ActivityLog, SimulationState, CommanderState, EmissionSnapshot, Achievement, OnboardingData } from "./types";
 import { ArrowRight, RefreshCw, Terminal } from "lucide-react";
+import CarbonGridSVG from "./components/CarbonGridSVG";
 import { useToast } from "./context/ToastContext";
 import { getCurrencySymbol } from "./utils/currency";
 import type { User } from "firebase/auth";
@@ -550,15 +551,7 @@ export default function App() {
               <span className="text-[#22c55e] animate-pulse">● Online</span>
             </div>
             <div className="h-60 w-full relative flex items-center justify-center opacity-75 group-hover:opacity-100 transition-opacity">
-              <img
-                alt="Planetary Climate Grid Earth Map"
-                className="w-full h-full object-contain filter invert opacity-50 relative z-10"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzqTRPDZEtIiwFPcHVwkwRSnyHhtKodv6uMRK1nrO4wvvw6c57jO7nK3s6afGRxSmkTpUhAVXQzooq4vXkzw9gITewx6Cb2oQZE84MROiFiv7QSKoZd6YDN6txHrMn8hufR9-EY35lncm3J0l9FzsLvkIbgH5g7dmTcSMUk3b-bpSwqO0uwUy_CjQFmV1EHDhUKS-TN7r6DclCZKUCXn5fdWxH6ohjRD6kyKh0GLzfzbkwfFW5QwjhVPenNDu_42j97ANlom9SS1CN"
-                referrerPolicy="no-referrer"
-                loading="eager"
-                fetchPriority="high"
-              />
-              <div className="absolute inset-y-0 left-0 w-1/3 bg-linear-to-r from-transparent via-[#5e6bff]/10 to-transparent map-sweep pointer-events-none z-20"></div>
+              <CarbonGridSVG />
             </div>
             <div className="flex justify-between text-[10px] font-mono tracking-wider font-bold text-[#bec2ff] uppercase">
               <span>Step 1: Connect</span>
