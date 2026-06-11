@@ -43,7 +43,7 @@ app.use(helmet({
         "https://accounts.google.com",
       ],
       fontSrc:        ["'self'"],
-      frameSrc:       ["https://accounts.google.com"],
+      frameSrc:       ["https://accounts.google.com", "https://*.firebaseapp.com"],
       objectSrc:      ["'none'"],
       baseUri:        ["'self'"],
       formAction:     ["'self'"],
