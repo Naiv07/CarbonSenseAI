@@ -1,4 +1,3 @@
-import React from "react";
 import { ArrowRight, Leaf, Zap, Target, Newspaper, ShieldCheck, Terminal } from "lucide-react";
 
 interface InfoViewProps {

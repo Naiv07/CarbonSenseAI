@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { LayoutDashboard, Calculator, BarChart3, Target, User, Settings, Trash2, Terminal, Newspaper } from "lucide-react";
 
 interface SidebarProps {

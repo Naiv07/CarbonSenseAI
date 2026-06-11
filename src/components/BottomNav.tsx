@@ -1,4 +1,3 @@
-import React from "react";
 import { LayoutDashboard, Calculator, BarChart3, Target, User, Newspaper } from "lucide-react";
 
 interface BottomNavProps {

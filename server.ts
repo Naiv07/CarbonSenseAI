@@ -96,7 +96,7 @@ let adminAuth: import("firebase-admin/auth").Auth | null = null;
       initializeApp({ credential: cert(JSON.parse(svcAccount) as object) });
     }
     adminAuth = getAuth();
-    console.log("Firebase Admin initialised.");
+    if (process.env.NODE_ENV !== "production") console.log("Firebase Admin initialised.");
   } catch (e) {
     console.error("Firebase Admin init failed:", e);
   }
@@ -130,8 +130,12 @@ function getGroq(): Groq | null {
 
 // Data types imported from ./src/types (single source of truth for client & server)
 
-// --- Constants ---
-const CHALLENGE_REFRESH_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+import { CHALLENGE_REFRESH_MS, ACTIVITY_LOG_MAX, EMISSION_HISTORY_MAX, HISTORY_SNAPSHOT_INTERVAL_MS } from "./src/lib/constants";
+
+/** Format current time as HH:MM:SS */
+function timestamp(): string {
+  return new Date().toTimeString().split(" ")[0];
+}
 
 // --- In-memory State ---
 let userLocation: UserLocation = { name: "", country: "", city: "" };
@@ -648,14 +652,14 @@ initHistory();
 function pushHistorySnapshot(label: string) {
   const current = calculateEmissions(true).total;
   emissionHistory.push({ label, total: Number(current.toFixed(1)), timestamp: Date.now() });
-  if (emissionHistory.length > 24) emissionHistory = emissionHistory.slice(-24);
+  if (emissionHistory.length > EMISSION_HISTORY_MAX) emissionHistory = emissionHistory.slice(-EMISSION_HISTORY_MAX);
 }
 
 // --- Streak ---
 function updateStreak() {
   const today = new Date().toDateString();
   if (streakData.lastDate === today) return;
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  const yesterday = new Date(Date.now() - HISTORY_SNAPSHOT_INTERVAL_MS).toDateString();
   streakData.days = streakData.lastDate === yesterday ? streakData.days + 1 : 1;
   streakData.lastDate = today;
 }
@@ -711,7 +715,7 @@ function calculateAchievements(): Achievement[] {
 // --- Activity Log (capped at 100 entries to prevent unbounded growth) ---
 function logActivity(entry: ActivityLog) {
   activityLogs.unshift(entry);
-  if (activityLogs.length > 100) activityLogs.length = 100;
+  if (activityLogs.length > ACTIVITY_LOG_MAX) activityLogs.length = ACTIVITY_LOG_MAX;
 }
 
 // --- Challenge Progress ---
@@ -745,7 +749,7 @@ function calculateMissionScore(): number {
     urbanRefit.status = "AVAILABLE";
     urbanRefit.urgency = "TIER_3: UNLOCKED";
     logActivity({
-      time: new Date().toTimeString().split(" ")[0],
+      time: timestamp(),
       text: "SYS: URBAN_REFIT_X TIER_3 ACCESS UNLOCKED",
       impact: "UNLOCKED",
       type: "SYS",
@@ -776,14 +780,27 @@ app.use("/api", (req: Request, res: Response, next: NextFunction) => {
   return requireAuth(req, res, next);
 });
 
-app.get("/api/telemetry", (req: Request, res: Response) => {
+app.get("/api/telemetry", (_req: Request, res: Response) => {
   updateStreak();
   const breakdown = calculateEmissions();
+
+  // Apply scrubber efficiency — reduces waste emissions by the configured percentage
+  const scrubberReduction = appSettings.scrubberEfficiency / 100;
+  const adjustedBreakdown: EmissionsBreakdown = {
+    ...breakdown,
+    waste: Number((breakdown.waste * (1 - scrubberReduction)).toFixed(2)),
+    total: Number((breakdown.transport + breakdown.energy + breakdown.food +
+      breakdown.waste * (1 - scrubberReduction) + breakdown.shopping).toFixed(1)),
+  };
+
+  // Safety threshold alert — flag when total exceeds the user-configured limit
+  const exceedsThreshold = adjustedBreakdown.total > appSettings.safetyThreshold;
+
   const missionScore = calculateMissionScore();
   const rank = getRank(missionScore);
   res.json({
     telemetry: userTelemetry,
-    breakdown,
+    breakdown: adjustedBreakdown,
     activeSimulation,
     commanderRecommendation,
     missionScore,
@@ -793,6 +810,8 @@ app.get("/api/telemetry", (req: Request, res: Response) => {
     achievements: calculateAchievements(),
     streak: streakData.days,
     baselineEmissions,
+    settings: { safetyThreshold: appSettings.safetyThreshold, scrubberEfficiency: appSettings.scrubberEfficiency },
+    alerts: exceedsThreshold ? [{ type: "THRESHOLD", message: `Total emissions (${adjustedBreakdown.total}t) exceed safety threshold (${appSettings.safetyThreshold}t)` }] : [],
   });
 });
 
@@ -842,7 +861,7 @@ app.post("/api/onboarding", (req: Request, res: Response) => {
   const rank = getRank(missionScore);
 
   logActivity({
-    time: new Date().toTimeString().split(" ")[0],
+    time: timestamp(),
     text: `INIT: COMMANDER_${(name || "UNKNOWN").toUpperCase().replace(/\s+/g, "_")}_ONBOARDED`,
     impact: `${breakdown.total}t CO2e`,
     type: "INIT",
@@ -862,11 +881,11 @@ app.post("/api/telemetry", (req: Request, res: Response) => {
 
   if (mileage !== undefined) {
     userTelemetry.mileage = Math.max(0, Number(mileage));
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `DATA: ANNUAL_MILEAGE_UPDATE -> ${mileage} KM`, impact: "CALC", type: "DATA" });
+    logActivity({ time: timestamp(), text: `DATA: ANNUAL_MILEAGE_UPDATE -> ${mileage} KM`, impact: "CALC", type: "DATA" });
   }
   if (commuteFrequency !== undefined) {
     userTelemetry.commuteFrequency = pickEnum(commuteFrequency, ["DAILY", "WEEKLY", "REMOTE"] as const, "DAILY");
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `SYS: COMMUTE_CYCLES -> ${userTelemetry.commuteFrequency}`, impact: "OK", type: "SYS" });
+    logActivity({ time: timestamp(), text: `SYS: COMMUTE_CYCLES -> ${userTelemetry.commuteFrequency}`, impact: "OK", type: "SYS" });
   }
   if (vehicleType !== undefined) {
     userTelemetry.vehicleType = pickEnum(vehicleType, [
@@ -876,19 +895,19 @@ app.post("/api/telemetry", (req: Request, res: Response) => {
   }
   if (flightsShortHaul !== undefined) {
     userTelemetry.flightsShortHaul = Math.max(0, Number(flightsShortHaul));
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `DATA: FLIGHT_SHORT_HAUL -> ${flightsShortHaul}`, impact: "CALC", type: "DATA" });
+    logActivity({ time: timestamp(), text: `DATA: FLIGHT_SHORT_HAUL -> ${flightsShortHaul}`, impact: "CALC", type: "DATA" });
   }
   if (flightsLongHaul !== undefined) {
     userTelemetry.flightsLongHaul = Math.max(0, Number(flightsLongHaul));
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `DATA: FLIGHT_LONG_HAUL -> ${flightsLongHaul}`, impact: "CALC", type: "DATA" });
+    logActivity({ time: timestamp(), text: `DATA: FLIGHT_LONG_HAUL -> ${flightsLongHaul}`, impact: "CALC", type: "DATA" });
   }
   if (utilityBill !== undefined) {
     userTelemetry.utilityBill = Math.max(0, Number(utilityBill));
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `DATA: UTILITY_BILL -> $${utilityBill}`, impact: "CALC", type: "DATA" });
+    logActivity({ time: timestamp(), text: `DATA: UTILITY_BILL -> $${utilityBill}`, impact: "CALC", type: "DATA" });
   }
   if (energySource !== undefined) {
     userTelemetry.energySource = pickEnum(energySource, ["renewable","mixed","fossil"] as const, "mixed");
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: `SYS: ENERGY_SOURCE -> ${userTelemetry.energySource.toUpperCase()}`, impact: "OK", type: "SYS" });
+    logActivity({ time: timestamp(), text: `SYS: ENERGY_SOURCE -> ${userTelemetry.energySource.toUpperCase()}`, impact: "OK", type: "SYS" });
   }
   if (heatingType !== undefined) userTelemetry.heatingType = pickEnum(heatingType, ["gas","electric","oil","heatpump","none"] as const, "none");
   if (meatIntake !== undefined) userTelemetry.meatIntake = pickEnum(meatIntake, ["DAILY","WEEKLY","VEGETARIAN","VEGAN"] as const, "WEEKLY");
@@ -907,7 +926,7 @@ app.post("/api/telemetry", (req: Request, res: Response) => {
   res.json({ success: true, breakdown, missionScore, rank, emissionHistory, achievements: calculateAchievements(), streak: streakData.days });
 });
 
-app.get("/api/logs", (req: Request, res: Response) => {
+app.get("/api/logs", (_req: Request, res: Response) => {
   res.json(activityLogs);
 });
 
@@ -929,9 +948,9 @@ app.post("/api/settings", (req: Request, res: Response) => {
   res.json({ success: true, settings: appSettings });
 });
 
-app.get("/api/challenges", (req: Request, res: Response) => {
+app.get("/api/challenges", (_req: Request, res: Response) => {
   let refreshed = false;
-  if (Date.now() - lastChallengeRefresh >= CHALLENGE_REFRESH_INTERVAL_MS) {
+  if (Date.now() - lastChallengeRefresh >= CHALLENGE_REFRESH_MS) {
     challenges = generatePersonalizedChallenges(userTelemetry, userLocation, challenges);
     lastChallengeRefresh = Date.now();
     refreshed = true;
@@ -956,7 +975,7 @@ app.post("/api/challenges/join", (req: Request, res: Response) => {
       challenge.joinedAt = Date.now();
     }
     logActivity({
-      time: new Date().toTimeString().split(" ")[0],
+      time: timestamp(),
       text: `INIT: ${challenge.title} -> ${challenge.status === "JOINED" ? "ENGAGED" : "VACATE"}`,
       type: "INIT",
       impact: challenge.status === "JOINED" ? "ACTIVE" : "RESET",
@@ -990,7 +1009,7 @@ app.post("/api/simulation", (req: Request, res: Response) => {
   if (plantBased !== undefined) activeSimulation.plantBased = plantBased;
   if (solarConversion !== undefined) activeSimulation.solarConversion = solarConversion;
   if (evMobility !== undefined) activeSimulation.evMobility = evMobility;
-  logActivity({ time: new Date().toTimeString().split(" ")[0], text: "SYS: SIMULATION_MATRIX_RECALIBRATED", impact: "STABLE", type: "SYS" });
+  logActivity({ time: timestamp(), text: "SYS: SIMULATION_MATRIX_RECALIBRATED", impact: "STABLE", type: "SYS" });
   const simBreakdown = calculateEmissions();
   const simScore = calculateMissionScore();
   const simRank = getRank(simScore);
@@ -1002,7 +1021,7 @@ app.post("/api/commander-action", (req: Request, res: Response) => {
   if (flag === "deploy") {
     commanderRecommendation.status = "DEPLOYED";
     activeSimulation.evMobility = true;
-    logActivity({ time: new Date().toTimeString().split(" ")[0], text: "INIT: BIKE_SWAP_PROTOCOL_EXECUTED", impact: "-4.2kg", type: "INIT" });
+    logActivity({ time: timestamp(), text: "INIT: BIKE_SWAP_PROTOCOL_EXECUTED", impact: "-4.2kg", type: "INIT" });
   } else {
     commanderRecommendation.status = "DISMISSED";
   }
@@ -1056,12 +1075,18 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
       commanderRecommendation.status = "ACTIVE";
       res.json({ text: responseText });
     } else {
-      const backupMessages = [
-        "Your transport emissions look high. Consider reducing driving or switching to remote work a few days a week — it could save around 0.4t CO₂ per year.",
-        "Your home energy use is a significant part of your footprint. Switching to a renewable energy plan or improving insulation can make a real impact.",
-        "Eating less meat — even just a few days a week — is one of the most effective things you can do to lower your food-related emissions.",
+      // Personalised fallback based on user's actual highest-emission category
+      const b = calculateEmissions(true);
+      const categories = [
+        { name: "transport", val: b.transport, tip: `Your transport footprint is ${b.transport}t — consider reducing driving or switching to remote work a few days a week.` },
+        { name: "energy", val: b.energy, tip: `Your energy usage accounts for ${b.energy}t — switching to a renewable plan or improving insulation can make a real impact.` },
+        { name: "food", val: b.food, tip: `Your food footprint is ${b.food}t — eating less meat, even a few days a week, is one of the most effective changes you can make.` },
       ];
-      const selected = backupMessages[Math.floor(Math.random() * backupMessages.length)];
+      const highest = categories.reduce((a, c) => c.val > a.val ? c : a);
+      const place = userLocation.city || userLocation.country || "";
+      const selected = place
+        ? `Based on your data${place ? ` in ${place}` : ""}: ${highest.tip}`
+        : highest.tip;
       commanderRecommendation.warning = selected;
       commanderRecommendation.status = "ACTIVE";
       res.json({ text: selected });
@@ -1117,12 +1142,12 @@ Tone: warm, conversational, like a knowledgeable friend texting you a morning ti
   }
 });
 
-app.post("/api/sync", (req: Request, res: Response) => {
-  logActivity({ time: new Date().toTimeString().split(" ")[0], text: "SYS: MISSION_CONTROL_SYNCED_OK", impact: "0.0kg", type: "SYS" });
+app.post("/api/sync", (_req: Request, res: Response) => {
+  logActivity({ time: timestamp(), text: "SYS: MISSION_CONTROL_SYNCED_OK", impact: "0.0kg", type: "SYS" });
   res.json({ success: true, logs: activityLogs });
 });
 
-app.post("/api/reset", (req: Request, res: Response) => {
+app.post("/api/reset", (_req: Request, res: Response) => {
   userLocation = { name: "", country: "", city: "" };
   userTelemetry = {
     mileage: 12500, commuteFrequency: "DAILY", vehicleType: "INTERNAL_COMBUSTION_MEDIUM",

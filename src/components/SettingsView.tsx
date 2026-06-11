@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Shield, Sliders, Save, Trash2, Cpu, Check } from "lucide-react";
 
 interface SettingsProps {

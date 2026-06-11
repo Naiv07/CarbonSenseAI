@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ArrowRight, ArrowLeft, CheckCircle, Car, Zap, ShoppingBag, Terminal, Rocket } from "lucide-react";
 import { getCurrencySymbol } from "../utils/currency";
+import { computeEmissions } from "../lib/emissions";
 
 export interface OnboardingData {
   name: string;
@@ -34,44 +35,6 @@ const COUNTRIES = [
   "South Africa", "South Korea", "Spain", "Sweden", "Switzerland", "Thailand",
   "Turkey", "UAE", "United Kingdom", "United States", "Vietnam",
 ];
-
-// Client-side emission estimate — mirrors server calculateEmissions(skipSimulation=true)
-function estimateBaseline(d: OnboardingData): { transport: number; energy: number; food: number; waste: number; shopping: number; total: number } {
-  let transport = (d.mileage * 0.18) / 1000;
-  if (d.commuteFrequency === "WEEKLY") transport *= 0.6;
-  if (d.commuteFrequency === "REMOTE") transport *= 0.1;
-  if (d.vehicleType === "ELECTRIC_BEV") transport *= 0.15;
-  else if (d.vehicleType === "HYBRID_PLUG_IN") transport *= 0.45;
-  else if (d.vehicleType === "INTERNAL_COMBUSTION_LARGE") transport *= 1.3;
-  transport += d.flightsShortHaul * 0.18 + d.flightsLongHaul * 1.56;
-
-  let energy = (d.utilityBill * 12 * 0.38) / 1000;
-  if (d.energySource === "renewable") energy *= 0.3;
-  else if (d.energySource === "fossil") energy *= 1.4;
-  const heatingMap: Record<string, number> = { gas: 0.8, electric: 0.4, oil: 1.2, heatpump: 0.2, none: 0 };
-  energy += heatingMap[d.heatingType] ?? 0;
-
-  let food = d.meatIntake === "VEGAN" ? 0.5 : d.meatIntake === "VEGETARIAN" ? 0.8 : d.meatIntake === "WEEKLY" ? 1.3 : 1.8;
-  const wasteMap: Record<string, number> = { low: 0.8, medium: 1.0, high: 1.3 };
-  food *= wasteMap[d.foodWaste] ?? 1;
-
-  const waste = 0.6 * (1 - d.recycledPercent / 100);
-
-  const shopBase: Record<string, number> = { minimal: 0.2, average: 0.5, frequent: 1.2 };
-  let shopping = shopBase[d.shoppingFrequency] ?? 0.5;
-  shopping += d.newElectronics * 0.3;
-  const clothMap: Record<string, number> = { "fast-fashion": 0.8, sustainable: 0.2, none: 0 };
-  shopping += clothMap[d.clothingType] ?? 0;
-
-  return {
-    transport: Number(transport.toFixed(2)),
-    energy: Number(energy.toFixed(2)),
-    food: Number(food.toFixed(2)),
-    waste: Number(waste.toFixed(2)),
-    shopping: Number(shopping.toFixed(2)),
-    total: Number((transport + energy + food + waste + shopping).toFixed(1)),
-  };
-}
 
 const STEP_LABELS = ["", "IDENTITY", "TRANSPORT", "ENERGY", "DIET", "LIFESTYLE"];
 
@@ -126,7 +89,7 @@ export default function OnboardingView({ onComplete }: Props) {
   };
 
   const currencySymbol = getCurrencySymbol(data.country);
-  const est = estimateBaseline(data);
+  const est = computeEmissions(data);
   const baselineColor = est.total < 4 ? "#00ff66" : est.total < 7 ? "#ffcc00" : "#ff6b6b";
   const baselineLabel = est.total < 4 ? "LOW IMPACT" : est.total < 7 ? "MODERATE IMPACT" : est.total < 10 ? "HIGH IMPACT" : "CRITICAL IMPACT";
 
