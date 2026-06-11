@@ -32,7 +32,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc:     ["'self'"],
-      scriptSrc:      ["'self'"],
+      scriptSrc:      ["'self'", "https://apis.google.com", "https://accounts.google.com"],
       styleSrc:       ["'self'", "'unsafe-inline'"],
       imgSrc:         ["'self'", "data:", "https://lh3.googleusercontent.com"],
       connectSrc:     [
