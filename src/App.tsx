@@ -14,7 +14,7 @@ const OnboardingView = React.lazy(() => import("./components/OnboardingView"));
 const InfoView = React.lazy(() => import("./components/InfoView"));
 const DailyView = React.lazy(() => import("./components/DailyView"));
 
-import { TelemetryState, EmissionsBreakdown, Challenge, ActivityLog, SimulationState, CommanderState, EmissionSnapshot, Achievement } from "./types";
+import { TelemetryState, EmissionsBreakdown, Challenge, ActivityLog, SimulationState, CommanderState, EmissionSnapshot, Achievement, OnboardingData } from "./types";
 import { ArrowRight, RefreshCw, Terminal } from "lucide-react";
 import { useToast } from "./context/ToastContext";
 import { getCurrencySymbol } from "./utils/currency";
@@ -167,7 +167,7 @@ export default function App() {
     }
   };
 
-  const handleOnboardingComplete = async (data: any) => {
+  const handleOnboardingComplete = async (data: OnboardingData) => {
     try {
       const res = await fetch("/api/onboarding", await withAuth({
         method: "POST",
@@ -459,8 +459,9 @@ export default function App() {
   const currencySymbol = getCurrencySymbol(userLocation.country);
 
   const suspenseFallback = (
-    <div className="min-h-screen bg-[#070708] flex items-center justify-center">
-      <div className="w-5 h-5 border-2 border-[#00f2ff]/30 border-t-[#00f2ff] rounded-full animate-spin" />
+    <div className="min-h-screen bg-[#070708] flex items-center justify-center" role="status" aria-label="Loading">
+      <div className="w-5 h-5 border-2 border-[#00f2ff]/30 border-t-[#00f2ff] rounded-full animate-spin" aria-hidden="true" />
+      <span className="sr-only">Loading content…</span>
     </div>
   );
 
@@ -495,7 +496,7 @@ export default function App() {
           <div className="flex-1 space-y-6">
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-[#bec2ff] font-mono text-[11px] font-bold tracking-[0.25em] uppercase">
-                <Terminal className="w-4 h-4 text-[#bec2ff]" />
+                <Terminal className="w-4 h-4 text-[#bec2ff]" aria-hidden="true" />
                 <span>Take Control of Your Carbon</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-display font-extrabold text-white uppercase tracking-tight leading-tight">
@@ -526,17 +527,18 @@ export default function App() {
             <button
               onClick={handleEnterMissionControl}
               disabled={isGateLoading}
+              aria-label={isGateLoading ? "Loading application…" : "Get started with CarbonSenseAI"}
               className="px-8 py-4 bg-[#bec2ff] text-[#000ba6] text-xs font-mono font-extrabold tracking-widest transition-all rounded shadow-[0_0_25px_rgba(190,194,255,0.35)] hover:bg-[#d0d3ff] hover:shadow-[0_0_35px_rgba(190,194,255,0.5)] active:scale-95 flex items-center gap-2 uppercase"
             >
               {isGateLoading ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <RefreshCw className="w-4 h-4 animate-spin" aria-hidden="true" />
                   <span>Loading...</span>
                 </>
               ) : (
                 <>
                   <span>Get Started</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </>
               )}
             </button>
@@ -583,7 +585,7 @@ export default function App() {
         <BottomNav currentTab={currentTab} setTab={setTab} />
 
         <section className="flex-1 p-3 sm:p-4 md:p-6 md:pl-[280px] min-h-[calc(100vh-64px)] overflow-x-hidden">
-          <Suspense fallback={<div className="flex items-center justify-center py-20"><div className="w-5 h-5 border-2 border-[#00f2ff]/30 border-t-[#00f2ff] rounded-full animate-spin" /></div>}>
+          <Suspense fallback={<div className="flex items-center justify-center py-20" role="status" aria-label="Loading"><div className="w-5 h-5 border-2 border-[#00f2ff]/30 border-t-[#00f2ff] rounded-full animate-spin" aria-hidden="true" /><span className="sr-only">Loading view…</span></div>}>
           {currentTab === "DASHBOARD" && (
             <DashboardView
               breakdown={breakdown}

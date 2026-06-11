@@ -1,11 +1,11 @@
 # CarbonSenseAI
 
-A personal carbon footprint tracker and climate action platform powered by Gemini AI. Built as a hackathon project.
+A personal carbon footprint tracker and climate action platform powered by Groq AI. Built as a hackathon project.
 
 ## Features
 
 - **Carbon Calculator** — Track emissions across transport, energy, food, waste, and shopping
-- **AI Advisor** — Gemini-powered advisor that gives warm, personalised tips based on your actual footprint data
+- **AI Advisor** — Groq-powered advisor that gives warm, personalised tips based on your actual footprint data
 - **Challenges** — Join climate challenges with interactive task checklists and progress tracking; refreshes weekly with personalised picks based on your habits and location
 - **Daily Insight** — AI-generated daily environmental briefing tailored to your city, cached per day
 - **Insights & Simulation** — What-if scenarios (EV adoption, solar, plant-based diet) with projected savings charts
@@ -18,7 +18,7 @@ A personal carbon footprint tracker and climate action platform powered by Gemin
 |---|---|
 | Frontend | React 19, TypeScript 5.8, Vite 6, Tailwind CSS |
 | Backend | Node.js, Express, tsx |
-| AI | Google Gemini 2.0 Flash (`@google/genai`) |
+| AI | Groq Llama 3.3 70B (`groq-sdk`) |
 | State | In-memory server state (no database) |
 
 ## Getting Started
@@ -32,9 +32,9 @@ A personal carbon footprint tracker and climate action platform powered by Gemin
 
 2. Create a `.env` file in the project root (must be **UTF-8** encoded):
    ```
-   GEMINI_API_KEY=AIzaSy...your_key_here
+   GROQ_API_KEY=gsk_...your_key_here
    ```
-   Get a free key at [Google AI Studio](https://aistudio.google.com/apikey).
+   Get a free key at [Groq Console](https://console.groq.com/keys).
 
 3. Run the development server:
    ```bash
@@ -75,8 +75,8 @@ A personal carbon footprint tracker and climate action platform powered by Gemin
 | GET | `/api/challenges` | List challenges (auto-refreshes weekly) |
 | POST | `/api/challenges/join` | Join or leave a challenge |
 | POST | `/api/challenges/:id/tasks/:taskId/toggle` | Check/uncheck a task |
-| POST | `/api/ai/commander` | Gemini AI advisor response |
-| GET | `/api/daily-insight` | Gemini daily city insight (cached per day) |
+| POST | `/api/ai/commander` | Groq AI advisor response |
+| GET | `/api/daily-insight` | Groq daily city insight (cached per day) |
 | GET | `/api/logs` | Activity log |
 | POST | `/api/simulation` | Update what-if simulation state |
 | POST | `/api/reset` | Reset all data to defaults |
@@ -85,4 +85,4 @@ A personal carbon footprint tracker and climate action platform powered by Gemin
 
 - All state is in-memory — restarting the server resets everything
 - The `.env` file **must be UTF-8 encoded** (not UTF-16); VS Code may save in UTF-16 if copy-pasted from certain sources
-- Free tier Gemini quota is 1,500 requests/day — add billing at [Google AI Studio](https://aistudio.google.com) to lift the cap
+- Free tier Groq quota is rate-limited — visit [Groq Console](https://console.groq.com) to view your usage and limits

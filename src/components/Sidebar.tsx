@@ -26,7 +26,7 @@ export default function Sidebar({ currentTab, setTab, onDeployInitiative, onRese
       <div className="p-6 border-b border-brand-border/60 bg-brand-black/50">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-8 h-8 rounded bg-brand-blue/10 flex items-center justify-center border border-brand-blue/20">
-            <Terminal className="text-brand-blue w-4.5 h-4.5" />
+            <Terminal className="text-brand-blue w-4.5 h-4.5" aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-xs font-display font-semibold tracking-wider text-brand-blue uppercase">

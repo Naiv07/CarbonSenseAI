@@ -51,8 +51,9 @@ export default function AuthGate({ children }: AuthGateProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#070708] flex items-center justify-center">
-        <div className="w-5 h-5 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#070708] flex items-center justify-center" role="status" aria-label="Authenticating">
+        <div className="w-5 h-5 border-2 border-brand-blue/30 border-t-brand-blue rounded-full animate-spin" aria-hidden="true" />
+        <span className="sr-only">Checking authentication…</span>
       </div>
     );
   }

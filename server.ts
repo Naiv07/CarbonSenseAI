@@ -2,10 +2,16 @@ import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import Groq from "groq-sdk";
 import { getRank } from "./src/lib/rank";
+import { computeEmissions } from "./src/lib/emissions";
+import type { TelemetryState, EmissionsBreakdown, EmissionSnapshot, Achievement, Challenge, ActivityLog, UserLocation } from "./src/types";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
+
+interface AuthenticatedRequest extends Request {
+  uid?: string;
+}
 
 dotenv.config();
 
@@ -57,7 +63,7 @@ app.use(compression());
 
 app.use(express.json({ limit: "32kb" }));
 
-// Rate limiters for AI endpoints (expensive Gemini calls)
+// Rate limiters for AI endpoints (expensive LLM API calls)
 const aiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 10,
@@ -106,7 +112,7 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const token = header.slice(7);
     const decoded = await adminAuth.verifyIdToken(token);
-    (req as any).uid = decoded.uid;
+    (req as AuthenticatedRequest).uid = decoded.uid;
     next();
   } catch {
     res.status(401).json({ error: "Invalid token" });
@@ -122,73 +128,13 @@ function getGroq(): Groq | null {
   return groqClient;
 }
 
-// --- Data Types ---
-interface EmissionSnapshot {
-  label: string;
-  total: number;
-  timestamp: number;
-}
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  unlocked: boolean;
-  icon: string;
-}
-
-interface TelemetryState {
-  mileage: number;
-  commuteFrequency: "DAILY" | "WEEKLY" | "REMOTE";
-  vehicleType: string;
-  flightsShortHaul: number;
-  flightsLongHaul: number;
-  utilityBill: number;
-  energySource: "renewable" | "mixed" | "fossil";
-  heatingType: "gas" | "electric" | "oil" | "heatpump" | "none";
-  meatIntake: string;
-  foodWaste: "low" | "medium" | "high";
-  shoppingFrequency: "minimal" | "average" | "frequent";
-  newElectronics: number;
-  clothingType: "fast-fashion" | "sustainable" | "none";
-  recycledPercent: number;
-  category: string;
-}
-
-interface ChallengeTask {
-  id: string;
-  label: string;
-  completed: boolean;
-  completedAt?: number;
-}
-
-interface Challenge {
-  id: string;
-  title: string;
-  description: string;
-  xp: number;
-  status: "LOCKED" | "AVAILABLE" | "JOINED" | "COMPLETED";
-  category: string;
-  urgency?: string;
-  xpReward: number;
-  image: string;
-  joinedAt?: number;
-  progress?: number;
-  tasks?: ChallengeTask[];
-}
-
-interface ActivityLog {
-  time: string;
-  text: string;
-  impact: string;
-  type: "LOG" | "INIT" | "DATA" | "SYS";
-}
+// Data types imported from ./src/types (single source of truth for client & server)
 
 // --- Constants ---
 const CHALLENGE_REFRESH_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // --- In-memory State ---
-let userLocation = { name: "", country: "", city: "" };
+let userLocation: UserLocation = { name: "", country: "", city: "" };
 
 let userTelemetry: TelemetryState = {
   mileage: 12500,
@@ -337,59 +283,11 @@ let commanderRecommendation = {
 };
 
 // --- Emissions Calculation ---
+// Delegates to the shared pure function in src/lib/emissions.ts (single source of truth).
 // skipSimulation = true → raw habits only (used for scoring)
 // skipSimulation = false → includes what-if simulation (used for Insights display)
-function calculateEmissions(skipSimulation = false) {
-  // Transport
-  let transportBase = (userTelemetry.mileage * 0.18) / 1000;
-  if (userTelemetry.commuteFrequency === "WEEKLY") transportBase *= 0.6;
-  if (userTelemetry.commuteFrequency === "REMOTE") transportBase *= 0.1;
-  if (userTelemetry.vehicleType === "ELECTRIC_BEV") transportBase *= 0.15;
-  else if (userTelemetry.vehicleType === "HYBRID_PLUG_IN") transportBase *= 0.45;
-  else if (userTelemetry.vehicleType === "INTERNAL_COMBUSTION_LARGE") transportBase *= 1.3;
-  // Flights: short-haul ~0.18t, long-haul ~1.56t per flight
-  transportBase += userTelemetry.flightsShortHaul * 0.18 + userTelemetry.flightsLongHaul * 1.56;
-
-  // Energy
-  let energyBase = (userTelemetry.utilityBill * 12 * 0.38) / 1000;
-  if (userTelemetry.energySource === "renewable") energyBase *= 0.3;
-  else if (userTelemetry.energySource === "fossil") energyBase *= 1.4;
-  const heatingFactors: Record<string, number> = { gas: 0.8, electric: 0.4, oil: 1.2, heatpump: 0.2, none: 0 };
-  energyBase += heatingFactors[userTelemetry.heatingType] ?? 0;
-
-  // Food
-  let foodBase =
-    userTelemetry.meatIntake === "VEGAN" ? 0.5 :
-    userTelemetry.meatIntake === "VEGETARIAN" ? 0.8 :
-    userTelemetry.meatIntake === "WEEKLY" ? 1.3 : 1.8;
-  const foodWasteMultiplier: Record<string, number> = { low: 0.8, medium: 1.0, high: 1.3 };
-  foodBase *= foodWasteMultiplier[userTelemetry.foodWaste] ?? 1.0;
-
-  // Waste
-  let wasteBase = 0.6 * (1 - userTelemetry.recycledPercent / 100);
-
-  // Shopping
-  const shoppingBase: Record<string, number> = { minimal: 0.2, average: 0.5, frequent: 1.2 };
-  let shopping = shoppingBase[userTelemetry.shoppingFrequency] ?? 0.5;
-  shopping += userTelemetry.newElectronics * 0.3;
-  const clothingFactors: Record<string, number> = { "fast-fashion": 0.8, sustainable: 0.2, none: 0 };
-  shopping += clothingFactors[userTelemetry.clothingType] ?? 0;
-
-  // Apply simulation modifiers (Insights what-if analysis only)
-  if (!skipSimulation) {
-    if (activeSimulation.plantBased) foodBase *= 0.2;
-    if (activeSimulation.solarConversion) energyBase *= 0.3;
-    if (activeSimulation.evMobility) transportBase *= 0.25;
-  }
-
-  const transport = Number(transportBase.toFixed(2));
-  const energy = Number(energyBase.toFixed(2));
-  const food = Number(foodBase.toFixed(2));
-  const waste = Number(wasteBase.toFixed(2));
-  const shoppingRounded = Number(shopping.toFixed(2));
-  const total = Number((transport + energy + food + waste + shoppingRounded).toFixed(1));
-
-  return { transport, energy, food, waste, shopping: shoppingRounded, total };
+function calculateEmissions(skipSimulation = false): EmissionsBreakdown {
+  return computeEmissions(userTelemetry, skipSimulation ? undefined : activeSimulation);
 }
 
 // Baseline locked from initial telemetry (no simulations)
@@ -452,7 +350,7 @@ const CHALLENGE_IMG = {
 // Preserves joinedAt / status for IDs that already exist in `existing`.
 function generatePersonalizedChallenges(
   telemetry: TelemetryState,
-  location: { name: string; country: string; city: string },
+  location: UserLocation,
   existing: Challenge[]
 ): Challenge[] {
   const ctx = getLocalContext(location.country);
@@ -973,7 +871,7 @@ app.post("/api/telemetry", (req: Request, res: Response) => {
   if (vehicleType !== undefined) {
     userTelemetry.vehicleType = pickEnum(vehicleType, [
       "INTERNAL_COMBUSTION_SMALL","INTERNAL_COMBUSTION_MEDIUM","INTERNAL_COMBUSTION_LARGE",
-      "HYBRID","ELECTRIC","NONE",
+      "HYBRID_PLUG_IN","ELECTRIC_BEV","NONE",
     ] as const, "INTERNAL_COMBUSTION_MEDIUM");
   }
   if (flightsShortHaul !== undefined) {
@@ -993,7 +891,7 @@ app.post("/api/telemetry", (req: Request, res: Response) => {
     logActivity({ time: new Date().toTimeString().split(" ")[0], text: `SYS: ENERGY_SOURCE -> ${userTelemetry.energySource.toUpperCase()}`, impact: "OK", type: "SYS" });
   }
   if (heatingType !== undefined) userTelemetry.heatingType = pickEnum(heatingType, ["gas","electric","oil","heatpump","none"] as const, "none");
-  if (meatIntake !== undefined) userTelemetry.meatIntake = pickEnum(meatIntake, ["DAILY","WEEKLY","RARELY","NEVER"] as const, "WEEKLY");
+  if (meatIntake !== undefined) userTelemetry.meatIntake = pickEnum(meatIntake, ["DAILY","WEEKLY","VEGETARIAN","VEGAN"] as const, "WEEKLY");
   if (foodWaste !== undefined) userTelemetry.foodWaste = pickEnum(foodWaste, ["low","medium","high"] as const, "medium");
   if (shoppingFrequency !== undefined) userTelemetry.shoppingFrequency = pickEnum(shoppingFrequency, ["minimal","average","frequent"] as const, "average");
   if (newElectronics !== undefined) userTelemetry.newElectronics = Math.max(0, Math.min(20, Number(newElectronics)));
@@ -1168,9 +1066,9 @@ app.post("/api/ai/commander", async (req: Request, res: Response) => {
       commanderRecommendation.status = "ACTIVE";
       res.json({ text: selected });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Groq API error:", error);
-    res.status(500).json({ error: error.message || "Couldn't reach the AI advisor right now. Try again in a moment." });
+    res.status(500).json({ error: "Couldn't reach the AI advisor right now. Try again in a moment." });
   }
 });
 
@@ -1213,7 +1111,7 @@ Tone: warm, conversational, like a knowledgeable friend texting you a morning ti
     }
     dailyInsightCache = { date: today, text: insightText, city: place };
     res.json({ insight: insightText, city: place, date: dateLabel, cached: false });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Groq API error (daily-insight):", error);
     res.status(500).json({ error: "Could not generate today's insight." });
   }

@@ -87,3 +87,15 @@ export interface Achievement {
   unlocked: boolean;
   icon: string;
 }
+
+export interface UserLocation {
+  name: string;
+  country: string;
+  city: string;
+}
+
+export type OnboardingData = Omit<TelemetryState, "category"> & {
+  name: string;
+  country: string;
+  city: string;
+};

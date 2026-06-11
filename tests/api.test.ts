@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import supertest from "supertest";
 import { app } from "../server";
+import type { Challenge } from "../src/types";
 
 const request = supertest(app);
 
@@ -144,7 +145,7 @@ describe("GET /api/challenges", () => {
 
   it("challenges include AVAILABLE and LOCKED statuses", async () => {
     const res = await request.get("/api/challenges");
-    const statuses = res.body.challenges.map((c: any) => c.status);
+    const statuses = res.body.challenges.map((c: Challenge) => c.status);
     expect(statuses).toContain("AVAILABLE");
     expect(statuses).toContain("LOCKED");
   });
@@ -158,7 +159,7 @@ describe("POST /api/challenges/join", () => {
       .send({ id: "oper-zero-grid" });
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    const joined = res.body.challenges.find((c: any) => c.id === "oper-zero-grid");
+    const joined = res.body.challenges.find((c: Challenge) => c.id === "oper-zero-grid");
     expect(joined.status).toBe("JOINED");
   });
 
@@ -167,7 +168,7 @@ describe("POST /api/challenges/join", () => {
     const res = await request
       .post("/api/challenges/join")
       .send({ id: "oper-zero-grid" });
-    const challenge = res.body.challenges.find((c: any) => c.id === "oper-zero-grid");
+    const challenge = res.body.challenges.find((c: Challenge) => c.id === "oper-zero-grid");
     expect(challenge.status).toBe("AVAILABLE");
   });
 
@@ -260,7 +261,7 @@ describe("POST /api/reset", () => {
     await request.post("/api/challenges/join").send({ id: "oper-zero-grid" });
     await request.post("/api/reset");
     const res = await request.get("/api/challenges");
-    const challenge = res.body.challenges.find((c: any) => c.id === "oper-zero-grid");
+    const challenge = res.body.challenges.find((c: Challenge) => c.id === "oper-zero-grid");
     expect(challenge.status).toBe("AVAILABLE");
   });
 });
@@ -392,7 +393,7 @@ describe("Data persistence across requests", () => {
   it("joining a challenge persists when challenges are re-fetched", async () => {
     await request.post("/api/challenges/join").send({ id: "transit-shift" });
     const res = await request.get("/api/challenges");
-    const challenge = res.body.challenges.find((c: any) => c.id === "transit-shift");
+    const challenge = res.body.challenges.find((c: Challenge) => c.id === "transit-shift");
     expect(challenge.status).toBe("JOINED");
   });
 

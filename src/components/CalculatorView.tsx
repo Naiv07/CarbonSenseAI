@@ -127,6 +127,7 @@ export default function CalculatorView({
                     </span>
                   </div>
                   <input type="range" min="1000" max="60000" step="500" value={telemetry.mileage}
+                    aria-label="Annual mileage"
                     onChange={(e) => onUpdateTelemetry({ mileage: Number(e.target.value) })}
                     className="w-full h-1 bg-brand-black rounded-lg cursor-pointer" />
                   {mileageIsHigh && (
@@ -314,6 +315,7 @@ export default function CalculatorView({
                     <span className="text-xl font-mono text-brand-blue font-bold">{telemetry.recycledPercent}%</span>
                   </div>
                   <input type="range" min="0" max="100" step="5" value={telemetry.recycledPercent}
+                    aria-label="Recycled waste percentage"
                     onChange={(e) => onUpdateTelemetry({ recycledPercent: Number(e.target.value) })}
                     className="w-full h-1 bg-brand-black rounded-lg cursor-pointer" />
                 </div>
