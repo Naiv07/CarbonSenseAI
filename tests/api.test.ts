@@ -530,3 +530,229 @@ describe("Security — malicious input handling", () => {
     expect(res.body.success).toBe(true);
   });
 });
+
+// ─── Scrubber efficiency & threshold alerts ──────────────────────────────────
+describe("Scrubber efficiency & threshold alerts", () => {
+  it("GET /api/telemetry includes settings and alerts fields", async () => {
+    const res = await request.get("/api/telemetry");
+    expect(res.body).toHaveProperty("settings");
+    expect(res.body.settings).toHaveProperty("safetyThreshold");
+    expect(res.body.settings).toHaveProperty("scrubberEfficiency");
+    expect(res.body).toHaveProperty("alerts");
+    expect(Array.isArray(res.body.alerts)).toBe(true);
+  });
+
+  it("lowering safetyThreshold below total triggers a THRESHOLD alert", async () => {
+    // Disable simulations so raw emissions are high enough to exceed threshold
+    await request.post("/api/simulation").send({ plantBased: false, solarConversion: false, evMobility: false });
+    await request.post("/api/settings").send({ safetyThreshold: 3.0, scrubberEfficiency: 50 });
+    const res = await request.get("/api/telemetry");
+    const alert = res.body.alerts.find((a: { type: string }) => a.type === "THRESHOLD");
+    expect(alert).toBeDefined();
+    expect(alert.message).toContain("exceed");
+  });
+
+  it("raising safetyThreshold above total produces no alerts", async () => {
+    await request.post("/api/settings").send({ safetyThreshold: 9.0 });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.alerts.length).toBe(0);
+  });
+
+  it("scrubber efficiency reduces waste in breakdown", async () => {
+    await request.post("/api/settings").send({ scrubberEfficiency: 100 });
+    const full = await request.get("/api/telemetry");
+    await request.post("/api/settings").send({ scrubberEfficiency: 50 });
+    const half = await request.get("/api/telemetry");
+    expect(full.body.breakdown.waste).toBeLessThanOrEqual(half.body.breakdown.waste);
+  });
+});
+
+// ─── Settings validation edge cases ──────────────────────────────────────────
+describe("Settings validation edge cases", () => {
+  it("clamps safetyThreshold below 3 to 3", async () => {
+    await request.post("/api/settings").send({ safetyThreshold: 1.0 });
+    const res = await request.get("/api/settings");
+    expect(res.body.safetyThreshold).toBe(3.0);
+  });
+
+  it("clamps safetyThreshold above 9 to 9", async () => {
+    await request.post("/api/settings").send({ safetyThreshold: 20 });
+    const res = await request.get("/api/settings");
+    expect(res.body.safetyThreshold).toBe(9.0);
+  });
+
+  it("clamps scrubberEfficiency below 50 to 50", async () => {
+    await request.post("/api/settings").send({ scrubberEfficiency: 10 });
+    const res = await request.get("/api/settings");
+    expect(res.body.scrubberEfficiency).toBe(50);
+  });
+
+  it("clamps scrubberEfficiency above 100 to 100", async () => {
+    await request.post("/api/settings").send({ scrubberEfficiency: 200 });
+    const res = await request.get("/api/settings");
+    expect(res.body.scrubberEfficiency).toBe(100);
+  });
+
+  it("ignores NaN values for safetyThreshold", async () => {
+    const before = (await request.get("/api/settings")).body.safetyThreshold;
+    await request.post("/api/settings").send({ safetyThreshold: "not-a-number" });
+    const after = (await request.get("/api/settings")).body.safetyThreshold;
+    expect(after).toBe(before);
+  });
+
+  it("audioFeedback only accepts true, not truthy strings", async () => {
+    await request.post("/api/settings").send({ audioFeedback: "yes" });
+    const res = await request.get("/api/settings");
+    expect(res.body.audioFeedback).toBe(false);
+  });
+});
+
+// ─── GET /api/daily-insight ──────────────────────────────────────────────────
+describe("GET /api/daily-insight", () => {
+  it("returns 200 with insight text, city, and date", async () => {
+    const res = await request.get("/api/daily-insight");
+    expect(res.status).toBe(200);
+    expect(typeof res.body.insight).toBe("string");
+    expect(res.body.insight.length).toBeGreaterThan(0);
+    expect(res.body).toHaveProperty("date");
+  });
+
+  it("second request returns cached result", async () => {
+    await request.get("/api/daily-insight");
+    const res = await request.get("/api/daily-insight");
+    expect(res.body.cached).toBe(true);
+  });
+
+  it("refresh=true returns a fresh (non-cached) result", async () => {
+    await request.get("/api/daily-insight");
+    const res = await request.get("/api/daily-insight?refresh=true");
+    expect(res.body.cached).toBe(false);
+  });
+});
+
+// ─── POST /api/ai/commander ─────────────────────────────────────────────────
+describe("POST /api/ai/commander", () => {
+  it("returns 200 with personalised fallback text (no API key)", async () => {
+    const res = await request.post("/api/ai/commander").send({});
+    expect(res.status).toBe(200);
+    expect(typeof res.body.text).toBe("string");
+    expect(res.body.text.length).toBeGreaterThan(0);
+  });
+
+  it("returns non-empty text regardless of API key availability", async () => {
+    const res = await request.post("/api/ai/commander").send({});
+    expect(res.body.text.length).toBeGreaterThan(20);
+  });
+
+  it("custom prompt is accepted without error", async () => {
+    const res = await request.post("/api/ai/commander").send({ customPrompt: "How can I reduce my transport emissions?" });
+    expect(res.status).toBe(200);
+    expect(typeof res.body.text).toBe("string");
+  });
+});
+
+// ─── Personalised challenges after onboarding ────────────────────────────────
+describe("Personalised challenges after onboarding", () => {
+  it("high-emission profile generates relevant challenge categories", async () => {
+    await request.post("/api/onboarding").send({
+      name: "Challenge Test", city: "Berlin", country: "Germany",
+      commuteFrequency: "DAILY", vehicleType: "INTERNAL_COMBUSTION_LARGE",
+      mileage: 25000, flightsShortHaul: 3, flightsLongHaul: 3,
+      energySource: "fossil", heatingType: "oil", utilityBill: 300,
+      meatIntake: "DAILY", foodWaste: "high", shoppingFrequency: "frequent",
+      newElectronics: 3, clothingType: "fast-fashion", recycledPercent: 10,
+    });
+    const res = await request.get("/api/challenges");
+    const categories = res.body.challenges.map((c: { category: string }) => c.category);
+    expect(categories).toContain("TRANSPORT");
+    expect(categories).toContain("ENERGY");
+  });
+
+  it("low-impact profile still gets at least 3 challenges", async () => {
+    await request.post("/api/onboarding").send({
+      name: "Low Impact", city: "Oslo", country: "Norway",
+      commuteFrequency: "REMOTE", vehicleType: "ELECTRIC_BEV",
+      mileage: 2000, flightsShortHaul: 0, flightsLongHaul: 0,
+      energySource: "renewable", heatingType: "heatpump", utilityBill: 50,
+      meatIntake: "VEGAN", foodWaste: "low", shoppingFrequency: "minimal",
+      newElectronics: 0, clothingType: "sustainable", recycledPercent: 95,
+    });
+    const res = await request.get("/api/challenges");
+    expect(res.body.challenges.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("challenges include tasks with ids and labels", async () => {
+    const res = await request.get("/api/challenges");
+    for (const c of res.body.challenges) {
+      if (c.tasks) {
+        for (const t of c.tasks) {
+          expect(t).toHaveProperty("id");
+          expect(t).toHaveProperty("label");
+          expect(typeof t.label).toBe("string");
+        }
+      }
+    }
+  });
+});
+
+// ─── Tier 3 challenge unlock ─────────────────────────────────────────────────
+describe("Tier 3 challenge unlock", () => {
+  it("urban-refit-x starts LOCKED with default data", async () => {
+    const res = await request.get("/api/challenges");
+    const urban = res.body.challenges.find((c: { id: string }) => c.id === "urban-refit-x");
+    expect(urban).toBeDefined();
+    expect(urban.status).toBe("LOCKED");
+  });
+
+  it("joining challenges after reducing emissions can push score above 60", async () => {
+    // Onboard with HIGH emissions to set a high baseline
+    await request.post("/api/onboarding").send({
+      name: "Tier3 Test", city: "Berlin", country: "Germany",
+      commuteFrequency: "DAILY", vehicleType: "INTERNAL_COMBUSTION_LARGE",
+      mileage: 25000, flightsShortHaul: 4, flightsLongHaul: 3,
+      energySource: "fossil", heatingType: "oil", utilityBill: 300,
+      meatIntake: "DAILY", foodWaste: "high", shoppingFrequency: "frequent",
+      newElectronics: 5, clothingType: "fast-fashion", recycledPercent: 5,
+    });
+    // Now dramatically improve lifestyle → raw emissions drop while baseline stays high
+    await request.post("/api/telemetry").send({
+      mileage: 0, commuteFrequency: "REMOTE", vehicleType: "ELECTRIC_BEV",
+      flightsShortHaul: 0, flightsLongHaul: 0,
+      utilityBill: 30, energySource: "renewable", heatingType: "heatpump",
+      meatIntake: "VEGAN", foodWaste: "low",
+      shoppingFrequency: "minimal", newElectronics: 0, clothingType: "none",
+      recycledPercent: 100,
+    });
+    // Join available challenges to boost score further (+3 each)
+    const challengeRes = await request.get("/api/challenges");
+    const available = challengeRes.body.challenges.filter(
+      (c: { status: string; id: string }) => c.status === "AVAILABLE" && c.id !== "urban-refit-x"
+    );
+    for (const c of available) {
+      await request.post("/api/challenges/join").send({ id: c.id });
+    }
+    const telRes = await request.get("/api/telemetry");
+    expect(telRes.body.missionScore).toBeGreaterThanOrEqual(60);
+  });
+});
+
+// ─── Enum validation on POST /api/telemetry ──────────────────────────────────
+describe("Enum validation on POST /api/telemetry", () => {
+  it("invalid commuteFrequency falls back to DAILY", async () => {
+    await request.post("/api/telemetry").send({ commuteFrequency: "INVALID_VALUE" });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.commuteFrequency).toBe("DAILY");
+  });
+
+  it("invalid energySource falls back to mixed", async () => {
+    await request.post("/api/telemetry").send({ energySource: "NUCLEAR" });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.energySource).toBe("mixed");
+  });
+
+  it("invalid vehicleType falls back to INTERNAL_COMBUSTION_MEDIUM", async () => {
+    await request.post("/api/telemetry").send({ vehicleType: "FLYING_CAR" });
+    const res = await request.get("/api/telemetry");
+    expect(res.body.telemetry.vehicleType).toBe("INTERNAL_COMBUSTION_MEDIUM");
+  });
+});
