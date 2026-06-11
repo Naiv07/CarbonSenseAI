@@ -3,17 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CLIMATE_MISSION_CONTROL</title>
-    <script type="speculationrules">
-      {
-        "prerender": [
-          { "where": { "href_matches": "/*" }, "eagerness": "moderate" }
-        ]
-      }
-    </script>
+    <meta name="description" content="CarbonSenseAI — track, reduce and offset your carbon footprint with AI-powered insights, personalised challenges and real-time emission monitoring." />
+    <meta name="theme-color" content="#070708" />
+    <title>CarbonSenseAI — Climate Mission Control</title>
+    <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com" />
+    <link rel="dns-prefetch" href="https://securetoken.googleapis.com" />
+    <style>
+      /* Inline critical CSS — gives the browser something to paint at TTFB */
+      body{margin:0;background:#070708;color:#e3e2e3}
+      #splash{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1.5rem}
+      #splash-card{max-width:64rem;width:100%;background:rgba(16,17,18,.9);border:1px solid #1f2023;padding:2.5rem;border-radius:.5rem;box-shadow:0 0 50px rgba(0,0,0,.8)}
+      .sk-tag{font-family:monospace;font-size:11px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:#bec2ff}
+      .sk-h1{font-size:clamp(1.75rem,5vw,3rem);font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:-.02em;line-height:1.15;margin:.5rem 0 0}
+      .sk-h1 span{color:#bec2ff}
+      .sk-p{color:#c6c5d8;font-size:.875rem;line-height:1.6;margin:1.25rem 0 0;max-width:32rem}
+      .sk-btn{display:inline-block;margin-top:1.5rem;padding:.875rem 2rem;background:#bec2ff;color:#000ba6;font-family:monospace;font-size:12px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;border:none;border-radius:.375rem;box-shadow:0 0 25px rgba(190,194,255,.35)}
+      .sk-pulse{animation:sk-fade 1.8s ease-in-out infinite}
+      @keyframes sk-fade{0%,100%{opacity:.6}50%{opacity:1}}
+    </style>
   </head>
   <body class="bg-[#070708] text-[#e3e2e3]">
-    <div id="root"></div>
+    <div id="root">
+      <!-- Inline skeleton — painted at TTFB, replaced when React mounts -->
+      <div id="splash" class="sk-pulse" aria-label="Loading CarbonSenseAI...">
+        <div id="splash-card">
+          <p class="sk-tag">Take Control of Your Carbon</p>
+          <h1 class="sk-h1">Planetary-Scale<br/><span>Carbon Control</span></h1>
+          <p class="sk-p">Monitor strategic transport bounds, evaluate thermal energy grids, coordinate global reforestation offsets, and execute warning mitigation matrix routines powered by AI Commander guidance.</p>
+          <div class="sk-btn" aria-hidden="true">Get Started</div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

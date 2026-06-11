@@ -13,13 +13,21 @@ export default defineConfig(() => {
     },
     build: {
       minify: 'terser' as const,
+      cssMinify: true,
       terserOptions: {
         compress: {
           drop_console: true,
           drop_debugger: true,
-          passes: 2,
+          passes: 3,
+          pure_getters: true,
+          unsafe_math: true,
         },
-        mangle: true,
+        mangle: {
+          toplevel: true,
+        },
+        format: {
+          comments: false,
+        },
       },
       rollupOptions: {
         output: {
