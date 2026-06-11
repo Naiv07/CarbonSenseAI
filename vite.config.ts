@@ -2,30 +2,10 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
-import type {Plugin} from 'vite';
-
-/**
- * Converts render-blocking <link rel="stylesheet"> tags in the built HTML
- * into non-render-blocking preloads so the inline skeleton paints at TTFB
- * instead of waiting for the full CSS download.
- */
-function asyncCssPlugin(): Plugin {
-  return {
-    name: 'async-css',
-    enforce: 'post',
-    transformIndexHtml(html) {
-      // Replace <link rel="stylesheet" ...> with preload + onload swap
-      return html.replace(
-        /<link rel="stylesheet" crossorigin href="([^"]+)">/g,
-        `<link rel="preload" as="style" href="$1" onload="this.rel='stylesheet'"><noscript><link rel="stylesheet" href="$1"></noscript>`,
-      );
-    },
-  };
-}
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), asyncCssPlugin()],
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
