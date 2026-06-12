@@ -98,7 +98,19 @@ export default function App() {
 
   const withAuth = async (options: RequestInit = {}): Promise<RequestInit> => {
     const { auth } = await import("./lib/firebase");
-    const token = await auth.currentUser?.getIdToken().catch(() => null);
+    // If auth hasn't settled yet (e.g. page reload), wait briefly for session restore
+    let user = auth.currentUser;
+    if (!user) {
+      user = await new Promise<typeof auth.currentUser>((resolve) => {
+        const timer = setTimeout(() => resolve(null), 1500);
+        const unsub = auth.onAuthStateChanged((u) => {
+          clearTimeout(timer);
+          unsub();
+          resolve(u);
+        });
+      });
+    }
+    const token = await user?.getIdToken().catch(() => null);
     if (!token) return options;
     return {
       ...options,
@@ -143,12 +155,12 @@ export default function App() {
         const serverLocationEmpty = !data.userLocation?.country && !data.userLocation?.city;
         const cached = localStorage.getItem("csai_onboarding_data");
         if (serverLocationEmpty && cached) {
-          const rehydrateRes = await fetch("/api/onboarding", await withAuth({
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: cached,
-          }));
-          if (rehydrateRes.ok) {
+          try {
+            const rehydrateRes = await resilientFetch("/api/onboarding", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: cached,
+            });
             const r = await rehydrateRes.json();
             if (r.breakdown) setBreakdown(r.breakdown);
             if (r.missionScore !== undefined) setMissionScore(r.missionScore);
@@ -158,6 +170,8 @@ export default function App() {
             if (r.achievements) setAchievements(r.achievements);
             if (r.streak !== undefined) setStreak(r.streak);
             if (r.baselineEmissions !== undefined) setBaselineEmissions(r.baselineEmissions);
+          } catch {
+            console.warn("Rehydration deferred — data will sync on next interaction.");
           }
         }
       }
