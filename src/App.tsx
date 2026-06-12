@@ -122,10 +122,14 @@ export default function App() {
     try {
       const authedOptions = await withAuth(options);
       const res = await fetch(url, authedOptions);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        // Don't retry auth failures — they won't self-heal
+        if (res.status === 401 || res.status === 403) throw new Error(`HTTP ${res.status}`);
+        throw Object.assign(new Error(`HTTP ${res.status}`), { retryable: true });
+      }
       return res;
     } catch (error) {
-      if (retries > 0) {
+      if (retries > 0 && (error as { retryable?: boolean }).retryable) {
         console.warn(`Fetch to ${url} failed, retrying in ${delay}ms...`, error);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return resilientFetch(url, options, retries - 1, delay * 1.5);

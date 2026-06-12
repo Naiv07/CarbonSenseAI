@@ -114,7 +114,8 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
     const decoded = await adminAuth.verifyIdToken(token);
     (req as AuthenticatedRequest).uid = decoded.uid;
     next();
-  } catch {
+  } catch (err) {
+    console.error("[Auth] verifyIdToken failed:", (err as Error).message ?? err);
     res.status(401).json({ error: "Invalid token" });
   }
 }
