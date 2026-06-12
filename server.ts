@@ -93,7 +93,12 @@ let adminAuth: import("firebase-admin/auth").Auth | null = null;
     const { initializeApp, getApps, cert } = await import("firebase-admin/app");
     const { getAuth } = await import("firebase-admin/auth");
     if (!getApps().length) {
-      initializeApp({ credential: cert(JSON.parse(svcAccount) as object) });
+      const parsed = JSON.parse(svcAccount) as Record<string, unknown>;
+      // Railway may double-escape \n in private_key — normalise to real newlines
+      if (typeof parsed.private_key === "string") {
+        parsed.private_key = parsed.private_key.replace(/\\n/g, "\n");
+      }
+      initializeApp({ credential: cert(parsed) });
     }
     adminAuth = getAuth();
     if (process.env.NODE_ENV !== "production") console.log("Firebase Admin initialised.");
