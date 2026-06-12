@@ -46,47 +46,47 @@ export default function App() {
   const [dataReady, setDataReady] = useState<boolean>(false);
 
   const [telemetry, setTelemetry] = useState<TelemetryState>({
-    mileage: 12500,
-    commuteFrequency: "DAILY",
-    vehicleType: "INTERNAL_COMBUSTION_MEDIUM",
+    mileage: 0,
+    commuteFrequency: "REMOTE",
+    vehicleType: "ELECTRIC_BEV",
     flightsShortHaul: 0,
     flightsLongHaul: 0,
-    utilityBill: 185,
-    energySource: "mixed",
+    utilityBill: 0,
+    energySource: "renewable",
     heatingType: "none",
     category: "TRANSPORT",
-    meatIntake: "DAILY",
-    foodWaste: "medium",
-    recycledPercent: 40,
-    shoppingFrequency: "average",
+    meatIntake: "VEGAN",
+    foodWaste: "low",
+    recycledPercent: 0,
+    shoppingFrequency: "minimal",
     newElectronics: 0,
     clothingType: "none",
   });
 
   const [breakdown, setBreakdown] = useState<EmissionsBreakdown>({
-    transport: 2.25,
-    energy: 0.84,
-    food: 1.8,
-    waste: 0.36,
-    shopping: 0.5,
-    total: 5.8,
+    transport: 0,
+    energy: 0,
+    food: 0,
+    waste: 0,
+    shopping: 0,
+    total: 0,
   });
 
-  const [missionScore, setMissionScore] = useState<number>(50);
-  const [rank, setRank] = useState<string>("Climate Ranger");
+  const [missionScore, setMissionScore] = useState<number>(0);
+  const [rank, setRank] = useState<string>("New Recruit");
 
   const [simulation, setSimulation] = useState<SimulationState>({
-    plantBased: true,
+    plantBased: false,
     solarConversion: false,
-    evMobility: true,
+    evMobility: false,
   });
 
   const [commander, setCommander] = useState<CommanderState>({
-    warning: "Warning: Transport emissions exceeding limits in Sector B. Deploy biking initiative.",
-    action: "EXECUTE_DEPLOY",
-    projectedSaving: "-0.4 MT",
-    sector: "Sector B",
-    status: "ACTIVE",
+    warning: "",
+    action: "",
+    projectedSaving: "",
+    sector: "",
+    status: "DISMISSED",
   });
 
   const [challenges, setChallenges] = useState<Challenge[]>([]);

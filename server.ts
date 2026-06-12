@@ -111,8 +111,8 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!adminAuth || process.env.VITEST) return next(); // auth disabled in local dev and tests
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) {
-    res.status(401).json({ error: "Unauthorized" });
-    return;
+    // Allow guest (unauthenticated) requests through without a uid
+    return next();
   }
   try {
     const token = header.slice(7);
