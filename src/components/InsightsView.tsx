@@ -106,7 +106,7 @@ export default function InsightsView({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
             {/* Custom concentric ring visualizer representation */}
-            <div className="relative aspect-square max-w-[200px] mx-auto flex items-center justify-center">
+            <div className="relative aspect-square max-w-50 mx-auto flex items-center justify-center">
               <div className="w-full h-full border-4 border-brand-border rounded-full flex items-center justify-center relative">
                 {/* Simulated colorful conic blur */}
                 <div className="absolute inset-2 bg-linear-to-tr from-brand-blue via-brand-green to-brand-orange opacity-10 rounded-full blur-md"></div>
@@ -205,7 +205,7 @@ export default function InsightsView({
               {/* Unlocked count header */}
               <div className="flex items-center gap-4 mb-4 p-3 bg-brand-black/80 border border-brand-border rounded-2xl">
                 <div className="w-10 h-10 rounded-full border-2 border-brand-green flex items-center justify-center bg-brand-green/10 glow-secondary shrink-0">
-                  <Award className="text-brand-green w-5 h-5 stroke-[2]" aria-hidden="true" />
+                  <Award className="text-brand-green w-5 h-5 stroke-2" aria-hidden="true" />
                 </div>
                 <div className="font-mono">
                   <h4 className="text-xs font-bold text-white tracking-wider leading-none uppercase">
