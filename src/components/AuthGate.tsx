@@ -17,9 +17,13 @@ export default function AuthGate({ children }: AuthGateProps) {
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
     Promise.all([import("../lib/firebase"), import("firebase/auth")]).then(
-      ([{ auth }, { onAuthStateChanged }]) => {
+      ([{ auth }, { onAuthStateChanged, getRedirectResult }]) => {
         unsubscribe = onAuthStateChanged(auth, (u) => {
           setUser(u);
+          setLoading(false);
+        });
+        getRedirectResult(auth).catch(() => {
+          setError("Sign-in failed. Please try again.");
           setLoading(false);
         });
       }
@@ -32,19 +36,13 @@ export default function AuthGate({ children }: AuthGateProps) {
     setError(null);
     setHint(null);
     try {
-      const [{ auth, googleProvider }, { signInWithPopup }] = await Promise.all([
+      const [{ auth, googleProvider }, { signInWithRedirect }] = await Promise.all([
         import("../lib/firebase"),
         import("firebase/auth"),
       ]);
-      await signInWithPopup(auth, googleProvider);
-    } catch (e: unknown) {
-      const code = (e as { code?: string }).code;
-      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") {
-        setHint("Sign-in was cancelled — try again or continue as guest below.");
-      } else {
-        setError("Sign-in failed. Please try again.");
-      }
-    } finally {
+      await signInWithRedirect(auth, googleProvider);
+    } catch {
+      setError("Sign-in failed. Please try again.");
       setSigningIn(false);
     }
   };
