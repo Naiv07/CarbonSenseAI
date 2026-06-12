@@ -23,7 +23,7 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 // crossOriginOpenerPolicy disabled — signInWithPopup requires the popup window
 // to communicate back to the opener; COOP: same-origin silently breaks that.
 app.use(helmet({
-  crossOriginOpenerPolicy: false,
+  crossOriginOpenerPolicy: { policy: "unsafe-none" },
   strictTransportSecurity: {
     maxAge: 31536000,
     includeSubDomains: true,
@@ -43,7 +43,7 @@ app.use(helmet({
         "https://accounts.google.com",
       ],
       fontSrc:        ["'self'"],
-      frameSrc:       ["https://accounts.google.com", "https://*.firebaseapp.com"],
+      frameSrc:       ["https://accounts.google.com", "https://carbonsense-e9991.firebaseapp.com"],
       objectSrc:      ["'none'"],
       baseUri:        ["'self'"],
       formAction:     ["'self'"],
